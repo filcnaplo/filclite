@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/login_cl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
@@ -71,7 +72,7 @@
         android:id="@+id/inst_code_s"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="100dp"
+        android:layout_marginTop="7dp"
         android:layout_weight="1"
         android:background="@color/colorPrimary"
         android:dropDownWidth="match_parent"
@@ -82,14 +83,30 @@
         android:scrollbarTrackHorizontal="@color/colorText"
         android:scrollbarTrackVertical="@color/colorText"
         android:spinnerMode="dropdown"
-        app:layout_constraintBottom_toTopOf="@+id/login_btt" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/login_ll" />
+
+    <ProgressBar
+        android:id="@+id/loginloading_bar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="75dp"
+        android:layout_marginBottom="75dp"
+        android:progressDrawable="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/login_ll"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inst_code_tt" />
 
     <Button
         android:id="@+id/login_btt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
         android:background="@color/colorAccent"
         android:text="Login"
         android:textColor="@color/colorText"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

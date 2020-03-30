@@ -6,12 +6,15 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.ApiHandler
 import com.thegergo02.minkreta.MainActivity
 import com.thegergo02.minkreta.controller.LoginController
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.view.LoginView
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -25,6 +28,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
         setContentView(R.layout.activity_login)
         controller = LoginController(this, ApiHandler(this))
         controller.getInstitutes()
+        showProgress()
         inst_code_s?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -37,6 +41,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
             var userName = username_et.text.toString()
             var password = password_et.text.toString()
             controller.getTokens(userName, password, instituteCode)
+            showProgress()
         }
     }
 
@@ -52,12 +57,25 @@ class LoginActivity : AppCompatActivity(), LoginView {
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
         inst_code_s.adapter = adapter
     }
-
     override fun setTokens(tokens: JSONObject) {
         val mainIntent = Intent(this, MainActivity::class.java)
         mainIntent.putExtra("access_token", tokens["access_token"].toString())
         mainIntent.putExtra("refresh_token", tokens["refresh_token"].toString())
         mainIntent.putExtra("institute_code", institutesWithCode.get(inst_code_s.selectedItem.toString()))
         startActivity(mainIntent)
+        finish()
+    }
+
+    override fun displayError(error: String) {
+        val errorSnack = Snackbar.make(login_cl, error, Snackbar.LENGTH_LONG)
+        errorSnack.view.setBackgroundColor(ContextCompat.getColor(this, R.color.colorError))
+        errorSnack.show()
+    }
+
+    override fun hideProgress() {
+        loginloading_bar.visibility = View.GONE
+    }
+    override fun showProgress() {
+        loginloading_bar.visibility = View.VISIBLE
     }
 }

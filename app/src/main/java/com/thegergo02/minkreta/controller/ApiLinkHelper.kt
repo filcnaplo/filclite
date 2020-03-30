@@ -1,5 +1,6 @@
 package com.thegergo02.minkreta.controller
 
+import com.android.volley.VolleyError
 import com.thegergo02.minkreta.ApiHandler
 import com.thegergo02.minkreta.data.Student
 import kotlinx.coroutines.GlobalScope
@@ -36,9 +37,9 @@ class ApiLinkHelper(private val apiHandler: ApiHandler)
     }
 
     override fun onInstitutesSuccess(str: JSONArray) {}
-    override fun onInstitutesError(str: String) {}
+    override fun onInstitutesError(str: VolleyError) {}
     override fun onTokensSuccess(tokens: String) {}
-    override fun onTokensError(error: String) {}
+    override fun onTokensError(error: VolleyError) {}
     override fun onStudentSuccess(student: String, accessToken: String, refreshToken: String) {}
-    override fun onStudentError(error: String) {}
+    override fun onStudentError(error: VolleyError) {}
 }

@@ -8,4 +8,5 @@ interface MainView {
     fun setStudent(student: Student)
     fun hideProgress()
     fun showProgress()
+    fun displayError(error: String)
 }

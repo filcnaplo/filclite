@@ -5,9 +5,13 @@
     <color name="colorAccent">#b71c1c</color>
     <color name="colorText">#ffffff</color>
     <color name="colorBackground">#000000</color>
+
     <color name="colorOne">#f44336</color>
     <color name="colorTwo">#FF5722</color>
     <color name="colorThree">#FFEB3B</color>
     <color name="colorFour">#827717</color>
     <color name="colorFive">#1B5E20</color>
+
+    <color name="colorError">#D50000</color>
+    <color name="colorSuccess">#00C853</color>
 </resources>

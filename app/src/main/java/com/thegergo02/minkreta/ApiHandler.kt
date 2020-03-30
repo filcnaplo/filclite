@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
@@ -27,13 +28,13 @@ class ApiHandler(ctx: Context) {
         fun onApiLinkError(error: String)
 
         fun onInstitutesSuccess(institutes: JSONArray)
-        fun onInstitutesError(error: String)
+        fun onInstitutesError(error: VolleyError)
 
         fun onTokensSuccess(tokens: String)
-        fun onTokensError(error: String)
+        fun onTokensError(error: VolleyError)
 
         fun onStudentSuccess(student: String, accessToken: String, refreshToken: String)
-        fun onStudentError(error: String)
+        fun onStudentError(error: VolleyError)
     }
 
     private val queue = Volley.newRequestQueue(ctx)
@@ -60,7 +61,7 @@ class ApiHandler(ctx: Context) {
                 listener.onInstitutesSuccess(response)
             },
             Response.ErrorListener { error ->
-                listener.onInstitutesError(error.toString())
+                listener.onInstitutesError(error)
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf<String, String>("apiKey" to API_KEY)
@@ -74,7 +75,7 @@ class ApiHandler(ctx: Context) {
                 listener.onTokensSuccess(response)
             },
             Response.ErrorListener { error ->
-                listener.onTokensError(error.toString())
+                listener.onTokensError(error)
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf<String, String>("apiKey" to API_KEY,
@@ -92,7 +93,7 @@ class ApiHandler(ctx: Context) {
                 listener.onStudentSuccess(response, accessToken, refreshToken)
             },
             Response.ErrorListener { error ->
-                listener.onStudentError(error.toString())
+                listener.onStudentError(error)
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf<String, String>(

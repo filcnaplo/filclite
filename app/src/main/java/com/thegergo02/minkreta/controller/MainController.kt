@@ -1,6 +1,7 @@
 package com.thegergo02.minkreta.controller
 
 import android.util.Log
+import com.android.volley.*
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.thegergo02.minkreta.ApiHandler
@@ -28,11 +29,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         mainView = null
     }
 
-    override fun onTokensSuccess(tokens: String) {
-        //val tokensJson = JSONObject(tokens)
-    }
-    override fun onTokensError(error: String) {}
-
     override fun onStudentSuccess(student: String, accessToken: String, refreshToken: String) {
         val moshi: Moshi = Moshi.Builder().build()
         val adapter: JsonAdapter<Student> = moshi.adapter(Student::class.java)
@@ -42,10 +38,23 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         currentStudent.refreshToken = refreshToken
         mainView?.setStudent(currentStudent)
     }
-    override fun onStudentError(error: String) {}
+    override fun onStudentError(error: VolleyError) {
+        var errorString: String
+        when(error) {
+            is AuthFailureError -> errorString = "Wrong credetinals! (AuthFailureError)"
+            is TimeoutError -> errorString = "The KRETA server took too long to respond. (TimeoutError)"
+            is NetworkError -> errorString = "Maybe the request got interrupted? (NetworkError)"
+            is NoConnectionError -> errorString = "Can't get student data without an internet connection."
+            else -> errorString = error.toString()
+        }
+        mainView?.displayError(errorString)
+        mainView?.hideProgress()
+    }
 
+    override fun onTokensSuccess(tokens: String) {}
+    override fun onTokensError(error: VolleyError) {}
     override fun onApiLinkSuccess(link: String) {}
     override fun onApiLinkError(error: String) {}
     override fun onInstitutesSuccess(institutes: JSONArray) {}
-    override fun onInstitutesError(error: String) {}
+    override fun onInstitutesError(error: VolleyError) {}
 }
