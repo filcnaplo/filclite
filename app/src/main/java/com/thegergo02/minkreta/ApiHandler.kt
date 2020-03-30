@@ -8,6 +8,7 @@ import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.thegergo02.minkreta.data.Student
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URLEncoder
@@ -22,14 +23,17 @@ class ApiHandler(ctx: Context) {
     }
 
     interface OnFinishedResult {
-        fun onApiLinkSuccess(str: String)
+        fun onApiLinkSuccess(link: String)
         fun onApiLinkError(error: String)
 
-        fun onInstitutesSuccess(str: JSONArray)
-        fun onInstitutesError(str: String)
+        fun onInstitutesSuccess(institutes: JSONArray)
+        fun onInstitutesError(error: String)
 
         fun onTokensSuccess(tokens: String)
         fun onTokensError(error: String)
+
+        fun onStudentSuccess(student: String, accessToken: String, refreshToken: String)
+        fun onStudentError(error: String)
     }
 
     private val queue = Volley.newRequestQueue(ctx)
@@ -64,7 +68,7 @@ class ApiHandler(ctx: Context) {
         queue.add(institutesQuery)
     }
 
-    suspend fun getTokens(listener: OnFinishedResult, apiLink: String, userName: String, password: String, instituteCode: String) {
+    suspend fun getTokens(listener: OnFinishedResult, userName: String, password: String, instituteCode: String) {
         val tokensQuery = object : StringRequest(Request.Method.POST, "https://$instituteCode.e-kreta.hu/idp/api/v1/Token",
             Response.Listener { response ->
                 listener.onTokensSuccess(response)
@@ -80,5 +84,22 @@ class ApiHandler(ctx: Context) {
             override fun getBody(): ByteArray = "password=$password&institute_code=$instituteCode&grant_type=password&client_id=$CLIENT_ID&userName=$userName".toByteArray()
         }
         queue.add(tokensQuery)
+    }
+
+    suspend fun getStudent(listener: OnFinishedResult, accessToken: String, refreshToken: String, instituteCode: String) {
+        val studentQuery = object : StringRequest(Request.Method.GET, "https://$instituteCode.e-kreta.hu/mapi/api/v1/StudentAmi",
+            Response.Listener { response ->
+                listener.onStudentSuccess(response, accessToken, refreshToken)
+            },
+            Response.ErrorListener { error ->
+                listener.onStudentError(error.toString())
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf<String, String>(
+                "Authorization" to "Bearer $accessToken",
+                "Accept" to "application/json",
+                "User-Agent" to USER_AGENT)
+        }
+        queue.add(studentQuery)
     }
 }

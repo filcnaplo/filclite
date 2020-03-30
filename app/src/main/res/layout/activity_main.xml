@@ -4,101 +4,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBackground"
     tools:context=".MainActivity">
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#00000000">
 
         <LinearLayout
             android:id="@+id/main_ll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/prod_btt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="PROD" />
-
-                <Button
-                    android:id="@+id/dev_btt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="DEV" />
-            </LinearLayout>
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/api_tv"
+                android:id="@+id/name_tt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="URL" />
+                android:gravity="center_horizontal"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/colorText"
+                android:textSize="24sp"
+                android:visibility="gone"
+                tools:visibility=":" />
 
-            <LinearLayout
+            <ProgressBar
+                android:id="@+id/loading_bar"
+                style="?android:attr/progressBarStyle"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <EditText
-                        android:id="@+id/username_et"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="Username"
-                        android:inputType="textPersonName" />
-
-                    <EditText
-                        android:id="@+id/password_et"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ems="10"
-                        android:hint="Password"
-                        android:inputType="textPassword" />
-
-                </LinearLayout>
-
-                <EditText
-                    android:id="@+id/inst_code_et"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:hint="klikxxxxxxxxx"
-                    android:inputType="textPersonName" />
-
-                <TextView
-                    android:id="@+id/access_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="access_token" />
-
-                <TextView
-                    android:id="@+id/refresh_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="refresh_token" />
-
-                <Button
-                    android:id="@+id/login_btt"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Login" />
-
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:progressDrawable="@color/colorAccent" />
 
             <LinearLayout
                 android:id="@+id/evals_ll"
@@ -110,13 +46,15 @@
                     android:id="@+id/evals_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="EVALUATIONS" />
+                    android:background="@color/colorAccent"
+                    android:text="EVALUATIONS"
+                    android:textColor="@color/colorText" />
 
                 <LinearLayout
-                    android:id="@+id/holder_ll"
+                    android:id="@+id/eval_holder_ll"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"></LinearLayout>
+                    android:orientation="vertical" />
 
             </LinearLayout>
 

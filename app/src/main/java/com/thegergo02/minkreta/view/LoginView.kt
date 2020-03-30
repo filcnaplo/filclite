@@ -1,10 +1,9 @@
-package com.thegergo02.minkreta
+package com.thegergo02.minkreta.view
 
 import org.json.JSONArray
 import org.json.JSONObject
 
-interface MainView {
-    fun setApiLinkText(link: String)
+interface LoginView {
     fun setInstitutes(institutes: JSONArray)
     fun setTokens(tokens: JSONObject)
 }

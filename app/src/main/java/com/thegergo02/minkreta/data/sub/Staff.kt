@@ -1,8 +1,12 @@
 package com.thegergo02.minkreta.data.sub
 
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
 data class Staff(
-    val uid: String,
-    val name: String,
-    val phoneNumbers: Array<String>,
-    val emailAddresses: Array<String>
+    @Json(name = "Uid") val uid: String?,
+    @Json(name = "Nev") val name: String?,
+    @Json(name = "Telefonok") val phoneNumbers: List<String>?,
+    @Json(name = "Emailek") val emailAddresses: List<String>?
 )

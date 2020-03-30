@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    tools:context=".login.LoginActivity">
+
+    <TextView
+        android:id="@+id/inst_code_tt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:gravity="center_horizontal"
+        android:text="Institute Code"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@color/colorText"
+        android:textSize="24sp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/login_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="300dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/username_et"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:background="@color/colorPrimary"
+                android:ems="10"
+                android:hint="Username"
+                android:inputType="textPersonName"
+                android:textColor="@color/colorText"
+                android:textColorHint="@color/colorText"
+                tools:layout_conversion_absoluteHeight="45dp"
+                tools:layout_conversion_absoluteWidth="213dp"
+                tools:layout_editor_absoluteX="0dp"
+                tools:layout_editor_absoluteY="540dp" />
+
+            <EditText
+                android:id="@+id/password_et"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:background="@color/colorPrimary"
+                android:ems="10"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:textColor="@color/colorText"
+                android:textColorHint="@color/colorText"
+                tools:layout_conversion_absoluteHeight="45dp"
+                tools:layout_conversion_absoluteWidth="198dp"
+                tools:layout_editor_absoluteX="213dp"
+                tools:layout_editor_absoluteY="540dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <Spinner
+        android:id="@+id/inst_code_s"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:layout_weight="1"
+        android:background="@color/colorPrimary"
+        android:dropDownWidth="match_parent"
+        android:minHeight="45dp"
+        android:scrollbarStyle="outsideInset"
+        android:scrollbarThumbHorizontal="@color/colorText"
+        android:scrollbarThumbVertical="@color/colorAccent"
+        android:scrollbarTrackHorizontal="@color/colorText"
+        android:scrollbarTrackVertical="@color/colorText"
+        android:spinnerMode="dropdown"
+        app:layout_constraintBottom_toTopOf="@+id/login_btt" />
+
+    <Button
+        android:id="@+id/login_btt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorAccent"
+        android:text="Login"
+        android:textColor="@color/colorText"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

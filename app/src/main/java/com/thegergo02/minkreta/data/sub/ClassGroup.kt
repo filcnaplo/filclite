@@ -1,11 +1,15 @@
 package com.thegergo02.minkreta.data.sub
 
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
 data class ClassGroup(
-    val eduMission: Map<String, String>,
-    val eduCategory: Map<String, String>,
-    val name: String,
-    val classGroupType: String,
-    val isActive: Boolean,
-    val uid: String,
-    val classRoomTeacherId: String
+    @Json(name = "OktatasNevelesiFeladat") val eduMission: Map<String, String>?,
+    @Json(name = "OktatasNevelesiKategoria") val eduCategory: Map<String, String>?,
+    @Json(name = "Nev") val name: String?,
+    @Json(name = "OsztalyCsoportTipus") val classGroupType: String?,
+    @Json(name = "IsAktiv") val isActive: Boolean?,
+    @Json(name = "Uid") val uid: String?,
+    @Json(name = "OsztalyfonokUid") val classRoomTeacherId: String?
 )
