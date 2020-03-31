@@ -60,7 +60,7 @@ class LoginController(private var loginView: LoginView?, private val apiHandler:
             is ClientError -> errorString = "Maybe you left a field empty? (ClientError)"
             is AuthFailureError -> errorString = "Wrong credetinals! (AuthFailureError)"
             is TimeoutError -> errorString = "The KRETA server took too long to respond. (TimeoutError)"
-            is NetworkError -> errorString = "Maybe the request got interrupted? (NetworkError)"
+            is NetworkError -> errorString = "Maybe the request got interrupted? (NetworkError) (${error.message})"
             is NoConnectionError -> errorString = "Can't login without an internet connection."
             else -> errorString = error.toString()
         }

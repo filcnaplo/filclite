@@ -18,10 +18,10 @@ data class Absence (
     @Json(name = "LessonStartTime") val lessonStartTime: String?,
     @Json(name = "NumberOfLessons") val numberOfLessons: Int?,
     @Json(name = "CreatingTime") val creatingTime: String?,
-    @Json(name = "JustificationState") val JustificationState: String?,
-    @Json(name = "JustificationStateName") val JustificationStateName: String?,
-    @Json(name = "JustificationType") val JustificationType: String?,
-    @Json(name = "JustificationTypeName") val JustificationTypeName: String?,
+    @Json(name = "JustificationState") val justificationState: String?,
+    @Json(name = "JustificationStateName") val justificationStateName: String?,
+    @Json(name = "JustificationType") val justificationType: String?,
+    @Json(name = "JustificationTypeName") val justificationTypeName: String?,
     @Json(name = "SeenByTutelaryUTC") val seenByTutelaryUtc: String?,
     @Json(name = "OsztalyCsoportUid") val classGroupUid: String?
 )

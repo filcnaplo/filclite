@@ -40,15 +40,16 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
     }
     override fun onStudentError(error: VolleyError) {
         var errorString: String
-        when(error) {
+       when(error) {
             is AuthFailureError -> errorString = "Wrong credetinals! (AuthFailureError)"
             is TimeoutError -> errorString = "The KRETA server took too long to respond. (TimeoutError)"
-            is NetworkError -> errorString = "Maybe the request got interrupted? (NetworkError)"
+            is NetworkError -> errorString = "Maybe the request got interrupted? (NetworkError) (${error.message})"
             is NoConnectionError -> errorString = "Can't get student data without an internet connection."
             else -> errorString = error.toString()
         }
         mainView?.displayError(errorString)
         mainView?.hideProgress()
+        Log.w("student", apiHandler.getUserAgent())
     }
 
     override fun onTokensSuccess(tokens: String) {}

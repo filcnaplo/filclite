@@ -1,29 +1,25 @@
 package com.thegergo02.minkreta
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.Layout
-import android.transition.Visibility
 import android.view.View
-import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.data.Student
+import com.thegergo02.minkreta.ui.AbsencesUI
 import com.thegergo02.minkreta.ui.EvaluationUI
+import com.thegergo02.minkreta.ui.HomeworksUI
+import com.thegergo02.minkreta.ui.NotesUI
 import com.thegergo02.minkreta.view.MainView
-import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONArray
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), MainView {
     private lateinit var controller: MainController
     private lateinit var cachedStudent: Student
+    private lateinit var itemHolders: Map<Tab, LinearLayout>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +34,13 @@ class MainActivity : AppCompatActivity(), MainView {
             controller.getStudent(accessToken, refreshToken, instituteCode)
             showProgress()
         }
+
+        itemHolders = mutableMapOf<Tab, LinearLayout>(
+            Tab.Evaluations to eval_holder_ll,
+            Tab.Notes to note_holder_ll,
+            Tab.Absences to abs_holder_ll,
+            Tab.Homeworks to homework_holder_ll
+        )
 
         name_tt.setOnClickListener {
             if (details_ll.visibility == View.GONE) {
@@ -64,11 +67,16 @@ class MainActivity : AppCompatActivity(), MainView {
         }
 
         evals_btt.setOnClickListener {
-            if (eval_holder_ll.visibility == View.GONE) {
-                eval_holder_ll.visibility = View.VISIBLE
-            } else {
-                eval_holder_ll.visibility = View.GONE
-            }
+            switchTab(Tab.Evaluations)
+        }
+        notes_btt.setOnClickListener {
+            switchTab(Tab.Notes)
+        }
+        abs_btt.setOnClickListener {
+            switchTab(Tab.Absences)
+        }
+        homeworks_btt.setOnClickListener {
+            switchTab(Tab.Homeworks)
         }
     }
     
@@ -101,10 +109,40 @@ class MainActivity : AppCompatActivity(), MainView {
         details_ll.removeAllViews()
     }
 
+    enum class Tab {
+        Evaluations,
+        Notes,
+        Absences,
+        Homeworks,
+        Messages
+    }
+
+    private fun closeTabs(exception: Tab? = null) {
+        for (tabHolder in itemHolders) {
+            if (tabHolder.key != exception) {
+                tabHolder.value.visibility = View.GONE
+            }
+        }
+    }
+    private fun switchTab(newTab: Tab) {
+        closeTabs(newTab)
+        val tabHolder = itemHolders.get(newTab)
+        if (tabHolder?.visibility == View.GONE) {
+            tabHolder?.visibility = View.VISIBLE
+        } else {
+            tabHolder?.visibility = View.GONE
+        }
+    }
+
     private fun refreshUI() {
+        showProgress()
+        closeTabs()
         name_tt.visibility = View.VISIBLE
         name_tt.text = cachedStudent.name
-        EvaluationUI.generateEvaluations(this, cachedStudent, eval_holder_ll, details_ll, ::showDetails, ::hideDetails)
+        EvaluationUI.generateEvaluations(this, cachedStudent, itemHolders.get(Tab.Evaluations), details_ll, ::showDetails, ::hideDetails)
+        NotesUI.generateNotes(this, cachedStudent, itemHolders.get(Tab.Notes), details_ll, ::showDetails, ::hideDetails)
+        AbsencesUI.generateAbsences(this, cachedStudent, itemHolders.get(Tab.Absences), details_ll, ::showDetails, ::hideDetails)
+        HomeworksUI.generateHomeworks(this, cachedStudent, itemHolders.get(Tab.Homeworks), details_ll, ::showDetails, ::hideDetails)
         hideProgress()
     }
 }

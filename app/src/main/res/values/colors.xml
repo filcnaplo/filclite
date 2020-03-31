@@ -9,9 +9,12 @@
     <color name="colorOne">#f44336</color>
     <color name="colorTwo">#FF5722</color>
     <color name="colorThree">#FFEB3B</color>
-    <color name="colorFour">#827717</color>
-    <color name="colorFive">#1B5E20</color>
+    <color name="colorFour">#1B5E20</color>
+    <color name="colorFive">#00C853</color>
 
     <color name="colorError">#D50000</color>
     <color name="colorSuccess">#00C853</color>
+
+    <color name="colorAbsUnjustified">#D50000</color>
+    <color name="colorAbsJustified">#00C853</color>
 </resources>

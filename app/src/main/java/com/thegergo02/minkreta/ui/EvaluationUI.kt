@@ -25,9 +25,7 @@ class EvaluationUI {
             }
         }
 
-        fun generateEvaluations(ctx: Context, cachedStudent: Student, eval_holder_ll: LinearLayout, details_ll: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
-            val currentEvalHolderLinearLayout = LinearLayout(ctx)
-            currentEvalHolderLinearLayout.orientation = LinearLayout.VERTICAL
+        fun generateEvaluations(ctx: Context, cachedStudent: Student, eval_holder_ll: LinearLayout?, details_ll: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
             for (eval in cachedStudent.evaluations) {
                 val evalButton = Button(ctx)
                 if (eval.form == "Diligence" || eval.form == "Deportment") {
@@ -68,10 +66,8 @@ class EvaluationUI {
                     details_ll.addView(evalDetailsTextView)
                     showDetails()
                 }
-                currentEvalHolderLinearLayout.addView(evalButton)
+                eval_holder_ll?.addView(evalButton)
             }
-            eval_holder_ll.addView(currentEvalHolderLinearLayout)
-            eval_holder_ll.visibility = View.GONE
         }
     }
 }

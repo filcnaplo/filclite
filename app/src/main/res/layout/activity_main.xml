@@ -70,6 +70,72 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/notes_ll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/notes_btt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorAccent"
+                    android:text="NOTES"
+                    android:textColor="@color/colorText" />
+
+                <LinearLayout
+                    android:id="@+id/note_holder_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/abs_ll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/abs_btt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorAccent"
+                    android:text="ABSENCES"
+                    android:textColor="@color/colorText" />
+
+                <LinearLayout
+                    android:id="@+id/abs_holder_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/homeworks_ll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/homeworks_btt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorAccent"
+                    android:text="HOMEWORKS"
+                    android:textColor="@color/colorText" />
+
+                <LinearLayout
+                    android:id="@+id/homework_holder_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
