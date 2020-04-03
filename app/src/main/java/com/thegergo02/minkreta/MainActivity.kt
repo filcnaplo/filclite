@@ -2,6 +2,7 @@ package com.thegergo02.minkreta
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -9,12 +10,16 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.data.Student
-import com.thegergo02.minkreta.ui.AbsencesUI
-import com.thegergo02.minkreta.ui.EvaluationUI
-import com.thegergo02.minkreta.ui.HomeworksUI
-import com.thegergo02.minkreta.ui.NotesUI
+import com.thegergo02.minkreta.data.timetable.SchoolClass
+import com.thegergo02.minkreta.data.timetable.SchoolDay
+import com.thegergo02.minkreta.ui.*
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.android.synthetic.main.activity_main.*
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
+
 
 class MainActivity : AppCompatActivity(), MainView {
     private lateinit var controller: MainController
@@ -26,20 +31,33 @@ class MainActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_main)
         controller = MainController(this, ApiHandler(this))
 
-        val accessToken = intent.getStringExtra("access_token")
-        val refreshToken = intent.getStringExtra("refresh_token")
-        val instituteCode = intent.getStringExtra("institute_code")
+        var passedAccessToken = intent.getStringExtra("access_token")
+        var passedRefreshToken = intent.getStringExtra("refresh_token")
+        var passedInstituteCode = intent.getStringExtra("institute_code")
 
-        if (accessToken != null && refreshToken != null && instituteCode != null) {
-            controller.getStudent(accessToken, refreshToken, instituteCode)
-            showProgress()
+        lateinit var accessToken: String
+        lateinit var refreshToken: String
+        lateinit var instituteCode: String
+
+        if (passedAccessToken == null) {
+            accessToken = accessToken
+            refreshToken = refreshToken
+            instituteCode = instituteCode
+        } else {
+            accessToken = passedAccessToken
+            refreshToken = passedRefreshToken
+            instituteCode = passedInstituteCode
         }
+
+        controller.getStudent(accessToken, refreshToken, instituteCode)
+        showProgress()
 
         itemHolders = mutableMapOf<Tab, LinearLayout>(
             Tab.Evaluations to eval_holder_ll,
             Tab.Notes to note_holder_ll,
             Tab.Absences to abs_holder_ll,
-            Tab.Homeworks to homework_holder_ll
+            Tab.Homeworks to homework_holder_ll,
+            Tab.Timetable to timetable_holder_ll
         )
 
         name_tt.setOnClickListener {
@@ -78,6 +96,25 @@ class MainActivity : AppCompatActivity(), MainView {
         homeworks_btt.setOnClickListener {
             switchTab(Tab.Homeworks)
         }
+        timetable_btt.setOnClickListener {
+            if (itemHolders.get(Tab.Timetable)?.visibility == View.GONE) {
+                showProgress()
+                val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
+                val startDate = KretaDate(firstDay)
+                val endDate = KretaDate(firstDay.plusDays(6))
+                Log.w("date", startDate.toString())
+                Log.w("date", endDate.toString())
+                controller.getTimetable(
+                    accessToken,
+                    refreshToken,
+                    instituteCode,
+                    startDate,
+                    endDate
+                )
+            } else {
+                switchTab(Tab.Timetable)
+            }
+        }
     }
     
     override fun hideProgress() {
@@ -114,6 +151,7 @@ class MainActivity : AppCompatActivity(), MainView {
         Notes,
         Absences,
         Homeworks,
+        Timetable,
         Messages
     }
 
@@ -132,6 +170,12 @@ class MainActivity : AppCompatActivity(), MainView {
         } else {
             tabHolder?.visibility = View.GONE
         }
+    }
+
+    override fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>) {
+        TimetableUI.generateTimetable(this, timetable, itemHolders.get(Tab.Timetable), details_ll, ::showDetails, ::hideDetails, controller)
+        switchTab(Tab.Timetable)
+        hideProgress()
     }
 
     private fun refreshUI() {

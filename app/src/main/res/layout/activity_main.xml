@@ -136,6 +136,28 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/timetable_ll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/timetable_btt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorAccent"
+                    android:text="TIMETABLE"
+                    android:textColor="@color/colorText" />
+
+                <LinearLayout
+                    android:id="@+id/timetable_holder_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 

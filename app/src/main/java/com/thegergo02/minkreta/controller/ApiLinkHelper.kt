@@ -42,4 +42,7 @@ class ApiLinkHelper(private val apiHandler: ApiHandler)
     override fun onTokensError(error: VolleyError) {}
     override fun onStudentSuccess(student: String, accessToken: String, refreshToken: String) {}
     override fun onStudentError(error: VolleyError) {}
+    override fun onTimetableSuccess(timetable: String) {}
+    override fun onTimetableError(error: VolleyError) {}
+
 }

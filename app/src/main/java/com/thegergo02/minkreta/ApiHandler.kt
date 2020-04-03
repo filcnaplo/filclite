@@ -33,15 +33,19 @@ class ApiHandler(ctx: Context) {
 
         fun onStudentSuccess(student: String, accessToken: String, refreshToken: String)
         fun onStudentError(error: VolleyError)
+
+        fun onTimetableSuccess(timetable: String)
+        fun onTimetableError(error: VolleyError)
+
     }
 
     private val queue = Volley.newRequestQueue(ctx)
     private val API_KEY = "7856d350-1fda-45f5-822d-e1a2f3f1acf0"
     private val CLIENT_ID = "919e0c1c-76a2-4646-a2fb-7085bbbf3c56"
-    private var userAgent = ""
-    private val USER_AGENT = "Kreta.Ellenorzo/2.9.10.2020031602 (Android; Bunny 7.3)"
+    //private var userAgent = ""
+    private val USER_AGENT = "Kreta.Ellenorzo/2.9.10.2020031602 (Android; Dalek 5.4)"
 
-    init {
+/*    init {
         GlobalScope.launch {
             setUserAgent()
         }
@@ -64,7 +68,7 @@ class ApiHandler(ctx: Context) {
             continue
         }
         return userAgent
-    }
+    }*/
 
     private val API_HOLDER_LINK = "https://kretamobile.blob.core.windows.net/configuration/ConfigurationDescriptor.json"
     suspend fun getApiLink(listener: OnFinishedResult, apiType : ApiType = ApiType.PROD) {
@@ -104,7 +108,7 @@ class ApiHandler(ctx: Context) {
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf<String, String>("apiKey" to API_KEY,
                 "Accept" to "application/json",
-                "User-Agent" to getUserAgent())
+                "User-Agent" to USER_AGENT)
             override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
             override fun getBody(): ByteArray = "password=$password&institute_code=$instituteCode&grant_type=password&client_id=$CLIENT_ID&userName=$userName".toByteArray()
         }
@@ -127,4 +131,21 @@ class ApiHandler(ctx: Context) {
         }
         queue.add(studentQuery)
     }
+    suspend fun getTimetable(listener: OnFinishedResult, accessToken: String, refreshToken: String, instituteCode: String, fromDate: String = "null", toDate: String = "null") {
+        val studentQuery = object : StringRequest(Request.Method.GET, "https://$instituteCode.e-kreta.hu/mapi/api/v1/LessonAmi?fromDate=${fromDate}&toDate=${toDate}",
+            Response.Listener { response ->
+                listener.onTimetableSuccess(response)
+            },
+            Response.ErrorListener { error ->
+                listener.onTimetableError(error)
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf<String, String>("Authorization" to "Bearer ${accessToken}",
+                "Accept" to "application/json",
+                "User-Agent" to USER_AGENT)
+            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
+        }
+        queue.add(studentQuery)
+    }
+
 }

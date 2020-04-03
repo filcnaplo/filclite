@@ -72,4 +72,6 @@ class LoginController(private var loginView: LoginView?, private val apiHandler:
     override fun onApiLinkError(error: String) {}
     override fun onStudentSuccess(student: String, accessToken: String, refreshToken: String) {}
     override fun onStudentError(error: VolleyError) {}
+    override fun onTimetableSuccess(timetable: String) {}
+    override fun onTimetableError(error: VolleyError) {}
 }
