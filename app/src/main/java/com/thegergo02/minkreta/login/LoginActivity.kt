@@ -1,20 +1,19 @@
 package com.thegergo02.minkreta.login
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.ApiHandler
 import com.thegergo02.minkreta.MainActivity
-import com.thegergo02.minkreta.controller.LoginController
 import com.thegergo02.minkreta.R
+import com.thegergo02.minkreta.controller.LoginController
 import com.thegergo02.minkreta.view.LoginView
 import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -32,14 +31,14 @@ class LoginActivity : AppCompatActivity(), LoginView {
         inst_code_s?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                var instituteCode = institutesWithCode.get(inst_code_s.selectedItem.toString())
+                val instituteCode = institutesWithCode[inst_code_s.selectedItem.toString()]
                 inst_code_tt.text = instituteCode
             }
         }
         login_btt.setOnClickListener {
-            var instituteCode = institutesWithCode.get(inst_code_s.selectedItem.toString()).toString()
-            var userName = username_et.text.toString()
-            var password = password_et.text.toString()
+            val instituteCode = institutesWithCode[inst_code_s.selectedItem.toString()].toString()
+            val userName = username_et.text.toString()
+            val password = password_et.text.toString()
             controller.getTokens(userName, password, instituteCode)
             showProgress()
         }
@@ -48,11 +47,11 @@ class LoginActivity : AppCompatActivity(), LoginView {
     override fun setInstitutes(institutes: JSONArray) {
         for (i in 0 until institutes.length()) {
             val institute = JSONObject(institutes[i].toString())
-            institutesWithCode.put(institute["Name"].toString(), institute["InstituteCode"].toString())
+            institutesWithCode[institute["Name"].toString()] = institute["InstituteCode"].toString()
             stringInstitutes.add(institute["Name"].toString())
 
         }
-        stringInstitutes.sortBy({it})
+        stringInstitutes.sortBy{it}
         val adapter = ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, stringInstitutes)
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
         inst_code_s.adapter = adapter
@@ -61,7 +60,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
         val mainIntent = Intent(this, MainActivity::class.java)
         mainIntent.putExtra("access_token", tokens["access_token"].toString())
         mainIntent.putExtra("refresh_token", tokens["refresh_token"].toString())
-        mainIntent.putExtra("institute_code", institutesWithCode.get(inst_code_s.selectedItem.toString()))
+        mainIntent.putExtra("institute_code", institutesWithCode[inst_code_s.selectedItem.toString()])
         startActivity(mainIntent)
         finish()
     }
@@ -73,9 +72,9 @@ class LoginActivity : AppCompatActivity(), LoginView {
     }
 
     override fun hideProgress() {
-        loginloading_bar.visibility = View.GONE
+        login_loading_bar.visibility = View.GONE
     }
     override fun showProgress() {
-        loginloading_bar.visibility = View.VISIBLE
+        login_loading_bar.visibility = View.VISIBLE
     }
 }

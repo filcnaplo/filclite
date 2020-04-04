@@ -1,11 +1,10 @@
 package com.thegergo02.minkreta.controller
 
+import com.thegergo02.minkreta.R
 import com.android.volley.*
-import com.android.volley.toolbox.Volley
 import com.thegergo02.minkreta.ApiHandler
-import com.thegergo02.minkreta.data.Student
+import com.thegergo02.minkreta.misc.Strings
 import com.thegergo02.minkreta.view.LoginView
-import com.thegergo02.minkreta.view.MainView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -30,20 +29,15 @@ class LoginController(private var loginView: LoginView?, private val apiHandler:
         }
     }
 
-    fun onDestroy() {
-        loginView = null
-    }
-
     override fun onInstitutesSuccess(institutes: JSONArray) {
         loginView?.setInstitutes(institutes)
         loginView?.hideProgress()
     }
     override fun onInstitutesError(error: VolleyError) {
-        var errorString: String
-        when(error) {
-            is ClientError -> errorString = "Couldn't get institutes. (ClientError)"
-            is NoConnectionError -> errorString = "Can't get institutes without an internet connection."
-            else -> errorString = error.toString()
+        val errorString: String = when(error) {
+            is ClientError -> Strings.get(R.string.client_error_inst)
+            is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
+            else -> error.toString()
         }
         loginView?.displayError(errorString)
         loginView?.hideProgress()
@@ -55,14 +49,13 @@ class LoginController(private var loginView: LoginView?, private val apiHandler:
         loginView?.hideProgress()
     }
     override fun onTokensError(error: VolleyError) {
-        var errorString: String
-        when(error) {
-            is ClientError -> errorString = "Maybe you left a field empty? (ClientError)"
-            is AuthFailureError -> errorString = "Wrong credetinals! (AuthFailureError)"
-            is TimeoutError -> errorString = "The KRETA server took too long to respond. (TimeoutError)"
-            is NetworkError -> errorString = "Maybe the request got interrupted? (NetworkError) (${error.message})"
-            is NoConnectionError -> errorString = "Can't login without an internet connection."
-            else -> errorString = error.toString()
+        val errorString: String = when(error) {
+            is ClientError -> Strings.get(R.string.client_error_login)
+            is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
+            is TimeoutError -> Strings.get(R.string.timeout_error_general)
+            is NetworkError -> Strings.get(R.string.network_error_general)
+            is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
+            else -> error.toString()
         }
         loginView?.displayError(errorString)
         loginView?.hideProgress()

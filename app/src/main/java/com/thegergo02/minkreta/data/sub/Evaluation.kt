@@ -1,7 +1,6 @@
 package com.thegergo02.minkreta.data.sub
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)

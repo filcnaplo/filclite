@@ -1,3 +1,26 @@
 <resources>
     <string name="app_name">MinKreta</string>
+    <!--ERRORS-->
+    <string name="timeout_error_general">The KRETA servers took too long to respond!</string>
+    <string name="network_error_general">The request abruptly closed!</string>
+    <string name="auth_failure_error_general">Wrong credetinals!</string>
+    <string name="no_connection_error_general">There is no internet connection!</string>
+
+    <!--LOGIN ERRORS-->
+    <string name="client_error_login">You left a field empty!</string>
+
+    <!--INST ERRORS-->
+    <string name="client_error_inst">There was a problem while getting institutes!</string>
+
+    <!--LOGIN ACTIVITY-->
+    <string name="username_la">Username</string>
+    <string name="password_la">Password</string>
+    <string name="login_la">Login</string>
+
+    <!--MAIN ACTIVITY-->
+    <string name="evals_ma">Evaluations</string>
+    <string name="notes_ma">Notes</string>
+    <string name="abs_ma">Absences</string>
+    <string name="homework_ma">Homework</string>
+    <string name="timetable_ma">Timetable</string>
 </resources>

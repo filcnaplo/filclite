@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection", "SpellCheckingInspection")
+
 package com.thegergo02.minkreta.data.sub
 
 import com.squareup.moshi.Json

@@ -14,7 +14,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
         android:gravity="center_horizontal"
-        android:text="Institute Code"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="@color/colorText"
         android:textSize="24sp"
@@ -28,43 +27,37 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <LinearLayout
-            android:id="@+id/linearLayout"
+        <EditText
+            android:id="@+id/username_et"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="45dp"
+            android:autofillHints="username"
+            android:background="@color/colorPrimary"
+            android:ems="10"
+            android:hint="@string/username_la"
+            android:inputType="textPersonName"
+            android:textColor="@color/colorText"
+            android:textColorHint="@color/colorText"
+            tools:layout_conversion_absoluteHeight="45dp"
+            tools:layout_conversion_absoluteWidth="213dp"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="540dp" />
 
-            <EditText
-                android:id="@+id/username_et"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:background="@color/colorPrimary"
-                android:ems="10"
-                android:hint="Username"
-                android:inputType="textPersonName"
-                android:textColor="@color/colorText"
-                android:textColorHint="@color/colorText"
-                tools:layout_conversion_absoluteHeight="45dp"
-                tools:layout_conversion_absoluteWidth="213dp"
-                tools:layout_editor_absoluteX="0dp"
-                tools:layout_editor_absoluteY="540dp" />
-
-            <EditText
-                android:id="@+id/password_et"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:background="@color/colorPrimary"
-                android:ems="10"
-                android:hint="Password"
-                android:inputType="textPassword"
-                android:textColor="@color/colorText"
-                android:textColorHint="@color/colorText"
-                tools:layout_conversion_absoluteHeight="45dp"
-                tools:layout_conversion_absoluteWidth="198dp"
-                tools:layout_editor_absoluteX="213dp"
-                tools:layout_editor_absoluteY="540dp" />
-
-        </LinearLayout>
+        <EditText
+            android:id="@+id/password_et"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:autofillHints="no"
+            android:background="@color/colorPrimary"
+            android:ems="10"
+            android:hint="@string/password_la"
+            android:inputType="textPassword"
+            android:textColor="@color/colorText"
+            android:textColorHint="@color/colorText"
+            tools:layout_conversion_absoluteHeight="45dp"
+            tools:layout_conversion_absoluteWidth="198dp"
+            tools:layout_editor_absoluteX="213dp"
+            tools:layout_editor_absoluteY="540dp" />
 
     </LinearLayout>
 
@@ -87,7 +80,7 @@
         app:layout_constraintTop_toBottomOf="@+id/login_ll" />
 
     <ProgressBar
-        android:id="@+id/loginloading_bar"
+        android:id="@+id/login_loading_bar"
         style="?android:attr/progressBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -105,7 +98,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="100dp"
         android:background="@color/colorAccent"
-        android:text="Login"
+        android:text="@string/login_la"
         android:textColor="@color/colorText"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

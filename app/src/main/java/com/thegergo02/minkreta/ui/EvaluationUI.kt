@@ -1,27 +1,24 @@
 package com.thegergo02.minkreta.ui
 
 import android.content.Context
-import android.telecom.Call
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.data.Student
-import kotlinx.android.synthetic.main.activity_main.*
 
 class EvaluationUI {
     companion object {
         private fun getColorFromGrade(ctx: Context, grade: Int?): Int {
-            when (grade) {
-                1 -> return ContextCompat.getColor(ctx, R.color.colorOne)
-                2 -> return ContextCompat.getColor(ctx, R.color.colorTwo)
-                3 -> return ContextCompat.getColor(ctx, R.color.colorThree)
-                4 -> return ContextCompat.getColor(ctx, R.color.colorFour)
-                5 -> return ContextCompat.getColor(ctx, R.color.colorFive)
-                else -> return ContextCompat.getColor(ctx, R.color.colorText)
+            return when (grade) {
+                1 -> ContextCompat.getColor(ctx, R.color.colorOne)
+                2 -> ContextCompat.getColor(ctx, R.color.colorTwo)
+                3 -> ContextCompat.getColor(ctx, R.color.colorThree)
+                4 -> ContextCompat.getColor(ctx, R.color.colorFour)
+                5 -> ContextCompat.getColor(ctx, R.color.colorFive)
+                else -> ContextCompat.getColor(ctx, R.color.colorText)
             }
         }
 

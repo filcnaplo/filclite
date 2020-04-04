@@ -1,11 +1,11 @@
 package com.thegergo02.minkreta
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.controller.MainController
@@ -16,9 +16,7 @@ import com.thegergo02.minkreta.ui.*
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.DayOfWeek
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 
 class MainActivity : AppCompatActivity(), MainView {
@@ -31,19 +29,15 @@ class MainActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_main)
         controller = MainController(this, ApiHandler(this))
 
-        var passedAccessToken = intent.getStringExtra("access_token")
-        var passedRefreshToken = intent.getStringExtra("refresh_token")
-        var passedInstituteCode = intent.getStringExtra("institute_code")
+        val passedAccessToken = intent.getStringExtra("access_token")
+        val passedRefreshToken = intent.getStringExtra("refresh_token")
+        val passedInstituteCode = intent.getStringExtra("institute_code")
 
         lateinit var accessToken: String
         lateinit var refreshToken: String
         lateinit var instituteCode: String
 
-        if (passedAccessToken == null) {
-            accessToken = accessToken
-            refreshToken = refreshToken
-            instituteCode = instituteCode
-        } else {
+        if (passedAccessToken != null) {
             accessToken = passedAccessToken
             refreshToken = passedRefreshToken
             instituteCode = passedInstituteCode
@@ -64,14 +58,11 @@ class MainActivity : AppCompatActivity(), MainView {
             if (details_ll.visibility == View.GONE) {
                 hideDetails()
                 val nameDetailsTextView = TextView(this)
-                nameDetailsTextView.text = "ID: ${cachedStudent.id} \n" +
-                        "SchoolYearID: ${cachedStudent.schoolYearId} \n" +
-                        "Name: ${cachedStudent.name} \n" +
-                        "NameOfBirth: ${cachedStudent.nameOfBirth} \n" +
-                        "PlaceOfBirth: ${cachedStudent.placeOfBirth} \n" +
+                nameDetailsTextView.text = "(${cachedStudent.id}, ${cachedStudent.schoolYearId}) \n" +
+                        "Place Of Birth: ${cachedStudent.placeOfBirth} \n" +
                         "Mother's name: ${cachedStudent.mothersName} \n" +
                         "AddressDataList: ${cachedStudent.addressDataList} \n" +
-                        "DateOfBirtUTC: ${cachedStudent.DateOfBirthUtc} \n" +
+                        "DateOfBirthUTC: ${cachedStudent.DateOfBirthUtc} \n" +
                         "InstituteName: ${cachedStudent.instituteName} \n" +
                         "InstituteCode: ${cachedStudent.instituteCode} \n" +
                         "Lessons: ${cachedStudent.lessons} \n" +
@@ -93,11 +84,11 @@ class MainActivity : AppCompatActivity(), MainView {
         abs_btt.setOnClickListener {
             switchTab(Tab.Absences)
         }
-        homeworks_btt.setOnClickListener {
+        homework_btt.setOnClickListener {
             switchTab(Tab.Homeworks)
         }
         timetable_btt.setOnClickListener {
-            if (itemHolders.get(Tab.Timetable)?.visibility == View.GONE) {
+            if (itemHolders[Tab.Timetable]?.visibility == View.GONE) {
                 showProgress()
                 val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
                 val startDate = KretaDate(firstDay)
@@ -161,19 +152,21 @@ class MainActivity : AppCompatActivity(), MainView {
                 tabHolder.value.visibility = View.GONE
             }
         }
+        hideDetails()
     }
     private fun switchTab(newTab: Tab) {
         closeTabs(newTab)
-        val tabHolder = itemHolders.get(newTab)
+        val tabHolder = itemHolders[newTab]
         if (tabHolder?.visibility == View.GONE) {
-            tabHolder?.visibility = View.VISIBLE
+            tabHolder.visibility = View.VISIBLE
         } else {
             tabHolder?.visibility = View.GONE
         }
     }
 
     override fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>) {
-        TimetableUI.generateTimetable(this, timetable, itemHolders.get(Tab.Timetable), details_ll, ::showDetails, ::hideDetails, controller)
+        TimetableUI.generateTimetable(this, timetable,
+            itemHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller)
         switchTab(Tab.Timetable)
         hideProgress()
     }
@@ -183,10 +176,14 @@ class MainActivity : AppCompatActivity(), MainView {
         closeTabs()
         name_tt.visibility = View.VISIBLE
         name_tt.text = cachedStudent.name
-        EvaluationUI.generateEvaluations(this, cachedStudent, itemHolders.get(Tab.Evaluations), details_ll, ::showDetails, ::hideDetails)
-        NotesUI.generateNotes(this, cachedStudent, itemHolders.get(Tab.Notes), details_ll, ::showDetails, ::hideDetails)
-        AbsencesUI.generateAbsences(this, cachedStudent, itemHolders.get(Tab.Absences), details_ll, ::showDetails, ::hideDetails)
-        HomeworksUI.generateHomeworks(this, cachedStudent, itemHolders.get(Tab.Homeworks), details_ll, ::showDetails, ::hideDetails)
+        EvaluationUI.generateEvaluations(this, cachedStudent,
+            itemHolders[Tab.Evaluations], details_ll, ::showDetails, ::hideDetails)
+        NotesUI.generateNotes(this, cachedStudent,
+            itemHolders[Tab.Notes], details_ll, ::showDetails, ::hideDetails)
+        AbsencesUI.generateAbsences(this, cachedStudent,
+            itemHolders[Tab.Absences], details_ll, ::showDetails, ::hideDetails)
+        HomeworkUI.generateHomework(this, cachedStudent,
+            itemHolders[Tab.Homeworks], details_ll, ::showDetails, ::hideDetails)
         hideProgress()
     }
 }

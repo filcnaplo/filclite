@@ -2,7 +2,6 @@ package com.thegergo02.minkreta.controller
 
 import com.android.volley.VolleyError
 import com.thegergo02.minkreta.ApiHandler
-import com.thegergo02.minkreta.data.Student
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -22,7 +21,7 @@ class ApiLinkHelper(private val apiHandler: ApiHandler)
         return currentApiLink
     }
 
-    fun getApiLink(apiType : ApiHandler.ApiType = ApiHandler.ApiType.PROD) {
+    private fun getApiLink(apiType : ApiHandler.ApiType = ApiHandler.ApiType.PROD) {
         val parentListener = this
         GlobalScope.launch {
             apiHandler.getApiLink(parentListener, apiType)

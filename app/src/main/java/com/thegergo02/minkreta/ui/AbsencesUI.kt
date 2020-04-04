@@ -12,9 +12,9 @@ import com.thegergo02.minkreta.data.Student
 class AbsencesUI {
     companion object {
         private fun getColorFromJustification(ctx: Context, justificationState: String?): Int {
-            when (justificationState) {
-                "Justified" -> return ContextCompat.getColor(ctx, R.color.colorAbsJustified)
-                else -> return ContextCompat.getColor(ctx, R.color.colorAbsUnjustified)
+            return when (justificationState) {
+                "Justified" -> ContextCompat.getColor(ctx, R.color.colorAbsJustified)
+                else -> ContextCompat.getColor(ctx, R.color.colorAbsUnjustified)
             }
         }
 

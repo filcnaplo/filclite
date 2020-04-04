@@ -9,9 +9,9 @@ import androidx.core.content.ContextCompat
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.data.Student
 
-class HomeworksUI {
+class HomeworkUI {
     companion object {
-        fun generateHomeworks(ctx: Context, cachedStudent: Student, noteHolder: LinearLayout?, detailLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
+        fun generateHomework(ctx: Context, cachedStudent: Student, noteHolder: LinearLayout?, detailLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
             for (homework in cachedStudent.notes) {
                 val noteButton = Button(ctx)
                 noteButton.text = "${homework.type} | ${homework.title} | ${homework.teacher}"
