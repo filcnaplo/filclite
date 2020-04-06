@@ -1,9 +1,7 @@
 package com.thegergo02.minkreta.controller
 
-import com.thegergo02.minkreta.R
 import com.android.volley.*
 import com.thegergo02.minkreta.ApiHandler
-import com.thegergo02.minkreta.misc.Strings
 import com.thegergo02.minkreta.view.LoginView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -35,8 +33,8 @@ class LoginController(private var loginView: LoginView?, private val apiHandler:
     }
     override fun onInstitutesError(error: VolleyError) {
         val errorString: String = when(error) {
-            is ClientError -> Strings.get(R.string.client_error_inst)
-            is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
+            is ClientError -> "There was a problem while getting institutes!"
+            is NoConnectionError -> "There is no internet connection!"
             else -> error.toString()
         }
         loginView?.displayError(errorString)
@@ -50,11 +48,11 @@ class LoginController(private var loginView: LoginView?, private val apiHandler:
     }
     override fun onTokensError(error: VolleyError) {
         val errorString: String = when(error) {
-            is ClientError -> Strings.get(R.string.client_error_login)
-            is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
-            is TimeoutError -> Strings.get(R.string.timeout_error_general)
-            is NetworkError -> Strings.get(R.string.network_error_general)
-            is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
+            is ClientError -> "You left a field empty!"
+            is AuthFailureError -> "Wrong credetinals!"
+            is TimeoutError -> "The KRETA servers took too long to respond!"
+            is NetworkError -> "The request abruptly closed!"
+            is NoConnectionError -> "There is no internet connection!"
             else -> error.toString()
         }
         loginView?.displayError(errorString)
@@ -67,4 +65,8 @@ class LoginController(private var loginView: LoginView?, private val apiHandler:
     override fun onStudentError(error: VolleyError) {}
     override fun onTimetableSuccess(timetable: String) {}
     override fun onTimetableError(error: VolleyError) {}
+    override fun onMessageListSuccess(messageListString: String) {}
+    override fun onMessageListError(error: VolleyError) {}
+    override fun onMessageSuccess(messageString: String) {}
+    override fun onMessageError(error: VolleyError) {}
 }

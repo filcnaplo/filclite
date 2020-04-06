@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Application
 import androidx.annotation.StringRes
 
-@SuppressLint("Registered")
 class App : Application() {
     companion object {
         lateinit var instance: App private set

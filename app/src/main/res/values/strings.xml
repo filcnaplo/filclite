@@ -23,4 +23,5 @@
     <string name="abs_ma">Absences</string>
     <string name="homework_ma">Homework</string>
     <string name="timetable_ma">Timetable</string>
+    <string name="messages_ma">Messages</string>
 </resources>

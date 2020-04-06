@@ -1,6 +1,19 @@
 package com.thegergo02.minkreta
 
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.ToJson
 import java.time.LocalDateTime
+
+class KretaDateAdapter {
+    @FromJson
+    fun fromJson(dateString: String): KretaDate {
+        return KretaDate().fromString(dateString)
+    }
+    @ToJson
+    fun toJson(kretaDate: KretaDate): String {
+        return kretaDate.toString()
+    }
+}
 
 class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
     var year: Int = 1970
@@ -33,7 +46,7 @@ class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
         fromString(date)
     }
 
-    private fun fromString(str: String?) {
+    fun fromString(str: String?): KretaDate {
         val dateAndTime = str?.split("-","T",":")
         if (dateAndTime != null) {
             year = dateAndTime[0].toInt()
@@ -43,6 +56,7 @@ class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
             minute = dateAndTime[4].toInt()
             second = dateAndTime[5].toInt()
         }
+        return this
     }
     private fun decideZero(num: Int): String {
         return if (num < 10) {

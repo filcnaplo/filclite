@@ -1,7 +1,6 @@
 package com.thegergo02.minkreta
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -10,6 +9,8 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.data.Student
+import com.thegergo02.minkreta.data.message.Message
+import com.thegergo02.minkreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.ui.*
@@ -24,6 +25,10 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var cachedStudent: Student
     private lateinit var itemHolders: Map<Tab, LinearLayout>
 
+    private lateinit var accessToken: String
+    private lateinit var refreshToken: String
+    private lateinit var instituteCode: String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -32,10 +37,6 @@ class MainActivity : AppCompatActivity(), MainView {
         val passedAccessToken = intent.getStringExtra("access_token")
         val passedRefreshToken = intent.getStringExtra("refresh_token")
         val passedInstituteCode = intent.getStringExtra("institute_code")
-
-        lateinit var accessToken: String
-        lateinit var refreshToken: String
-        lateinit var instituteCode: String
 
         if (passedAccessToken != null) {
             accessToken = passedAccessToken
@@ -51,7 +52,8 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Notes to note_holder_ll,
             Tab.Absences to abs_holder_ll,
             Tab.Homeworks to homework_holder_ll,
-            Tab.Timetable to timetable_holder_ll
+            Tab.Timetable to timetable_holder_ll,
+            Tab.Messages to messages_holder_ll
         )
 
         name_tt.setOnClickListener {
@@ -93,17 +95,22 @@ class MainActivity : AppCompatActivity(), MainView {
                 val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
                 val startDate = KretaDate(firstDay)
                 val endDate = KretaDate(firstDay.plusDays(6))
-                Log.w("date", startDate.toString())
-                Log.w("date", endDate.toString())
                 controller.getTimetable(
                     accessToken,
-                    refreshToken,
                     instituteCode,
                     startDate,
                     endDate
                 )
             } else {
                 switchTab(Tab.Timetable)
+            }
+        }
+        messages_btt.setOnClickListener {
+            if (itemHolders[Tab.Messages]?.visibility == View.GONE) {
+                showProgress()
+                controller.getMessageList(accessToken)
+            } else {
+                switchTab(Tab.Messages)
             }
         }
     }
@@ -171,6 +178,16 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
 
+    override fun generateMessageDescriptors(messages: List<MessageDescriptor>) {
+        MessageUI.generateMessageDescriptors(this, messages, itemHolders[Tab.Messages], controller, accessToken)
+        switchTab(Tab.Messages)
+        hideProgress()
+    }
+
+    override fun generateMessage(message: Message) {
+        MessageUI.generateMessage(this, message, details_ll, ::showDetails, ::hideDetails)
+    }
+
     private fun refreshUI() {
         showProgress()
         closeTabs()
@@ -182,7 +199,7 @@ class MainActivity : AppCompatActivity(), MainView {
             itemHolders[Tab.Notes], details_ll, ::showDetails, ::hideDetails)
         AbsencesUI.generateAbsences(this, cachedStudent,
             itemHolders[Tab.Absences], details_ll, ::showDetails, ::hideDetails)
-        HomeworkUI.generateHomework(this, cachedStudent,
+        HomeworkUI.generateHomework(this, listOf(),
             itemHolders[Tab.Homeworks], details_ll, ::showDetails, ::hideDetails)
         hideProgress()
     }
