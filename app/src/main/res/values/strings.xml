@@ -5,6 +5,7 @@
     <string name="network_error_general">The request abruptly closed!</string>
     <string name="auth_failure_error_general">Wrong credetinals!</string>
     <string name="no_connection_error_general">There is no internet connection!</string>
+    <string name="server_error_general">Something is wrong with the KRETA servers!</string>
 
     <!--LOGIN ERRORS-->
     <string name="client_error_login">You left a field empty!</string>

@@ -19,37 +19,55 @@ class AbsencesUI {
         }
 
         fun generateAbsences(ctx: Context, cachedStudent: Student, absenceHolder: LinearLayout?, detailLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
-            for (abs in cachedStudent.absences) {
-                val absenceButton = Button(ctx)
-                absenceButton.text = "${abs.justificationStateName} | ${abs.subject} | ${abs.lessonStartTime} | ${abs.teacher}"
-                absenceButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimary))
-                absenceButton.setTextColor(getColorFromJustification(ctx, abs.justificationState))
-                absenceButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
-                absenceButton.setOnClickListener {
-                    hideDetails()
-                    val absDetailsTextView = TextView(ctx)
-                    absDetailsTextView.text = "Type: ${abs.type} \n" +
-                            "Type's name: ${abs.typeName} \n" +
-                            "Mode: ${abs.mode} \n" +
-                            "Mode's name: ${abs.modeName} \n" +
-                            "Subject: ${abs.subject} \n" +
-                            "Subject category: ${abs.subjectCategory} \n" +
-                            "Subject category's name: ${abs.subjectCategoryName} \n" +
-                            "Delay in minutes: ${abs.delayTime} \n" +
-                            "Teacher: ${abs.teacher} \n" +
-                            "Lesson's start time: ${abs.lessonStartTime} \n" +
-                            "Number of lessons: ${abs.numberOfLessons} \n" +
-                            "Creating time: ${abs.creatingTime} \n" +
-                            "Justification state: ${abs.justificationState} \n" +
-                            "Justification state's name: ${abs.justificationStateName} \n" +
-                            "Justification type: ${abs.justificationType} \n" +
-                            "Justification type's name: ${abs.justificationTypeName} \n" +
-                            "Seen by tutelary (UTC): ${abs.seenByTutelaryUtc} \n"
-                    absDetailsTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
-                    detailLL.addView(absDetailsTextView)
-                    showDetails()
+            if (cachedStudent.absences != null) {
+                for (abs in cachedStudent.absences) {
+                    val absenceButton = Button(ctx)
+                    absenceButton.text =
+                        "${abs.justificationStateName} | ${abs.subject} | ${abs.lessonStartTime} | ${abs.teacher}"
+                    absenceButton.setBackgroundColor(
+                        ContextCompat.getColor(
+                            ctx,
+                            R.color.colorPrimaryDark
+                        )
+                    )
+                    absenceButton.setTextColor(
+                        getColorFromJustification(
+                            ctx,
+                            abs.justificationState
+                        )
+                    )
+                    absenceButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
+                    absenceButton.setOnClickListener {
+                        hideDetails()
+                        val absDetailsTextView = TextView(ctx)
+                        absDetailsTextView.text = "Type: ${abs.type} \n" +
+                                "Type's name: ${abs.typeName} \n" +
+                                "Mode: ${abs.mode} \n" +
+                                "Mode's name: ${abs.modeName} \n" +
+                                "Subject: ${abs.subject} \n" +
+                                "Subject category: ${abs.subjectCategory} \n" +
+                                "Subject category's name: ${abs.subjectCategoryName} \n" +
+                                "Delay in minutes: ${abs.delayTime} \n" +
+                                "Teacher: ${abs.teacher} \n" +
+                                "Lesson's start time: ${abs.lessonStartTime} \n" +
+                                "Number of lessons: ${abs.numberOfLessons} \n" +
+                                "Creating time: ${abs.creatingTime} \n" +
+                                "Justification state: ${abs.justificationState} \n" +
+                                "Justification state's name: ${abs.justificationStateName} \n" +
+                                "Justification type: ${abs.justificationType} \n" +
+                                "Justification type's name: ${abs.justificationTypeName} \n" +
+                                "Seen by tutelary (UTC): ${abs.seenByTutelaryUtc} \n"
+                        absDetailsTextView.setTextColor(
+                            ContextCompat.getColor(
+                                ctx,
+                                R.color.colorText
+                            )
+                        )
+                        detailLL.addView(absDetailsTextView)
+                        showDetails()
+                    }
+                    absenceHolder?.addView(absenceButton)
                 }
-                absenceHolder?.addView(absenceButton)
             }
         }
     }

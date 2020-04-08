@@ -1,19 +1,17 @@
 package com.thegergo02.minkreta.controller
 
-import com.android.volley.*
+import com.android.volley.VolleyError
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.thegergo02.minkreta.ApiHandler
 import com.thegergo02.minkreta.KretaDate
 import com.thegergo02.minkreta.KretaDateAdapter
-import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.data.Student
 import com.thegergo02.minkreta.data.message.Message
 import com.thegergo02.minkreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.data.timetable.SchoolDayOrder
-import com.thegergo02.minkreta.misc.Strings
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -49,6 +47,7 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
             apiHandler.getMessage(parentListener, accessToken, messageId)
         }
     }
+
     override fun onStudentSuccess(student: String, accessToken: String, refreshToken: String) {
         val moshi: Moshi = Moshi.Builder().build()
         val adapter: JsonAdapter<Student> = moshi.adapter(Student::class.java)
@@ -59,13 +58,14 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         mainView?.setStudent(currentStudent)
     }
     override fun onStudentError(error: VolleyError) {
-        val errorString: String = when(error) {
+    /*    val errorString: String = when(error) {
             is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
             is TimeoutError -> Strings.get(R.string.timeout_error_general)
             is NetworkError -> Strings.get(R.string.network_error_general)
             is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
             else -> error.toString()
-        }
+        }*/
+        val errorString = error.toString()
         mainView?.displayError(errorString)
         mainView?.hideProgress()
     }
@@ -82,22 +82,28 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         for (i in 0 until timetableJson.length()) {
             val schoolClass = adapter.fromJson(timetableJson[i].toString())
             if (schoolClass != null) {
-                val kretaDate = KretaDate(schoolClass.startTime)
-                val schoolDay =
-                    SchoolDayOrder.schoolDayOrder[kretaDate.toLocalDateTime().dayOfWeek.value - 1]
+                val schoolDay = KretaDate(schoolClass.startTime).toSchoolDay()
                 returnedTimetable[schoolDay]?.add(schoolClass)
             }
+        }
+        for (day in SchoolDayOrder.schoolDayOrder) {
+            val schoolDay = returnedTimetable[day]
+            if (schoolDay != null)
+                if (schoolDay.isEmpty()) {
+                    returnedTimetable.remove(day)
+                }
         }
         mainView?.generateTimetable(returnedTimetable)
     }
     override fun onTimetableError(error: VolleyError) {
-        val errorString: String = when(error) {
+        /*val errorString: String = when(error) {
             is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
             is TimeoutError -> Strings.get(R.string.timeout_error_general)
             is NetworkError -> Strings.get(R.string.network_error_general)
             is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
             else -> error.toString()
-        }
+        }*/
+        val errorString = error.toString()
         mainView?.displayError(errorString)
         mainView?.hideProgress()
     }
@@ -116,13 +122,15 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         mainView?.generateMessageDescriptors(messageList)
     }
     override fun onMessageListError(error: VolleyError) {
-        val errorString: String = when(error) {
+        /*val errorString: String = when(error) {
             is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
             is TimeoutError -> Strings.get(R.string.timeout_error_general)
             is NetworkError -> Strings.get(R.string.network_error_general)
             is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
+            is ServerError -> Strings.get(R.string.server_error_general)
             else -> error.toString()
-        }
+        }*/
+        val errorString = error.toString()
         mainView?.displayError(errorString)
         mainView?.hideProgress()
     }
@@ -136,13 +144,15 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         }
     }
     override fun onMessageError(error: VolleyError) {
-        val errorString: String = when(error) {
+/*        val errorString: String = when(error) {
             is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
             is TimeoutError -> Strings.get(R.string.timeout_error_general)
             is NetworkError -> Strings.get(R.string.network_error_general)
             is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
+            is ServerError -> Strings.get(R.string.server_error_general)
             else -> error.toString()
-        }
+        }*/
+        val errorString = error.toString()
         mainView?.displayError(errorString)
         mainView?.hideProgress()
     }

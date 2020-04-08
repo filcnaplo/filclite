@@ -2,6 +2,7 @@ package com.thegergo02.minkreta
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var controller: MainController
     private lateinit var cachedStudent: Student
     private lateinit var itemHolders: Map<Tab, LinearLayout>
+    private lateinit var tabButtons: Map<Tab, Button>
 
     private lateinit var accessToken: String
     private lateinit var refreshToken: String
@@ -54,6 +56,14 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Homeworks to homework_holder_ll,
             Tab.Timetable to timetable_holder_ll,
             Tab.Messages to messages_holder_ll
+        )
+        tabButtons = mutableMapOf<Tab, Button>(
+            Tab.Evaluations to evals_btt,
+            Tab.Notes to notes_btt,
+            Tab.Absences to abs_btt,
+            Tab.Homeworks to homework_btt,
+            Tab.Timetable to timetable_btt,
+            Tab.Messages to messages_btt
         )
 
         name_tt.setOnClickListener {
@@ -157,6 +167,7 @@ class MainActivity : AppCompatActivity(), MainView {
         for (tabHolder in itemHolders) {
             if (tabHolder.key != exception) {
                 tabHolder.value.visibility = View.GONE
+                tabButtons[tabHolder.key]?.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary))
             }
         }
         hideDetails()
@@ -164,10 +175,15 @@ class MainActivity : AppCompatActivity(), MainView {
     private fun switchTab(newTab: Tab) {
         closeTabs(newTab)
         val tabHolder = itemHolders[newTab]
-        if (tabHolder?.visibility == View.GONE) {
-            tabHolder.visibility = View.VISIBLE
-        } else {
-            tabHolder?.visibility = View.GONE
+        val tabButton = tabButtons[newTab]
+        if (tabHolder != null && tabButton != null) {
+            if (tabHolder.visibility == View.GONE) {
+                tabHolder.visibility = View.VISIBLE
+                tabButton.setBackgroundColor(ContextCompat.getColor(this, R.color.colorAccent))
+            } else {
+                tabHolder.visibility = View.GONE
+                tabButton.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary))
+            }
         }
     }
 

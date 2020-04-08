@@ -48,7 +48,7 @@ class ApiHandler(ctx: Context) {
     private val API_KEY = "7856d350-1fda-45f5-822d-e1a2f3f1acf0"
     private val CLIENT_ID = "919e0c1c-76a2-4646-a2fb-7085bbbf3c56"
     private var userAgent = ""
-    private val FALLBACK_USER_AGENT = "Kreta.Ellenorzo/2.9.10.2020031602 (Android; Dalek 5.4)"
+    private val FALLBACK_USER_AGENT = "Kreta.Ellenorzo/2.9.10.2020031602 (Android; <codename> 0.0)"
 
    init {
        GlobalScope.launch {
@@ -63,7 +63,7 @@ class ApiHandler(ctx: Context) {
                 userAgent = response["KretaUserAgent"].toString().replace("(Android; <codename> 0.0)", "(Android; ${UUID.randomUUID()} ${(5..9)}.${2..9})")
             },
             Response.ErrorListener { error ->
-                userAgent = FALLBACK_USER_AGENT
+                userAgent = FALLBACK_USER_AGENT.replace("(Android; <codename> 0.0)", "(Android; ${UUID.randomUUID()} ${(5..9)}.${2..9})")
             }
         )
         queue.add(userAgentQuery)
@@ -176,7 +176,7 @@ class ApiHandler(ctx: Context) {
 
     fun getMessage(listener: OnFinishedResult, accessToken: String, messageId: Int) {
         val messageQuery = object : StringRequest(
-            Method.GET, "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/postaladaelemek/sajat/$messageId",
+            Method.GET, "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/postaladaelemek/$messageId",
             Response.Listener { response ->
                 listener.onMessageSuccess(response)
             },
@@ -187,7 +187,6 @@ class ApiHandler(ctx: Context) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
                 "Accept" to "application/json",
                 "User-Agent" to getUserAgent())
-            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
         queue.add(messageQuery)
     }

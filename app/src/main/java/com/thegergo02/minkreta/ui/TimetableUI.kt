@@ -20,7 +20,7 @@ class TimetableUI {
             for (schoolClass in classes) {
                 val classButton = Button(ctx)
                 classButton.text = "${schoolClass.count} | ${schoolClass.subject} | ${schoolClass.classRoom} | ${schoolClass.teacher}"
-                classButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimary))
+                classButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimaryDark))
                 classButton.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                 classButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
                 classButton.setOnClickListener {
@@ -49,14 +49,19 @@ class TimetableUI {
             for (day in currentTimetable) {
                 val dayButton = Button(ctx)
                 dayButton.text = day.key.toString()
-                dayButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimary))
-                dayButton.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
+                dayButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimaryDark))
+                val textColor = if (KretaDate().fromSchoolDay(day.key).isToday()) {
+                    ContextCompat.getColor(ctx, R.color.colorText)
+                } else {
+                    ContextCompat.getColor(ctx, R.color.colorUnavailable)
+                }
+                dayButton.setTextColor(textColor)
                 dayButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
                 dayButton.setOnClickListener {
                     val timetableClassLL = generateSchoolClasses(ctx, day.value, detailLL, showDetails, hideDetails)
                     val timetableBackButton = Button(ctx)
                     timetableBackButton.text = "BACK"
-                    timetableBackButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimary))
+                    timetableBackButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimaryDark))
                     timetableBackButton.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                     timetableBackButton.setOnClickListener {
                         generateTimetable(ctx, currentTimetable, timetableHolder, detailLL, showDetails, hideDetails, controller)

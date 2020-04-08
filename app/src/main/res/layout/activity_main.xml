@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@color/colorText"
+                android:textColor="@color/colorAccent2"
                 android:textSize="24sp"
                 android:visibility="visible" />
 
@@ -55,7 +55,7 @@
                     android:id="@+id/notes_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorAccent"
+                    android:background="@color/colorPrimary"
                     android:text="@string/notes_ma"
                     android:textColor="@color/colorText" />
 
@@ -76,7 +76,7 @@
                     android:id="@+id/messages_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorAccent"
+                    android:background="@color/colorPrimary"
                     android:text="@string/messages_ma"
                     android:textColor="@color/colorText" />
 
@@ -97,7 +97,7 @@
                     android:id="@+id/timetable_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorAccent"
+                    android:background="@color/colorPrimary"
                     android:text="@string/timetable_ma"
                     android:textColor="@color/colorText" />
 
@@ -118,7 +118,7 @@
                     android:id="@+id/homework_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorAccent"
+                    android:background="@color/colorPrimary"
                     android:text="@string/homework_ma"
                     android:textColor="@color/colorText" />
 
@@ -139,7 +139,7 @@
                     android:id="@+id/evals_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorAccent"
+                    android:background="@color/colorPrimary"
                     android:text="@string/evals_ma"
                     android:textColor="@color/colorText" />
 
@@ -160,7 +160,7 @@
                     android:id="@+id/abs_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorAccent"
+                    android:background="@color/colorPrimary"
                     android:text="@string/abs_ma"
                     android:textColor="@color/colorText" />
 

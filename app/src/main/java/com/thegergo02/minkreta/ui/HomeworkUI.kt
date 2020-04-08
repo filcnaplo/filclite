@@ -15,7 +15,7 @@ class HomeworkUI {
             for (homework in homeworkList) {
                 val noteButton = Button(ctx)
                 noteButton.text = ""
-                noteButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimary))
+                noteButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimaryDark))
                 noteButton.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                 noteButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
                 noteButton.setOnClickListener {

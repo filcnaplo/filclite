@@ -1,7 +1,11 @@
 package com.thegergo02.minkreta
 
+import android.util.Log
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
+import com.thegergo02.minkreta.data.timetable.SchoolDay
+import com.thegergo02.minkreta.data.timetable.SchoolDayOrder
+import java.time.DayOfWeek
 import java.time.LocalDateTime
 
 class KretaDateAdapter {
@@ -46,6 +50,26 @@ class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
         fromString(date)
     }
 
+    fun fromSchoolDay(schoolDay: SchoolDay): KretaDate {
+        val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
+        for (i in (0..6)) {
+            firstDay.plusDays(i.toLong())
+            Log.w("day", firstDay.dayOfWeek.toString())
+            Log.w("day", schoolDay.toString().toUpperCase())
+            //TODO: FIX TIMETABLE CURRENT DAY COLOR CHANGE FUTURE ME ;)
+            if (firstDay.dayOfWeek.toString() == schoolDay.toString().toUpperCase()) {
+                year = firstDay.year
+                month = firstDay.monthValue
+                day = firstDay.dayOfMonth
+                hour = firstDay.hour
+                minute = firstDay.minute
+                second = firstDay.second
+                break
+            }
+        }
+        return this
+    }
+
     fun fromString(str: String?): KretaDate {
         val dateAndTime = str?.split("-","T",":")
         if (dateAndTime != null) {
@@ -73,6 +97,10 @@ class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
         return LocalDateTime.of(year, month, day, hour, minute, second)
     }
 
+    fun toSchoolDay(): SchoolDay {
+        return SchoolDayOrder.schoolDayOrder[toLocalDateTime().dayOfWeek.value - 1]
+    }
+
     enum class KretaDateFormat {
         DATE,
         TIME,
@@ -86,5 +114,9 @@ class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
             KretaDateFormat.TIME -> timeString
             KretaDateFormat.DATETIME -> "$dateString $timeString"
         }
+    }
+
+    fun isToday(): Boolean {
+        return (toSchoolDay().toString() == LocalDateTime.now().dayOfWeek.toString())
     }
 }

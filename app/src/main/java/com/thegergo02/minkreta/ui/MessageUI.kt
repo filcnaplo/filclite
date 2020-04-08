@@ -28,7 +28,7 @@ class MessageUI {
                     "${message.text} \n" +
                     "${message.senderName} (${message.senderRole}) \n" +
                     "${message.sendDate} \n" +
-                    "Attachments: ${message.attachments}"
+                    "Attachments: TODO: IMPLEMENT"
             detailsLL.addView(messageTextView)
         }
 
@@ -44,16 +44,18 @@ class MessageUI {
                 val messageButton = Button(ctx)
                 messageButton.text =
                     "${message.subject} | ${message.senderName} (${message.senderRole})"
-                messageButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimary))
+                messageButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimaryDark))
                 val textColor = if (messageDescriptor.isRead) {
-                    ContextCompat.getColor(ctx, R.color.colorText)
+                    ContextCompat.getColor(ctx, R.color.colorUnavailable)
                 } else {
-                    ContextCompat.getColor(ctx, R.color.colorSuccess)
+                    ContextCompat.getColor(ctx, R.color.colorText)
                 }
                 messageButton.setTextColor(textColor)
                 messageButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
                 messageButton.setOnClickListener {
-                    controller.getMessage(accessToken, message.id)
+                    if (message.id != null) {
+                        controller.getMessage(accessToken, message.id)
+                    }
                 }
                 messageDescriptorsHolder?.addView(messageButton)
             }
