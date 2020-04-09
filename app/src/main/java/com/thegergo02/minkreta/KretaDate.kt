@@ -78,7 +78,7 @@ class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
             day = dateAndTime[2].toInt()
             hour = dateAndTime[3].toInt()
             minute = dateAndTime[4].toInt()
-            second = dateAndTime[5].toInt()
+            second = dateAndTime[5].replace("Z", "").toInt()
         }
         return this
     }

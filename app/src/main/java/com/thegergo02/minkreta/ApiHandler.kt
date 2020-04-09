@@ -31,6 +31,9 @@ class ApiHandler(ctx: Context) {
         fun onTokensSuccess(tokens: String)
         fun onTokensError(error: VolleyError)
 
+        fun onRefreshTokensSuccess(tokens: String)
+        fun onRefreshTokensError(error: VolleyError)
+
         fun onStudentSuccess(student: String, accessToken: String, refreshToken: String)
         fun onStudentError(error: VolleyError)
 
@@ -42,6 +45,9 @@ class ApiHandler(ctx: Context) {
 
         fun onMessageSuccess(messageString: String)
         fun onMessageError(error: VolleyError)
+
+        fun onTestsSuccess(testsString: String)
+        fun onTestsError(error: VolleyError)
     }
 
     private val queue = Volley.newRequestQueue(ctx)
@@ -121,7 +127,24 @@ class ApiHandler(ctx: Context) {
         }
         queue.add(tokensQuery)
     }
-
+    fun refreshToken(listener: OnFinishedResult, instituteCode: String, refreshToken: String) {
+        val tokensQuery = object : StringRequest(
+            Method.POST, "https://$instituteCode.e-kreta.hu/idp/api/v1/Token",
+            Response.Listener { response ->
+                listener.onRefreshTokensSuccess(response)
+            },
+            Response.ErrorListener { error ->
+                listener.onRefreshTokensError(error)
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to API_KEY,
+                "Accept" to "application/json",
+                "User-Agent" to getUserAgent())
+            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
+            override fun getBody(): ByteArray = "refresh_token=$refreshToken&institute_code=$instituteCode&grant_type=refresh_token&client_id=$CLIENT_ID".toByteArray()
+        }
+        queue.add(tokensQuery)
+    }
     fun getStudent(listener: OnFinishedResult, accessToken: String, refreshToken: String, instituteCode: String) {
         val studentQuery = object : StringRequest(
             Method.GET, "https://$instituteCode.e-kreta.hu/mapi/api/v1/StudentAmi",
@@ -139,7 +162,8 @@ class ApiHandler(ctx: Context) {
         }
         queue.add(studentQuery)
     }
-    fun getTimetable(listener: OnFinishedResult, accessToken: String, instituteCode: String, fromDate: String = "null", toDate: String = "null") {
+
+    fun getTimetable(listener: OnFinishedResult, accessToken: String, instituteCode: String, fromDate: KretaDate, toDate: KretaDate) {
         val timetableQuery = object : StringRequest(
             Method.GET, "https://$instituteCode.e-kreta.hu/mapi/api/v1/LessonAmi?fromDate=${fromDate}&toDate=${toDate}",
             Response.Listener { response ->
@@ -156,6 +180,7 @@ class ApiHandler(ctx: Context) {
         }
         queue.add(timetableQuery)
     }
+
     fun getMessageList(listener: OnFinishedResult, accessToken: String) {
         val messageListQuery = object : StringRequest(
             Method.GET, "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/postaladaelemek/sajat",
@@ -173,7 +198,6 @@ class ApiHandler(ctx: Context) {
         }
         queue.add(messageListQuery)
     }
-
     fun getMessage(listener: OnFinishedResult, accessToken: String, messageId: Int) {
         val messageQuery = object : StringRequest(
             Method.GET, "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/postaladaelemek/$messageId",
@@ -189,5 +213,39 @@ class ApiHandler(ctx: Context) {
                 "User-Agent" to getUserAgent())
         }
         queue.add(messageQuery)
+    }
+    fun setMessageRead(accessToken: String, messageId: Int, isRead: Boolean) {
+        val messageReadQuery = object : StringRequest(
+            Method.POST,
+            "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/uzenetek/olvasott",
+            Response.Listener {},
+            Response.ErrorListener {}
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf(
+                "Authorization" to "Bearer ${accessToken}",
+                "Accept" to "application/json",
+                "User-Agent" to getUserAgent()
+            )
+            override fun getBodyContentType(): String = "application/json; charset=utf-8"
+            override fun getBody(): ByteArray = "{\"isOlvasott\": ${isRead},\"uzenetAzonositoLista\": [${messageId}] }".toByteArray()
+        }
+        queue.add(messageReadQuery)
+    }
+
+    fun getTests(listener: OnFinishedResult, accessToken: String, instituteCode: String, fromDate: KretaDate, toDate: KretaDate) {
+        val testsQuery = object : StringRequest(
+            Method.GET, "https://${instituteCode}.e-kreta.hu/mapi/api/v1/BejelentettSzamonkeresAmi?fromDate=${fromDate}&toDate=${toDate}",
+            Response.Listener { response ->
+                listener.onTestsSuccess(response)
+            },
+            Response.ErrorListener { error ->
+                listener.onTestsError(error)
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "Accept" to "application/json",
+                "User-Agent" to getUserAgent())
+        }
+        queue.add(testsQuery)
     }
 }

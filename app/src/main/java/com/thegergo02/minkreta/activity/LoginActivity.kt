@@ -1,5 +1,6 @@
-package com.thegergo02.minkreta.login
+package com.thegergo02.minkreta.activity
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -9,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.ApiHandler
-import com.thegergo02.minkreta.MainActivity
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.LoginController
 import com.thegergo02.minkreta.view.LoginView
@@ -25,6 +25,14 @@ class LoginActivity : AppCompatActivity(), LoginView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
+        if (sharedPref.getString("accessToken", null) != null) {
+            val mainIntent = Intent(this, MainActivity::class.java)
+            startActivity(mainIntent)
+            finish()
+        }
+
         controller = LoginController(this, ApiHandler(this))
         controller.getInstitutes()
         showProgress()
@@ -58,9 +66,13 @@ class LoginActivity : AppCompatActivity(), LoginView {
     }
     override fun setTokens(tokens: JSONObject) {
         val mainIntent = Intent(this, MainActivity::class.java)
-        mainIntent.putExtra("access_token", tokens["access_token"].toString())
-        mainIntent.putExtra("refresh_token", tokens["refresh_token"].toString())
-        mainIntent.putExtra("institute_code", institutesWithCode[inst_code_s.selectedItem.toString()])
+        val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
+        with (sharedPref.edit()) {
+            putString("accessToken", tokens["access_token"].toString())
+            putString("refreshToken", tokens["refresh_token"].toString())
+            putString("instituteCode", institutesWithCode[inst_code_s.selectedItem.toString()])
+            commit()
+        }
         startActivity(mainIntent)
         finish()
     }

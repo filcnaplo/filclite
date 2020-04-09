@@ -1,11 +1,14 @@
 package com.thegergo02.minkreta.ui
 
 import android.content.Context
+import android.util.Log
 import android.view.View
+import android.webkit.WebView
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.thegergo02.minkreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.data.message.Message
@@ -21,15 +24,23 @@ class MessageUI {
             hideDetails: () -> Unit
         ) {
             hideDetails()
-            val messageTextView = TextView(ctx)
-            messageTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
-            messageTextView.text = "Receivers: ${message.receiverList} \n" +
-                    "${message.subject} \n" +
-                    "${message.text} \n" +
-                    "${message.senderName} (${message.senderRole}) \n" +
-                    "${message.sendDate} \n" +
-                    "Attachments: TODO: IMPLEMENT"
-            detailsLL.addView(messageTextView)
+            val messageWebView = WebView(ctx)
+            val subjectTextView = TextView(ctx)
+            subjectTextView.text = "${message.subject}"
+            subjectTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
+            val cssString = "<style>body{background-color: black !important;color: white;}</style>"
+            val htmlMessage =
+                    "${cssString}${message.text?.replace("style=\"color: black;\"", "style=\"color: white;\"")?.replace("style=\"color: rgb(0, 0, 0);\"", "style=\"color: white;\"")}"
+            Log.w("html", htmlMessage)
+            val senderTextView = TextView(ctx)
+            senderTextView.text = "${message.senderName} (${message.senderRole}) \n" +
+                    "${message.sendDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+            senderTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
+            messageWebView.loadData(htmlMessage, "text/html", "UTF-8")
+            detailsLL.addView(subjectTextView)
+            detailsLL.addView(messageWebView)
+            detailsLL.addView(senderTextView)
+            showDetails()
         }
 
         fun generateMessageDescriptors(
@@ -39,6 +50,7 @@ class MessageUI {
             controller: MainController,
             accessToken: String
         ) {
+            messageDescriptorsHolder?.removeAllViews()
             for (messageDescriptor in messageDescriptors) {
                 val message = messageDescriptor.message
                 val messageButton = Button(ctx)
@@ -54,7 +66,8 @@ class MessageUI {
                 messageButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
                 messageButton.setOnClickListener {
                     if (message.id != null) {
-                        controller.getMessage(accessToken, message.id)
+                        controller.getMessage(accessToken, messageDescriptor.id)
+                        controller.setMessageRead(accessToken, message.id)
                     }
                 }
                 messageDescriptorsHolder?.addView(messageButton)

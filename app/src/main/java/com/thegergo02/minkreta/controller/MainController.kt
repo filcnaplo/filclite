@@ -1,5 +1,8 @@
 package com.thegergo02.minkreta.controller
 
+import android.util.Log
+import com.android.volley.AuthFailureError
+import com.android.volley.ServerError
 import com.android.volley.VolleyError
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
@@ -7,15 +10,16 @@ import com.thegergo02.minkreta.ApiHandler
 import com.thegergo02.minkreta.KretaDate
 import com.thegergo02.minkreta.KretaDateAdapter
 import com.thegergo02.minkreta.data.Student
-import com.thegergo02.minkreta.data.message.Message
 import com.thegergo02.minkreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.data.timetable.SchoolDayOrder
+import com.thegergo02.minkreta.data.timetable.Test
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
+import org.json.JSONObject
 
 class MainController(private var mainView: MainView?, private val apiHandler: ApiHandler)
     : ApiHandler.OnFinishedResult {
@@ -31,7 +35,7 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
     fun getTimetable(accessToken: String, instituteCode: String, fromDate: KretaDate, toDate: KretaDate) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getTimetable(parentListener, accessToken, instituteCode, fromDate.toString(), toDate.toString())
+            apiHandler.getTimetable(parentListener, accessToken, instituteCode, fromDate, toDate)
         }
     }
 
@@ -47,6 +51,25 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
             apiHandler.getMessage(parentListener, accessToken, messageId)
         }
     }
+    fun setMessageRead(accessToken: String, messageId: Int, isRead: Boolean = true) {
+        GlobalScope.launch {
+            apiHandler.setMessageRead(accessToken, messageId, isRead)
+        }
+    }
+
+    fun refreshToken(instituteCode: String, refreshToken: String) {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.refreshToken(parentListener, instituteCode, refreshToken)
+        }
+    }
+
+    fun getTests(accessToken: String, instituteCode: String, fromDate: KretaDate, toDate: KretaDate) {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.getTests(parentListener, accessToken, instituteCode, fromDate, toDate)
+        }
+    }
 
     override fun onStudentSuccess(student: String, accessToken: String, refreshToken: String) {
         val moshi: Moshi = Moshi.Builder().build()
@@ -58,6 +81,9 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         mainView?.setStudent(currentStudent)
     }
     override fun onStudentError(error: VolleyError) {
+        when (error) {
+            is AuthFailureError -> {mainView?.triggerRefreshToken()}
+        }
     /*    val errorString: String = when(error) {
             is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
             is TimeoutError -> Strings.get(R.string.timeout_error_general)
@@ -96,6 +122,9 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         mainView?.generateTimetable(returnedTimetable)
     }
     override fun onTimetableError(error: VolleyError) {
+        when (error) {
+            is AuthFailureError -> {mainView?.triggerRefreshToken()}
+        }
         /*val errorString: String = when(error) {
             is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
             is TimeoutError -> Strings.get(R.string.timeout_error_general)
@@ -109,6 +138,10 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
     }
 
     override fun onMessageListSuccess(messageListString: String) {
+        if (messageListString.isEmpty()) {
+            onMessageError(ServerError())
+            return
+        }
         val messageListJson = JSONArray(messageListString)
         val messageList = mutableListOf<MessageDescriptor>()
         val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
@@ -119,9 +152,12 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
                 messageList.add(messageDescriptor)
             }
         }
-        mainView?.generateMessageDescriptors(messageList)
+        mainView?.generateMessageDescriptors(messageList.reversed())
     }
     override fun onMessageListError(error: VolleyError) {
+        when (error) {
+            is AuthFailureError -> {mainView?.triggerRefreshToken()}
+        }
         /*val errorString: String = when(error) {
             is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
             is TimeoutError -> Strings.get(R.string.timeout_error_general)
@@ -137,13 +173,16 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
 
     override fun onMessageSuccess(messageString: String) {
         val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-        val adapter: JsonAdapter<Message> = moshi.adapter(Message::class.java)
+        val adapter: JsonAdapter<MessageDescriptor> = moshi.adapter(MessageDescriptor::class.java)
         val message = adapter.fromJson(messageString)
         if (message != null) {
             mainView?.generateMessage(message)
         }
     }
     override fun onMessageError(error: VolleyError) {
+        when (error) {
+            is AuthFailureError -> {mainView?.triggerRefreshToken()}
+        }
 /*        val errorString: String = when(error) {
             is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
             is TimeoutError -> Strings.get(R.string.timeout_error_general)
@@ -155,6 +194,35 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         val errorString = error.toString()
         mainView?.displayError(errorString)
         mainView?.hideProgress()
+    }
+
+    override fun onRefreshTokensSuccess(tokens: String) {
+        val tokensJson = JSONObject(tokens)
+        mainView?.refreshToken(tokensJson)
+        mainView?.hideProgress()
+    }
+    override fun onRefreshTokensError(error: VolleyError) {
+        mainView?.sendToLogin()
+    }
+
+    override fun onTestsSuccess(tests: String) {
+        val returnedTests = mutableListOf<Test>()
+        Log.w("test", tests)
+        val testsJson = JSONArray(tests)
+        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+        val adapter: JsonAdapter<Test> = moshi.adapter(Test::class.java)
+        for (i in 0 until testsJson.length()) {
+            val test = adapter.fromJson(testsJson[i].toString())
+            if (test != null) {
+                returnedTests.add(test)
+            }
+        }
+        mainView?.generateTests(returnedTests)
+    }
+    override fun onTestsError(error: VolleyError) {
+        when (error) {
+            is AuthFailureError -> {mainView?.triggerRefreshToken()}
+        }
     }
 
     override fun onTokensSuccess(tokens: String) {}

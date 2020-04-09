@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    tools:context=".MainActivity">
+    tools:context=".activity.MainActivity">
 
     <ScrollView
         android:id="@+id/scroll_view"
@@ -32,7 +32,7 @@
                 android:id="@+id/details_ll"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/colorPrimary"
+                android:background="@color/colorPrimaryDark"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -94,6 +94,27 @@
                 android:orientation="vertical">
 
                 <Button
+                    android:id="@+id/tests_btt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorPrimary"
+                    android:text="@string/tests_ma"
+                    android:textColor="@color/colorText" />
+
+                <LinearLayout
+                    android:id="@+id/tests_holder_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <Button
                     android:id="@+id/timetable_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -115,15 +136,15 @@
                 android:orientation="vertical">
 
                 <Button
-                    android:id="@+id/homework_btt"
+                    android:id="@+id/abs_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/colorPrimary"
-                    android:text="@string/homework_ma"
+                    android:text="@string/abs_ma"
                     android:textColor="@color/colorText" />
 
                 <LinearLayout
-                    android:id="@+id/homework_holder_ll"
+                    android:id="@+id/abs_holder_ll"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical" />
@@ -157,15 +178,15 @@
                 android:orientation="vertical">
 
                 <Button
-                    android:id="@+id/abs_btt"
+                    android:id="@+id/homework_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/colorPrimary"
-                    android:text="@string/abs_ma"
+                    android:text="@string/homework_ma"
                     android:textColor="@color/colorText" />
 
                 <LinearLayout
-                    android:id="@+id/abs_holder_ll"
+                    android:id="@+id/homework_holder_ll"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical" />
