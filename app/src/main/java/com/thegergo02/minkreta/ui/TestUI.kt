@@ -31,8 +31,7 @@ class TestUI {
                     val testDetailsTextView = TextView(ctx)
                     testDetailsTextView.text = "${test.subject} (${test.teacher}) \n" +
                             "${test.name} (${test.mode}) \n" +
-                            "Date: ${test.date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)} \n" +
-                            "Notification Date: ${test.notificationDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+                            "${test.date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)} \n"
                     testDetailsTextView.setTextColor(
                         ContextCompat.getColor(
                             ctx,
@@ -42,6 +41,7 @@ class TestUI {
                     detailLL.addView(testDetailsTextView)
                     showDetails()
                 }
+                testsHolder?.removeAllViews()
                 testsHolder?.addView(testButton)
             }
         }

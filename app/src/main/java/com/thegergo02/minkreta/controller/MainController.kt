@@ -10,6 +10,7 @@ import com.thegergo02.minkreta.ApiHandler
 import com.thegergo02.minkreta.KretaDate
 import com.thegergo02.minkreta.KretaDateAdapter
 import com.thegergo02.minkreta.data.Student
+import com.thegergo02.minkreta.data.homework.StudentHomework
 import com.thegergo02.minkreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.data.timetable.SchoolDay
@@ -71,8 +72,41 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         }
     }
 
+    fun getHomework(accessToken: String, instituteCode: String, homeworkIds: List<Int>) {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.getHomework(parentListener, accessToken, instituteCode, homeworkIds)
+        }
+    }
+
+    fun makeTimetable(timetable: String): MutableMap<SchoolDay, MutableList<SchoolClass>> {
+        val returnedTimetable = mutableMapOf<SchoolDay, MutableList<SchoolClass>>()
+        val timetableJson = JSONArray(timetable)
+        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+        val adapter: JsonAdapter<SchoolClass> = moshi.adapter(SchoolClass::class.java)
+        for (day in SchoolDayOrder.schoolDayOrder)
+        {
+            returnedTimetable[day] = mutableListOf()
+        }
+        for (i in 0 until timetableJson.length()) {
+            val schoolClass = adapter.fromJson(timetableJson[i].toString())
+            if (schoolClass != null) {
+                val schoolDay = schoolClass.startTime.toSchoolDay()
+                returnedTimetable[schoolDay]?.add(schoolClass)
+            }
+        }
+        for (day in SchoolDayOrder.schoolDayOrder) {
+            val schoolDay = returnedTimetable[day]
+            if (schoolDay != null)
+                if (schoolDay.isEmpty()) {
+                    returnedTimetable.remove(day)
+                }
+        }
+        return returnedTimetable
+    }
+
     override fun onStudentSuccess(student: String, accessToken: String, refreshToken: String) {
-        val moshi: Moshi = Moshi.Builder().build()
+        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
         val adapter: JsonAdapter<Student> = moshi.adapter(Student::class.java)
         val newStudent = adapter.fromJson(student)
         if (newStudent != null) currentStudent = newStudent
@@ -96,30 +130,8 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         mainView?.hideProgress()
     }
 
-    override fun onTimetableSuccess(timetable: String) {
-        val returnedTimetable = mutableMapOf<SchoolDay, MutableList<SchoolClass>>()
-        val timetableJson = JSONArray(timetable)
-        val moshi: Moshi = Moshi.Builder().build()
-        val adapter: JsonAdapter<SchoolClass> = moshi.adapter(SchoolClass::class.java)
-        for (day in SchoolDayOrder.schoolDayOrder)
-        {
-            returnedTimetable[day] = mutableListOf()
-        }
-        for (i in 0 until timetableJson.length()) {
-            val schoolClass = adapter.fromJson(timetableJson[i].toString())
-            if (schoolClass != null) {
-                val schoolDay = KretaDate(schoolClass.startTime).toSchoolDay()
-                returnedTimetable[schoolDay]?.add(schoolClass)
-            }
-        }
-        for (day in SchoolDayOrder.schoolDayOrder) {
-            val schoolDay = returnedTimetable[day]
-            if (schoolDay != null)
-                if (schoolDay.isEmpty()) {
-                    returnedTimetable.remove(day)
-                }
-        }
-        mainView?.generateTimetable(returnedTimetable)
+    override fun onTimetableSuccess(timetableString: String) {
+        mainView?.generateTimetable(makeTimetable(timetableString))
     }
     override fun onTimetableError(error: VolleyError) {
         when (error) {
@@ -205,10 +217,9 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         mainView?.sendToLogin()
     }
 
-    override fun onTestsSuccess(tests: String) {
+    override fun onTestsSuccess(testsString: String) {
         val returnedTests = mutableListOf<Test>()
-        Log.w("test", tests)
-        val testsJson = JSONArray(tests)
+        val testsJson = JSONArray(testsString)
         val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
         val adapter: JsonAdapter<Test> = moshi.adapter(Test::class.java)
         for (i in 0 until testsJson.length()) {
@@ -220,6 +231,27 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         mainView?.generateTests(returnedTests)
     }
     override fun onTestsError(error: VolleyError) {
+        when (error) {
+            is AuthFailureError -> {mainView?.triggerRefreshToken()}
+        }
+    }
+
+    override fun onStudentHomeworkSuccess(homeworkListString: String, isLast: Boolean) {
+        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+        val adapter: JsonAdapter<StudentHomework> = moshi.adapter(StudentHomework::class.java)
+        val homeworkJSONArray = JSONArray(homeworkListString)
+        for (i in 0 until homeworkJSONArray.length()) {
+            val homeworkString = homeworkJSONArray[i].toString()
+            if (homeworkString.isNotBlank()) {
+                val homework = adapter.fromJson(homeworkString)
+                if (homework != null) {
+                    Log.w("anya", isLast.toString())
+                    mainView?.collectStudentHomework(homework, isLast)
+                }
+            }
+        }
+    }
+    override fun onStudentHomeworkError(error: VolleyError) {
         when (error) {
             is AuthFailureError -> {mainView?.triggerRefreshToken()}
         }

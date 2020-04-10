@@ -51,4 +51,6 @@ class ApiLinkHelper(private val apiHandler: ApiHandler)
     override fun onRefreshTokensError(error: VolleyError) {}
     override fun onTestsSuccess(tests: String) {}
     override fun onTestsError(error: VolleyError) {}
+    override fun onStudentHomeworkSuccess(homeworkString: String, isLast: Boolean) {}
+    override fun onStudentHomeworkError(error: VolleyError) {}
 }

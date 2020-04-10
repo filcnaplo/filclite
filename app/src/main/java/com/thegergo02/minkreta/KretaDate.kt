@@ -72,13 +72,13 @@ class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
 
     fun fromString(str: String?): KretaDate {
         val dateAndTime = str?.split("-","T",":")
-        if (dateAndTime != null) {
+        if (dateAndTime != null && str.isNotBlank()) {
             year = dateAndTime[0].toInt()
             month = dateAndTime[1].toInt()
             day = dateAndTime[2].toInt()
             hour = dateAndTime[3].toInt()
             minute = dateAndTime[4].toInt()
-            second = dateAndTime[5].replace("Z", "").toInt()
+            second = dateAndTime[5].replace("Z", "").replaceAfter(".", "").replace(".", "").toInt()
         }
         return this
     }

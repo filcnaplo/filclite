@@ -19,4 +19,7 @@
 
     <color name="colorAbsUnjustified">#D50000</color>
     <color name="colorAbsJustified">#00C853</color>
+
+    <color name="colorButtonUnselected">#000000</color>
+    <color name="colorButtonSelected">#b71c1c</color>
 </resources>

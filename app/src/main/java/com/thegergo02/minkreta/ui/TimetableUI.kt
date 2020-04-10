@@ -32,7 +32,7 @@ class TimetableUI {
                         ""
                     }
                     classDetailsTextView.text = "${schoolClass.subject} \n" +
-                            "${KretaDate(schoolClass.startTime).toFormattedString(KretaDate.KretaDateFormat.TIME)}-${KretaDate(schoolClass.endTime).toFormattedString(KretaDate.KretaDateFormat.TIME)} \n" +
+                            "${schoolClass.startTime.toFormattedString(KretaDate.KretaDateFormat.TIME)}-${schoolClass.endTime.toFormattedString(KretaDate.KretaDateFormat.TIME)} \n" +
                             "${schoolClass.classRoom} \n" +
                             "${schoolClass.teacher} $deputy"
                     classDetailsTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))

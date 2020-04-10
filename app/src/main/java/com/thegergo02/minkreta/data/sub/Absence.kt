@@ -4,6 +4,7 @@ package com.thegergo02.minkreta.data.sub
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import com.thegergo02.minkreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 data class Absence (
@@ -17,9 +18,9 @@ data class Absence (
     @Json(name = "SubjectCategoryName") val subjectCategoryName: String?,
     @Json(name = "DelayTimeMinutes") val delayTime: Int?,
     @Json(name = "Teacher") val teacher: String?,
-    @Json(name = "LessonStartTime") val lessonStartTime: String?,
+    @Json(name = "LessonStartTime") val lessonStartTime: KretaDate?,
     @Json(name = "NumberOfLessons") val numberOfLessons: Int?,
-    @Json(name = "CreatingTime") val creatingTime: String?,
+    @Json(name = "CreatingTime") val creatingTime: KretaDate?,
     @Json(name = "JustificationState") val justificationState: String?,
     @Json(name = "JustificationStateName") val justificationStateName: String?,
     @Json(name = "JustificationType") val justificationType: String?,

@@ -2,6 +2,7 @@ package com.thegergo02.minkreta.data.timetable
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import com.thegergo02.minkreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 data class SchoolClass(
@@ -9,8 +10,8 @@ data class SchoolClass(
     @Json(name = "CalendarOraType") val calendarClassType: String?,
     @Json(name = "Count") val count: Int?,
     @Json(name = "Date") val date: String?,
-    @Json(name = "StartTime") val startTime: String,
-    @Json(name = "EndTime") val endTime: String,
+    @Json(name = "StartTime") val startTime: KretaDate,
+    @Json(name = "EndTime") val endTime: KretaDate,
     @Json(name = "Subject") val subject: String?,
     @Json(name = "SubjectCategory") val subjectCategory: String?,
     @Json(name = "SubjectCategoryName") val subjectCategoryName: String?,
@@ -28,5 +29,5 @@ data class SchoolClass(
     @Json(name = "BejelentettSzamonkeresIdList") val testIdList: List<String>?,
     @Json(name = "Theme") val theme: String?,
     @Json(name = "Nev") val name: String?,
-    @Json(name = "Homework") val homework: String?
+    @Json(name = "StudentHomework") val homework: String?
 )

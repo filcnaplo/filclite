@@ -15,6 +15,7 @@ import com.thegergo02.minkreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.data.Student
+import com.thegergo02.minkreta.data.homework.StudentHomework
 import com.thegergo02.minkreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.data.timetable.SchoolDay
@@ -36,6 +37,8 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var accessToken: String
     private lateinit var refreshToken: String
     private lateinit var instituteCode: String
+
+    private var isStudentHomeworkNeeded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +73,7 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Evaluations to eval_holder_ll,
             Tab.Notes to note_holder_ll,
             Tab.Absences to abs_holder_ll,
-            Tab.Homeworks to homework_holder_ll,
+            Tab.StudentHomework to homework_holder_ll,
             Tab.Timetable to timetable_holder_ll,
             Tab.Messages to messages_holder_ll,
             Tab.Tests to tests_holder_ll
@@ -79,7 +82,7 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Evaluations to evals_btt,
             Tab.Notes to notes_btt,
             Tab.Absences to abs_btt,
-            Tab.Homeworks to homework_btt,
+            Tab.StudentHomework to homework_btt,
             Tab.Timetable to timetable_btt,
             Tab.Messages to messages_btt,
             Tab.Tests to tests_btt
@@ -118,21 +121,19 @@ class MainActivity : AppCompatActivity(), MainView {
         tabButtons[Tab.Absences]?.setOnClickListener {
             switchTab(Tab.Absences)
         }
-        tabButtons[Tab.Homeworks]?.setOnClickListener {
-            switchTab(Tab.Homeworks)
+        tabButtons[Tab.StudentHomework]?.setOnClickListener {
+            if (itemHolders[Tab.StudentHomework]?.visibility == View.GONE) {
+                showProgress()
+                isStudentHomeworkNeeded = true
+                startTimetableRequest()
+            } else {
+                switchTab(Tab.StudentHomework)
+            }
         }
         tabButtons[Tab.Timetable]?.setOnClickListener {
             if (itemHolders[Tab.Timetable]?.visibility == View.GONE) {
                 showProgress()
-                val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
-                val startDate = KretaDate(firstDay)
-                val endDate = KretaDate(firstDay.plusDays(6))
-                controller.getTimetable(
-                    accessToken,
-                    instituteCode,
-                    startDate,
-                    endDate
-                )
+                startTimetableRequest()
             } else {
                 switchTab(Tab.Timetable)
             }
@@ -190,7 +191,7 @@ class MainActivity : AppCompatActivity(), MainView {
         Evaluations,
         Notes,
         Absences,
-        Homeworks,
+        StudentHomework,
         Timetable,
         Messages,
         Tests
@@ -200,7 +201,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (tabHolder.key != exception) {
                 tabHolder.value.visibility = View.GONE
                 tabButtons[tabHolder.key]?.setBackgroundColor(ContextCompat.getColor(this,
-                    R.color.colorPrimary
+                    R.color.colorButtonUnselected
                 ))
             }
         }
@@ -214,22 +215,49 @@ class MainActivity : AppCompatActivity(), MainView {
             if (tabHolder.visibility == View.GONE) {
                 tabHolder.visibility = View.VISIBLE
                 tabButton.setBackgroundColor(ContextCompat.getColor(this,
-                    R.color.colorAccent
+                    R.color.colorButtonSelected
                 ))
             } else {
                 tabHolder.visibility = View.GONE
                 tabButton.setBackgroundColor(ContextCompat.getColor(this,
-                    R.color.colorPrimary
+                    R.color.colorButtonUnselected
                 ))
             }
         }
     }
 
     override fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>) {
-        TimetableUI.generateTimetable(this, timetable,
-            itemHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller)
-        switchTab(Tab.Timetable)
-        hideProgress()
+        if (isStudentHomeworkNeeded) {
+            populateHomeworkIds(timetable)
+            isStudentHomeworkNeeded = false
+        } else {
+            TimetableUI.generateTimetable(this, timetable,
+                itemHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller)
+            switchTab(Tab.Timetable)
+            hideProgress()
+        }
+    }
+    private fun populateHomeworkIds(timetable: Map<SchoolDay, List<SchoolClass>>) {
+        val studentHomeworkIds = mutableListOf<Int>()
+        for (schoolClassList in timetable.values) {
+            for (schoolClass in schoolClassList) {
+                if (schoolClass.teacherHomeworkId != null) {
+                    studentHomeworkIds.add(schoolClass.teacherHomeworkId)
+                }
+            }
+        }
+        controller.getHomework(accessToken, instituteCode, studentHomeworkIds)
+    }
+    override fun collectStudentHomework(homework: StudentHomework, isLast: Boolean) {
+        val studentHomeworkList = mutableListOf<StudentHomework>()
+        if (isLast) {
+            studentHomeworkList.add(homework)
+            StudentHomeworkUI.generateHomework(this, studentHomeworkList, itemHolders[Tab.StudentHomework], details_ll, ::showDetails, ::hideDetails)
+            switchTab(Tab.StudentHomework)
+            hideProgress()
+        } else {
+            studentHomeworkList.add(homework)
+        }
     }
 
     override fun generateMessageDescriptors(messages: List<MessageDescriptor>) {
@@ -258,8 +286,6 @@ class MainActivity : AppCompatActivity(), MainView {
             itemHolders[Tab.Notes], details_ll, ::showDetails, ::hideDetails)
         AbsencesUI.generateAbsences(this, cachedStudent,
             itemHolders[Tab.Absences], details_ll, ::showDetails, ::hideDetails)
-        HomeworkUI.generateHomework(this, listOf(),
-            itemHolders[Tab.Homeworks], details_ll, ::showDetails, ::hideDetails)
         hideProgress()
     }
 
@@ -281,5 +307,17 @@ class MainActivity : AppCompatActivity(), MainView {
         val loginIntent = Intent(this, LoginActivity::class.java)
         startActivity(loginIntent)
         finish()
+    }
+
+    private fun startTimetableRequest() {
+        val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
+        val startDate = KretaDate(firstDay)
+        val endDate = KretaDate(firstDay.plusDays(6))
+        controller.getTimetable(
+            accessToken,
+            instituteCode,
+            startDate,
+            endDate
+        )
     }
 }

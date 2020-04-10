@@ -37,7 +37,7 @@ class ApiHandler(ctx: Context) {
         fun onStudentSuccess(student: String, accessToken: String, refreshToken: String)
         fun onStudentError(error: VolleyError)
 
-        fun onTimetableSuccess(timetable: String)
+        fun onTimetableSuccess(timetableString: String)
         fun onTimetableError(error: VolleyError)
 
         fun onMessageListSuccess(messageListString: String)
@@ -48,6 +48,9 @@ class ApiHandler(ctx: Context) {
 
         fun onTestsSuccess(testsString: String)
         fun onTestsError(error: VolleyError)
+
+        fun onStudentHomeworkSuccess(homeworkString: String, isLast: Boolean)
+        fun onStudentHomeworkError(error: VolleyError)
     }
 
     private val queue = Volley.newRequestQueue(ctx)
@@ -247,5 +250,31 @@ class ApiHandler(ctx: Context) {
                 "User-Agent" to getUserAgent())
         }
         queue.add(testsQuery)
+    }
+
+    private fun makeHomeworkRequest(listener: OnFinishedResult, accessToken: String, instituteCode: String, classHomeworkId: Int, isLast: Boolean): StringRequest {
+        val homeworkQuery = object : StringRequest(
+            Method.GET, "https://${instituteCode}.e-kreta.hu/mapi/api/v1/HaziFeladat/TanuloHaziFeladatLista/${classHomeworkId}",
+            Response.Listener { response ->
+                listener.onStudentHomeworkSuccess(response, isLast)
+            },
+            Response.ErrorListener { error ->
+                listener.onStudentHomeworkError(error)
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "User-Agent" to getUserAgent())
+        }
+        return homeworkQuery
+    }
+    fun getHomework(listener: OnFinishedResult, accessToken: String, instituteCode: String, classHomeworkIds: List<Int>) {
+        val homeworkQueries = mutableListOf<StringRequest>()
+        for (i in 0 until classHomeworkIds.size) {
+            var isLast = classHomeworkIds.size == i + 1
+            homeworkQueries.add(makeHomeworkRequest(listener, accessToken, instituteCode, classHomeworkIds[i], isLast))
+        }
+        for (homeworkQuery in homeworkQueries) {
+            queue.add(homeworkQuery)
+        }
     }
 }

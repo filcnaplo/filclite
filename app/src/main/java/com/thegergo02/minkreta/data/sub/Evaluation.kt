@@ -2,6 +2,7 @@ package com.thegergo02.minkreta.data.sub
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import com.thegergo02.minkreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 data class Evaluation(
@@ -21,8 +22,8 @@ data class Evaluation(
     @Json(name = "NumberValue") val numberValue: Int?,
     @Json(name = "SeenByTutelaryUTC") val seenByTutelaryUtc: String?,
     @Json(name = "Teacher") val teacher: String?,
-    @Json(name = "Date") val date: String?,
-    @Json(name = "CreatingTime") val creatingTime: String?,
+    @Json(name = "Date") val date: KretaDate?,
+    @Json(name = "CreatingTime") val creatingTime: KretaDate?,
     @Json(name = "Jelleg") val nature: Nature?,
     @Json(name = "JellegNev") val natureName: String?,
     @Json(name = "ErtekFajta") val valueType: Nature?,
