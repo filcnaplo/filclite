@@ -17,19 +17,11 @@ class TimetableUI {
             val timetableClassLL = LinearLayout(ctx)
             timetableClassLL.orientation = LinearLayout.VERTICAL
             for (schoolClass in classes) {
-                val text = "${schoolClass.count} | ${schoolClass.subject} | ${schoolClass.classRoom} | ${schoolClass.teacher}"
+                val text = schoolClass.toString()
                 val classOnClickListener = {
                     _: View ->
                     val classDetailsTextView = TextView(ctx)
-                    val deputy = if (schoolClass.deputyTeacher != "") {
-                        "(Deputy: ${schoolClass.deputyTeacher})"
-                    } else {
-                        ""
-                    }
-                    classDetailsTextView.text = "${schoolClass.subject} \n" +
-                            "${schoolClass.startTime.toFormattedString(KretaDate.KretaDateFormat.TIME)}-${schoolClass.endTime.toFormattedString(KretaDate.KretaDateFormat.TIME)} \n" +
-                            "${schoolClass.classRoom} \n" +
-                            "${schoolClass.teacher} $deputy"
+                    classDetailsTextView.text = schoolClass.toDetailedString()
                     classDetailsTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                     listOf(classDetailsTextView)
                 }

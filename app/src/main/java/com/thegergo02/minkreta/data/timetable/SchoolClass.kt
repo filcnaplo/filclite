@@ -5,7 +5,7 @@ import com.squareup.moshi.JsonClass
 import com.thegergo02.minkreta.KretaDate
 
 @JsonClass(generateAdapter = true)
-data class SchoolClass(
+class SchoolClass(
     @Json(name = "LessonId")  val id: Int?,
     @Json(name = "CalendarOraType") val calendarClassType: String?,
     @Json(name = "Count") val count: Int?,
@@ -30,4 +30,20 @@ data class SchoolClass(
     @Json(name = "Theme") val theme: String?,
     @Json(name = "Nev") val name: String?,
     @Json(name = "Homework") val homework: String?
-)
+) {
+    override fun toString(): String {
+        return  "$count. $subject ($classRoom) \n" +
+                "$teacher"
+    }
+    fun toDetailedString(): String {
+        val deputy = if (deputyTeacher != "") {
+            "(Deputy: ${deputyTeacher})"
+        } else {
+            ""
+        }
+        return  "$subject \n" +
+                "${startTime.toFormattedString(KretaDate.KretaDateFormat.TIME)}-${endTime.toFormattedString(KretaDate.KretaDateFormat.TIME)} \n" +
+                "$classRoom \n" +
+                "$teacher $deputy"
+    }
+}

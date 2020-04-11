@@ -5,7 +5,7 @@ import com.squareup.moshi.JsonClass
 import com.thegergo02.minkreta.KretaDate
 
 @JsonClass(generateAdapter = true)
-data class Test(
+class Test(
     @Json(name = "Uid")  val uid: String?,
     @Json(name = "Id")  val id: Int?,
     @Json(name = "Datum")  val date: KretaDate?,
@@ -17,4 +17,15 @@ data class Test(
     @Json(name = "SzamonkeresModja")  val mode: String?,
     @Json(name = "BejelentesDatuma")  val notificationDate: KretaDate?,
     @Json(name = "OsztalyCsoportUid")  val classGroupUid: String?
-)
+) {
+    override fun toString(): String {
+        return  "$subject ($teacher) \n" +
+                "$name ($mode)\n" +
+                "${date?.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
+    }
+    fun toDetailedString(): String {
+        return  "$subject ($teacher) \n" +
+                "$name ($mode)\n" +
+                "${date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+    }
+}

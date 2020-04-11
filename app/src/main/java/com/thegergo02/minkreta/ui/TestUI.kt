@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.thegergo02.minkreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.data.timetable.Test
 
@@ -20,13 +19,11 @@ class TestUI {
             hideDetails: () -> Unit
         ) {
             for (test in tests) {
-                val text = "${test.subject} | ${test.date} | ${test.teacher}"
+                val text = test.toString()
                 val testOnClickListener = {
                     _: View ->
                     val testDetailsTextView = TextView(ctx)
-                    testDetailsTextView.text = "${test.subject} (${test.teacher}) \n" +
-                            "${test.name} (${test.mode}) \n" +
-                            "${test.date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)} \n"
+                    testDetailsTextView.text = test.toDetailedString()
                     testDetailsTextView.setTextColor(
                         ContextCompat.getColor(
                             ctx,

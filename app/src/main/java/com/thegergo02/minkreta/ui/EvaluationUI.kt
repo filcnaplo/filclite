@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.thegergo02.minkreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.data.Student
 
@@ -25,21 +24,14 @@ class EvaluationUI {
         fun generateEvaluations(ctx: Context, cachedStudent: Student, eval_holder_ll: LinearLayout?, detailsLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
             if (cachedStudent.evaluations != null) {
                 for (eval in cachedStudent.evaluations) {
-                    var text = "${eval.value} | ${eval.subject} | ${eval.theme} (${eval.weight})"
-                    if (eval.form == "Diligence" || eval.form == "Deportment") {
-                        text = "${eval.value} | ${eval.natureName}"
-                    }
                     val evalOnClickListener = {
                         _: View ->
                         val evalDetailsTextView = TextView(ctx)
-                        evalDetailsTextView.text = "${eval.subject} (${eval.teacher}) \n" +
-                                "${eval.value} \n" +
-                                "${eval.theme} \n" +
-                                "${eval.creatingTime?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+                        evalDetailsTextView.text = eval.toDetailedString()
                         evalDetailsTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                         listOf(evalDetailsTextView)
                     }
-                    val evalButton = UIHelper.generateButton(ctx, text, evalOnClickListener, showDetails, hideDetails, detailsLL, getColorFromGrade(ctx, eval.numberValue))
+                    val evalButton = UIHelper.generateButton(ctx, eval.toString(), evalOnClickListener, showDetails, hideDetails, detailsLL, getColorFromGrade(ctx, eval.numberValue))
                     eval_holder_ll?.addView(evalButton)
                 }
             }

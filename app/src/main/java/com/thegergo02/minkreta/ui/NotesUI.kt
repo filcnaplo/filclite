@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.thegergo02.minkreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.data.Student
 
@@ -14,13 +13,11 @@ class NotesUI {
         fun generateNotes(ctx: Context, cachedStudent: Student, noteHolder: LinearLayout?, detailsLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
             if (cachedStudent.notes != null) {
                 for (note in cachedStudent.notes) {
-                    val text = "${note.type} | ${note.title} | ${note.teacher}"
+                    val text = note.toString()
                     val noteOnClickListener = {
                         _: View ->
                         val noteDetailsTextView = TextView(ctx)
-                        noteDetailsTextView.text = "${note.title} (${note.type}) \n" +
-                                "${note.content} \n" +
-                                "${note.teacher} (${note.date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)})"
+                        noteDetailsTextView.text = note.toDetailedString()
                         noteDetailsTextView.setTextColor(
                             ContextCompat.getColor(
                                 ctx,

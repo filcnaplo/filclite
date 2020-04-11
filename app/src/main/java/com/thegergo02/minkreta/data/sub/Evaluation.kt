@@ -5,7 +5,7 @@ import com.squareup.moshi.JsonClass
 import com.thegergo02.minkreta.KretaDate
 
 @JsonClass(generateAdapter = true)
-data class Evaluation(
+class Evaluation(
     @Json(name = "EvaluationId")  val id: Int?,
     @Json(name = "Form") val form: String?,
     @Json(name = "FormName") val formName: String?,
@@ -28,4 +28,23 @@ data class Evaluation(
     @Json(name = "JellegNev") val natureName: String?,
     @Json(name = "ErtekFajta") val valueType: Nature?,
     @Json(name = "OsztalyCsoportUid") val classGroupUid: String?
-)
+) {
+    override fun toString(): String {
+        if (form == "Diligence" || form == "Deportment") {
+            return  "$natureName ($teacher) \n" +
+                    "${date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+        }
+        return  "$subject ($teacher) \n" +
+                "$value ($weight) \n" +
+                "$theme \n" +
+                "${date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+    }
+    fun toDetailedString(): String {
+        return  "$subject ($teacher)\n" +
+                "$value ($weight) \n" +
+                "$typeName \n" +
+                "$formName \n" +
+                "$theme \n" +
+                "${creatingTime?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+    }
+}
