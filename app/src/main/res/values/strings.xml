@@ -26,4 +26,5 @@
     <string name="timetable_ma">Timetable</string>
     <string name="messages_ma">Messages</string>
     <string name="tests_ma">Tests</string>
+    <string name="back_ma">Back</string>
 </resources>

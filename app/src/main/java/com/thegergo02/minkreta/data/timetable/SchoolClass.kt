@@ -29,5 +29,5 @@ data class SchoolClass(
     @Json(name = "BejelentettSzamonkeresIdList") val testIdList: List<String>?,
     @Json(name = "Theme") val theme: String?,
     @Json(name = "Nev") val name: String?,
-    @Json(name = "StudentHomework") val homework: String?
+    @Json(name = "Homework") val homework: String?
 )

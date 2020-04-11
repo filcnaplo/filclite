@@ -49,8 +49,11 @@ class ApiHandler(ctx: Context) {
         fun onTestsSuccess(testsString: String)
         fun onTestsError(error: VolleyError)
 
-        fun onStudentHomeworkSuccess(homeworkString: String, isLast: Boolean)
+        fun onStudentHomeworkSuccess(homeworkString: String)
         fun onStudentHomeworkError(error: VolleyError)
+
+        fun onTeacherHomeworkSuccess(homeworkString: String)
+        fun onTeacherHomeworkError(error: VolleyError)
     }
 
     private val queue = Volley.newRequestQueue(ctx)
@@ -252,17 +255,34 @@ class ApiHandler(ctx: Context) {
         queue.add(testsQuery)
     }
 
-    private fun makeHomeworkRequest(listener: OnFinishedResult, accessToken: String, instituteCode: String, classHomeworkId: Int, isLast: Boolean): StringRequest {
+    private fun makeStudentHomeworkRequest(listener: OnFinishedResult, accessToken: String, instituteCode: String, classHomeworkId: Int): StringRequest {
         val homeworkQuery = object : StringRequest(
             Method.GET, "https://${instituteCode}.e-kreta.hu/mapi/api/v1/HaziFeladat/TanuloHaziFeladatLista/${classHomeworkId}",
             Response.Listener { response ->
-                listener.onStudentHomeworkSuccess(response, isLast)
+                listener.onStudentHomeworkSuccess(response)
             },
             Response.ErrorListener { error ->
                 listener.onStudentHomeworkError(error)
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "Accept" to "application/json; charset: utf-8",
+                "User-Agent" to getUserAgent())
+        }
+        return homeworkQuery
+    }
+    private fun makeTeacherHomeworkRequest(listener: OnFinishedResult, accessToken: String, instituteCode: String, classHomeworkId: Int): StringRequest {
+        val homeworkQuery = object : StringRequest(
+            Method.GET, "https://${instituteCode}.e-kreta.hu/mapi/api/v1/HaziFeladat/TanarHaziFeladat/${classHomeworkId}",
+            Response.Listener { response ->
+                listener.onTeacherHomeworkSuccess(response)
+            },
+            Response.ErrorListener { error ->
+                listener.onTeacherHomeworkError(error)
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "Accept" to "application/json; charset: utf-8",
                 "User-Agent" to getUserAgent())
         }
         return homeworkQuery
@@ -270,8 +290,8 @@ class ApiHandler(ctx: Context) {
     fun getHomework(listener: OnFinishedResult, accessToken: String, instituteCode: String, classHomeworkIds: List<Int>) {
         val homeworkQueries = mutableListOf<StringRequest>()
         for (i in 0 until classHomeworkIds.size) {
-            var isLast = classHomeworkIds.size == i + 1
-            homeworkQueries.add(makeHomeworkRequest(listener, accessToken, instituteCode, classHomeworkIds[i], isLast))
+            homeworkQueries.add(makeStudentHomeworkRequest(listener, accessToken, instituteCode, classHomeworkIds[i]))
+            homeworkQueries.add(makeTeacherHomeworkRequest(listener, accessToken, instituteCode, classHomeworkIds[i]))
         }
         for (homeworkQuery in homeworkQueries) {
             queue.add(homeworkQuery)

@@ -6,7 +6,7 @@ import com.thegergo02.minkreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 data class StudentHomework(
-    @Json(name = "Uid")  val uid: Int?,
+    @Json(name = "Uid")  val uid: String?,
     @Json(name = "Id")  val id: Int?,
     @Json(name = "TanuloNev")  val studentName: String?,
     @Json(name = "FeladasDatuma")  val postDate: KretaDate?,

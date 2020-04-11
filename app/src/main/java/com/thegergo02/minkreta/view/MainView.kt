@@ -2,6 +2,7 @@ package com.thegergo02.minkreta.view
 
 import com.thegergo02.minkreta.data.Student
 import com.thegergo02.minkreta.data.homework.StudentHomework
+import com.thegergo02.minkreta.data.homework.TeacherHomework
 import com.thegergo02.minkreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.data.timetable.SchoolDay
@@ -20,5 +21,6 @@ interface MainView {
     fun triggerRefreshToken()
     fun refreshToken(tokensJson: JSONObject)
     fun sendToLogin()
-    fun collectStudentHomework(homework: StudentHomework, isLast: Boolean)
+    fun collectStudentHomework(homeworkList: List<StudentHomework?>?)
+    fun collectTeacherHomework(homework: TeacherHomework?)
 }

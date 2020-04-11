@@ -1,10 +1,7 @@
 package com.thegergo02.minkreta.ui
 
 import android.content.Context
-import android.util.Log
 import android.view.View
-import android.webkit.WebView
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -23,24 +20,20 @@ class MessageUI {
             showDetails: () -> Unit,
             hideDetails: () -> Unit
         ) {
-            hideDetails()
-            val messageWebView = WebView(ctx)
-            val subjectTextView = TextView(ctx)
-            subjectTextView.text = "${message.subject}"
-            subjectTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
-            val cssString = "<style>body{background-color: black !important;color: white;}</style>"
-            val htmlMessage =
-                    "${cssString}${message.text?.replace("style=\"color: black;\"", "style=\"color: white;\"")?.replace("style=\"color: rgb(0, 0, 0);\"", "style=\"color: white;\"")}"
-            Log.w("html", htmlMessage)
-            val senderTextView = TextView(ctx)
-            senderTextView.text = "${message.senderName} (${message.senderRole}) \n" +
-                    "${message.sendDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
-            senderTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
-            messageWebView.loadData(htmlMessage, "text/html", "UTF-8")
-            detailsLL.addView(subjectTextView)
-            detailsLL.addView(messageWebView)
-            detailsLL.addView(senderTextView)
-            showDetails()
+            UIHelper.wrapIntoDetails({
+                val subjectTextView = TextView(ctx)
+                subjectTextView.text = "${message.subject}"
+                subjectTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
+                val senderTextView = TextView(ctx)
+                senderTextView.text = "${message.senderName} (${message.senderRole}) \n" +
+                        "${message.sendDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+                senderTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
+                val htmlString = if (message.text != null) {
+                    UIHelper.formatHtml(UIHelper.decodeHtml(message.text))
+                } else { "" }
+                val messageWebView = UIHelper.generateWebView(ctx, htmlString)
+                listOf(subjectTextView, messageWebView, senderTextView)
+            }, showDetails, hideDetails, detailsLL)(View(ctx))
         }
 
         fun generateMessageDescriptors(
@@ -53,23 +46,22 @@ class MessageUI {
             messageDescriptorsHolder?.removeAllViews()
             for (messageDescriptor in messageDescriptors) {
                 val message = messageDescriptor.message
-                val messageButton = Button(ctx)
-                messageButton.text =
+                val text =
                     "${message.subject} | ${message.senderName} (${message.senderRole})"
-                messageButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimaryDark))
                 val textColor = if (messageDescriptor.isRead) {
-                    ContextCompat.getColor(ctx, R.color.colorUnavailable)
+                    R.color.colorUnavailable
                 } else {
-                    ContextCompat.getColor(ctx, R.color.colorText)
+                    R.color.colorText
                 }
-                messageButton.setTextColor(textColor)
-                messageButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
-                messageButton.setOnClickListener {
+                val messageOnClickListener = {
+                    _: View ->
                     if (message.id != null) {
                         controller.getMessage(accessToken, messageDescriptor.id)
                         controller.setMessageRead(accessToken, message.id)
                     }
+                    null
                 }
+                val messageButton = UIHelper.generateButton(ctx, text, messageOnClickListener, {}, {}, LinearLayout(ctx), textColor)
                 messageDescriptorsHolder?.addView(messageButton)
             }
         }

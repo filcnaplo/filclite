@@ -1,6 +1,5 @@
 package com.thegergo02.minkreta.controller
 
-import android.util.Log
 import com.android.volley.AuthFailureError
 import com.android.volley.ServerError
 import com.android.volley.VolleyError
@@ -11,6 +10,7 @@ import com.thegergo02.minkreta.KretaDate
 import com.thegergo02.minkreta.KretaDateAdapter
 import com.thegergo02.minkreta.data.Student
 import com.thegergo02.minkreta.data.homework.StudentHomework
+import com.thegergo02.minkreta.data.homework.TeacherHomework
 import com.thegergo02.minkreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.data.timetable.SchoolDay
@@ -236,22 +236,34 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         }
     }
 
-    override fun onStudentHomeworkSuccess(homeworkListString: String, isLast: Boolean) {
+    override fun onStudentHomeworkSuccess(homeworkListString: String) {
         val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
         val adapter: JsonAdapter<StudentHomework> = moshi.adapter(StudentHomework::class.java)
         val homeworkJSONArray = JSONArray(homeworkListString)
+        if (homeworkJSONArray.length() == 0) {
+            mainView?.collectStudentHomework(null)
+            return
+        }
+        val homeworkList = mutableListOf<StudentHomework?>()
         for (i in 0 until homeworkJSONArray.length()) {
             val homeworkString = homeworkJSONArray[i].toString()
-            if (homeworkString.isNotBlank()) {
-                val homework = adapter.fromJson(homeworkString)
-                if (homework != null) {
-                    Log.w("anya", isLast.toString())
-                    mainView?.collectStudentHomework(homework, isLast)
-                }
-            }
+            homeworkList.add(adapter.fromJson(homeworkString))
         }
+        mainView?.collectStudentHomework(homeworkList)
     }
     override fun onStudentHomeworkError(error: VolleyError) {
+        when (error) {
+            is AuthFailureError -> {mainView?.triggerRefreshToken()}
+        }
+    }
+
+    override fun onTeacherHomeworkSuccess(homeworkString: String) {
+        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+        val adapter: JsonAdapter<TeacherHomework> = moshi.adapter(TeacherHomework::class.java)
+        val homework = adapter.fromJson(homeworkString)
+        mainView?.collectTeacherHomework(homework)
+    }
+    override fun onTeacherHomeworkError(error: VolleyError) {
         when (error) {
             is AuthFailureError -> {mainView?.triggerRefreshToken()}
         }

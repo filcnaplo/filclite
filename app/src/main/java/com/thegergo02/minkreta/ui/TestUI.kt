@@ -2,7 +2,6 @@ package com.thegergo02.minkreta.ui
 
 import android.content.Context
 import android.view.View
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -16,18 +15,14 @@ class TestUI {
             ctx: Context,
             tests: List<Test>,
             testsHolder: LinearLayout?,
-            detailLL: LinearLayout,
+            detailsLL: LinearLayout,
             showDetails: () -> Unit,
             hideDetails: () -> Unit
         ) {
             for (test in tests) {
-                val testButton = Button(ctx)
-                testButton.text = "${test.subject} | ${test.date} | ${test.teacher}"
-                testButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimaryDark))
-                testButton.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
-                testButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
-                testButton.setOnClickListener {
-                    hideDetails()
+                val text = "${test.subject} | ${test.date} | ${test.teacher}"
+                val testOnClickListener = {
+                    _: View ->
                     val testDetailsTextView = TextView(ctx)
                     testDetailsTextView.text = "${test.subject} (${test.teacher}) \n" +
                             "${test.name} (${test.mode}) \n" +
@@ -38,10 +33,10 @@ class TestUI {
                             R.color.colorText
                         )
                     )
-                    detailLL.addView(testDetailsTextView)
-                    showDetails()
+                    listOf(testDetailsTextView)
                 }
                 testsHolder?.removeAllViews()
+                val testButton = UIHelper.generateButton(ctx, text, testOnClickListener, showDetails, hideDetails, detailsLL)
                 testsHolder?.addView(testButton)
             }
         }

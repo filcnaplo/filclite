@@ -2,7 +2,6 @@ package com.thegergo02.minkreta.ui
 
 import android.content.Context
 import android.view.View
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -14,17 +13,13 @@ import com.thegergo02.minkreta.data.timetable.SchoolDay
 
 class TimetableUI {
     companion object {
-        private fun generateSchoolClasses(ctx: Context, classes: List<SchoolClass>, detailLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit): LinearLayout {
+        private fun generateSchoolClasses(ctx: Context, classes: List<SchoolClass>, detailsLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit): LinearLayout {
             val timetableClassLL = LinearLayout(ctx)
             timetableClassLL.orientation = LinearLayout.VERTICAL
             for (schoolClass in classes) {
-                val classButton = Button(ctx)
-                classButton.text = "${schoolClass.count} | ${schoolClass.subject} | ${schoolClass.classRoom} | ${schoolClass.teacher}"
-                classButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimaryDark))
-                classButton.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
-                classButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
-                classButton.setOnClickListener {
-                    hideDetails()
+                val text = "${schoolClass.count} | ${schoolClass.subject} | ${schoolClass.classRoom} | ${schoolClass.teacher}"
+                val classOnClickListener = {
+                    _: View ->
                     val classDetailsTextView = TextView(ctx)
                     val deputy = if (schoolClass.deputyTeacher != "") {
                         "(Deputy: ${schoolClass.deputyTeacher})"
@@ -36,40 +31,39 @@ class TimetableUI {
                             "${schoolClass.classRoom} \n" +
                             "${schoolClass.teacher} $deputy"
                     classDetailsTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
-                    detailLL.addView(classDetailsTextView)
-                    showDetails()
+                    listOf(classDetailsTextView)
                 }
+                val classButton = UIHelper.generateButton(ctx, text, classOnClickListener, showDetails, hideDetails, detailsLL)
                 timetableClassLL.addView(classButton)
             }
             return timetableClassLL
         }
 
-        fun generateTimetable(ctx: Context, currentTimetable: Map<SchoolDay, List<SchoolClass>>, timetableHolder: LinearLayout?, detailLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit, controller: MainController) {
+        fun generateTimetable(ctx: Context, currentTimetable: Map<SchoolDay, List<SchoolClass>>, timetableHolder: LinearLayout?, detailsLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit, controller: MainController) {
             timetableHolder?.removeAllViews()
             for (day in currentTimetable) {
-                val dayButton = Button(ctx)
-                dayButton.text = day.key.toString()
-                dayButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimaryDark))
+                val text = day.key.toString()
                 val textColor = if (KretaDate().fromSchoolDay(day.key).isToday()) {
-                    ContextCompat.getColor(ctx, R.color.colorText)
+                    R.color.colorText
                 } else {
-                    ContextCompat.getColor(ctx, R.color.colorUnavailable)
+                    R.color.colorUnavailable
                 }
-                dayButton.setTextColor(textColor)
-                dayButton.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
-                dayButton.setOnClickListener {
-                    val timetableClassLL = generateSchoolClasses(ctx, day.value, detailLL, showDetails, hideDetails)
-                    val timetableBackButton = Button(ctx)
-                    timetableBackButton.text = "BACK"
-                    timetableBackButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorPrimaryDark))
-                    timetableBackButton.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
-                    timetableBackButton.setOnClickListener {
-                        generateTimetable(ctx, currentTimetable, timetableHolder, detailLL, showDetails, hideDetails, controller)
+                val dayOnClickListener = {
+                    _: View ->
+                    val text = ctx.getString(R.string.back_ma)
+                    val timetableBackOnClickListener = {
+                        _: View ->
+                        generateTimetable(ctx, currentTimetable, timetableHolder, detailsLL, showDetails, hideDetails, controller)
+                        listOf<View>()
                     }
                     timetableHolder?.removeAllViews()
+                    val timetableBackButton = UIHelper.generateButton(ctx, text, timetableBackOnClickListener, showDetails, hideDetails, detailsLL, textColor)
                     timetableHolder?.addView(timetableBackButton)
+                    val timetableClassLL = generateSchoolClasses(ctx, day.value, detailsLL, showDetails, hideDetails)
                     timetableHolder?.addView(timetableClassLL)
+                    listOf<View>()
                 }
+                val dayButton = UIHelper.generateButton(ctx, text, dayOnClickListener, showDetails, hideDetails, detailsLL, textColor)
                 timetableHolder?.addView(dayButton)
             }
         }
