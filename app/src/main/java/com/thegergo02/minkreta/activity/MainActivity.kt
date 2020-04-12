@@ -10,21 +10,20 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
-import com.thegergo02.minkreta.ApiHandler
-import com.thegergo02.minkreta.KretaDate
+import com.thegergo02.minkreta.kreta.KretaRequests
+import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
-import com.thegergo02.minkreta.data.Student
-import com.thegergo02.minkreta.data.homework.StudentHomework
-import com.thegergo02.minkreta.data.homework.TeacherHomework
-import com.thegergo02.minkreta.data.message.MessageDescriptor
-import com.thegergo02.minkreta.data.timetable.SchoolClass
-import com.thegergo02.minkreta.data.timetable.SchoolDay
-import com.thegergo02.minkreta.data.timetable.Test
+import com.thegergo02.minkreta.kreta.data.Student
+import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
+import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
+import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
+import com.thegergo02.minkreta.kreta.data.timetable.Test
 import com.thegergo02.minkreta.ui.*
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONObject
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 
@@ -39,29 +38,28 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private lateinit var accessToken: String
     private lateinit var refreshToken: String
+    private lateinit var instituteUrl: String
     private lateinit var instituteCode: String
 
     private var isHomeworkNeeded = false
     private var homeworkIds = mutableListOf<Int>()
-    private var studentHomeworkList = mutableListOf<StudentHomework>()
-    private var studentHomeworkSize = 0
-    private var teacherHomeworkList = mutableListOf<TeacherHomework>()
-    private var teacherHomeworkSize = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        controller = MainController(this, ApiHandler(this))
+        controller = MainController(this, KretaRequests(this))
 
         val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
 
         val storedAccessToken = sharedPref.getString("accessToken", null)
         val storedRefreshToken = sharedPref.getString("refreshToken", null)
+        val storedInstituteUrl = sharedPref.getString("instituteUrl", null)
         val storedInstituteCode = sharedPref.getString("instituteCode", null)
 
-        if (storedAccessToken != null && storedRefreshToken != null && storedInstituteCode != null) {
+        if (storedAccessToken != null && storedRefreshToken != null && storedInstituteUrl != null && storedInstituteCode != null) {
             accessToken = storedAccessToken
             refreshToken = storedRefreshToken
+            instituteUrl = storedInstituteUrl
             instituteCode = storedInstituteCode
         } else {
             sendToLogin()
@@ -70,7 +68,7 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     private fun initializeActivity() {
-        controller.getStudent(accessToken, refreshToken, instituteCode)
+        controller.getStudent(accessToken, instituteUrl)
         showProgress()
         setupHolders()
         setupClickListeners()
@@ -176,7 +174,10 @@ class MainActivity : AppCompatActivity(), MainView {
             if (canClick) {
                 if (itemHolders[Tab.Tests]?.visibility == View.GONE) {
                     showProgress()
-                    controller.getTests(accessToken, instituteCode, KretaDate(1970), KretaDate())
+                    controller.getTestList(accessToken, instituteUrl,
+                        KretaDate(1970),
+                        KretaDate()
+                    )
                 } else {
                     switchTab(Tab.Tests)
                 }
@@ -275,43 +276,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 }
             }
         }
-        controller.getHomework(accessToken, instituteCode, homeworkIds)
-    }
-    override fun collectStudentHomework(homeworkList: List<StudentHomework?>?) {
-        if (homeworkList != null) {
-            for (homework in homeworkList) {
-                if (homework != null) {
-                    studentHomeworkList.add(homework)
-                }
-            }
-        }
-        studentHomeworkSize++
-        if (homeworkIds.size == studentHomeworkSize) {
-            homeworkCollectionDone()
-        }
-    }
-    override fun collectTeacherHomework(homework: TeacherHomework?) {
-        if (homework != null) {
-            teacherHomeworkList.add(homework)
-        }
-        teacherHomeworkSize++
-        if (homeworkIds.size == teacherHomeworkSize) {
-            homeworkCollectionDone()
-        }
-    }
-    fun homeworkCollectionDone() {
-        if (homeworkIds.size == studentHomeworkSize && homeworkIds.size == teacherHomeworkSize) {
-            itemHolders[Tab.Homework]?.removeAllViews()
-            HomeworkUI.generateTeacherHomework(this, teacherHomeworkList, itemHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
-            HomeworkUI.generateStudentHomework(this, studentHomeworkList, itemHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
-            switchTab(Tab.Homework)
-            homeworkIds = mutableListOf()
-            studentHomeworkList = mutableListOf()
-            studentHomeworkSize = 0
-            teacherHomeworkList = mutableListOf()
-            teacherHomeworkSize = 0
-            hideProgress()
-        }
+        controller.getHomework(accessToken, instituteUrl, homeworkIds)
     }
 
     override fun generateMessageDescriptors(messages: List<MessageDescriptor>) {
@@ -323,9 +288,18 @@ class MainActivity : AppCompatActivity(), MainView {
         MessageUI.generateMessage(this, message.message, details_ll, ::showDetails, ::hideDetails)
     }
 
-    override fun generateTests(tests: List<Test>) {
-        TestUI.generateTests(this, tests, itemHolders[Tab.Tests], details_ll, ::showDetails, ::hideDetails)
+    override fun generateTests(testList: List<Test>) {
+        TestUI.generateTests(this, testList, itemHolders[Tab.Tests], details_ll, ::showDetails, ::hideDetails)
         switchTab(Tab.Tests)
+        hideProgress()
+    }
+
+    override fun generateHomeworkList(studentHomeworkList: List<StudentHomework>, teacherHomeworkList: List<TeacherHomework>) {
+        itemHolders[Tab.Homework]?.removeAllViews()
+        HomeworkUI.generateTeacherHomework(this, teacherHomeworkList, itemHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
+        HomeworkUI.generateStudentHomework(this, studentHomeworkList, itemHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
+        switchTab(Tab.Homework)
+        homeworkIds = mutableListOf()
         hideProgress()
     }
 
@@ -344,14 +318,14 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun triggerRefreshToken() {
-        controller.refreshToken(instituteCode, refreshToken)
+        controller.refreshToken(refreshToken, instituteUrl, instituteCode)
     }
-    override fun refreshToken(tokens: JSONObject) {
+    override fun refreshToken(tokens: Map<String, String>) {
         val mainIntent = Intent(this, MainActivity::class.java)
         val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
         with (sharedPref.edit()) {
-            putString("accessToken", tokens["access_token"].toString())
-            putString("refreshToken", tokens["refresh_token"].toString())
+            putString("accessToken", tokens["access_token"])
+            putString("refreshToken", tokens["refresh_token"])
             commit()
         }
         initializeActivity()
@@ -369,7 +343,7 @@ class MainActivity : AppCompatActivity(), MainView {
         val endDate = KretaDate(firstDay.plusDays(6))
         controller.getTimetable(
             accessToken,
-            instituteCode,
+            instituteUrl,
             startDate,
             endDate
         )

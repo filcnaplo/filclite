@@ -1,4 +1,4 @@
-package com.thegergo02.minkreta.data.message
+package com.thegergo02.minkreta.kreta.data.message
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass

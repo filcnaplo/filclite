@@ -1,35 +1,39 @@
 package com.thegergo02.minkreta.controller
 
 import com.android.volley.AuthFailureError
-import com.android.volley.ServerError
 import com.android.volley.VolleyError
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import com.thegergo02.minkreta.ApiHandler
-import com.thegergo02.minkreta.KretaDate
-import com.thegergo02.minkreta.KretaDateAdapter
-import com.thegergo02.minkreta.data.Student
-import com.thegergo02.minkreta.data.homework.StudentHomework
-import com.thegergo02.minkreta.data.homework.TeacherHomework
-import com.thegergo02.minkreta.data.message.MessageDescriptor
-import com.thegergo02.minkreta.data.timetable.SchoolClass
-import com.thegergo02.minkreta.data.timetable.SchoolDay
-import com.thegergo02.minkreta.data.timetable.SchoolDayOrder
-import com.thegergo02.minkreta.data.timetable.Test
+import com.thegergo02.minkreta.kreta.HomeworkCollector
+import com.thegergo02.minkreta.kreta.data.Student
+import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
+import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
+import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
+import com.thegergo02.minkreta.kreta.data.timetable.Test
+import com.thegergo02.minkreta.kreta.KretaDate
+import com.thegergo02.minkreta.kreta.KretaError
+import com.thegergo02.minkreta.kreta.KretaRequests
+import com.thegergo02.minkreta.kreta.adapter.KretaDateAdapter
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
-import org.json.JSONObject
 
-class MainController(private var mainView: MainView?, private val apiHandler: ApiHandler)
-    : ApiHandler.OnFinishedResult {
+class MainController(private var mainView: MainView?, private val apiHandler: KretaRequests)
+    : KretaRequests.OnStudentResult,
+    KretaRequests.OnRefreshTokensResult,
+    KretaRequests.OnTimetableResult,
+    KretaRequests.OnMessageListResult,
+    KretaRequests.OnMessageResult,
+    KretaRequests.OnTestListResult,
+    HomeworkCollector.OnHomeworkListFinished {
 
-    private lateinit var currentStudent: Student
-    fun getStudent(accessToken: String, refreshToken: String, instituteCode: String) {
+    fun getStudent(accessToken: String, instituteCode: String) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getStudent(parentListener, accessToken, refreshToken, instituteCode)
+            apiHandler.getStudent(parentListener, accessToken, instituteCode)
         }
     }
 
@@ -58,221 +62,123 @@ class MainController(private var mainView: MainView?, private val apiHandler: Ap
         }
     }
 
-    fun refreshToken(instituteCode: String, refreshToken: String) {
+    fun refreshToken(refreshToken: String, instituteUrl: String, instituteCode: String) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.refreshToken(parentListener, instituteCode, refreshToken)
+            apiHandler.refreshToken(parentListener, refreshToken, instituteUrl, instituteCode)
         }
     }
 
-    fun getTests(accessToken: String, instituteCode: String, fromDate: KretaDate, toDate: KretaDate) {
+    fun getTestList(accessToken: String, instituteUrl: String, fromDate: KretaDate, toDate: KretaDate) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getTests(parentListener, accessToken, instituteCode, fromDate, toDate)
+            apiHandler.getTestList(parentListener, accessToken, instituteUrl, fromDate, toDate)
         }
     }
 
-    fun getHomework(accessToken: String, instituteCode: String, homeworkIds: List<Int>) {
-        val parentListener = this
+    fun getHomework(accessToken: String, instituteUrl: String, homeworkIds: List<Int>) {
+        val homeworkCollector = HomeworkCollector(this, homeworkIds.size)
         GlobalScope.launch {
-            apiHandler.getHomework(parentListener, accessToken, instituteCode, homeworkIds)
+            apiHandler.getHomework(homeworkCollector, accessToken, instituteUrl, homeworkIds)
         }
     }
 
-    fun makeTimetable(timetable: String): MutableMap<SchoolDay, MutableList<SchoolClass>> {
-        val returnedTimetable = mutableMapOf<SchoolDay, MutableList<SchoolClass>>()
-        val timetableJson = JSONArray(timetable)
-        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-        val adapter: JsonAdapter<SchoolClass> = moshi.adapter(SchoolClass::class.java)
-        for (day in SchoolDayOrder.schoolDayOrder)
-        {
-            returnedTimetable[day] = mutableListOf()
-        }
-        for (i in 0 until timetableJson.length()) {
-            val schoolClass = adapter.fromJson(timetableJson[i].toString())
-            if (schoolClass != null) {
-                val schoolDay = schoolClass.startTime.toSchoolDay()
-                returnedTimetable[schoolDay]?.add(schoolClass)
-            }
-        }
-        for (day in SchoolDayOrder.schoolDayOrder) {
-            val schoolDay = returnedTimetable[day]
-            if (schoolDay != null)
-                if (schoolDay.isEmpty()) {
-                    returnedTimetable.remove(day)
+    override fun onStudentSuccess(student: Student) {
+        mainView?.setStudent(student)
+    }
+    override fun onStudentError(error: KretaError) {
+        when (error) {
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
                 }
-        }
-        return returnedTimetable
-    }
-
-    override fun onStudentSuccess(student: String, accessToken: String, refreshToken: String) {
-        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-        val adapter: JsonAdapter<Student> = moshi.adapter(Student::class.java)
-        val newStudent = adapter.fromJson(student)
-        if (newStudent != null) currentStudent = newStudent
-        currentStudent.accessToken = accessToken
-        currentStudent.refreshToken = refreshToken
-        mainView?.setStudent(currentStudent)
-    }
-    override fun onStudentError(error: VolleyError) {
-        when (error) {
-            is AuthFailureError -> {mainView?.triggerRefreshToken()}
-        }
-    /*    val errorString: String = when(error) {
-            is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
-            is TimeoutError -> Strings.get(R.string.timeout_error_general)
-            is NetworkError -> Strings.get(R.string.network_error_general)
-            is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
-            else -> error.toString()
-        }*/
-        val errorString = error.toString()
-        mainView?.displayError(errorString)
-        mainView?.hideProgress()
-    }
-
-    override fun onTimetableSuccess(timetableString: String) {
-        mainView?.generateTimetable(makeTimetable(timetableString))
-    }
-    override fun onTimetableError(error: VolleyError) {
-        when (error) {
-            is AuthFailureError -> {mainView?.triggerRefreshToken()}
-        }
-        /*val errorString: String = when(error) {
-            is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
-            is TimeoutError -> Strings.get(R.string.timeout_error_general)
-            is NetworkError -> Strings.get(R.string.network_error_general)
-            is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
-            else -> error.toString()
-        }*/
-        val errorString = error.toString()
-        mainView?.displayError(errorString)
-        mainView?.hideProgress()
-    }
-
-    override fun onMessageListSuccess(messageListString: String) {
-        if (messageListString.isEmpty()) {
-            onMessageError(ServerError())
-            return
-        }
-        val messageListJson = JSONArray(messageListString)
-        val messageList = mutableListOf<MessageDescriptor>()
-        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-        val adapter: JsonAdapter<MessageDescriptor> = moshi.adapter(MessageDescriptor::class.java)
-        for (i in 0 until messageListJson.length()) {
-            val messageDescriptor = adapter.fromJson(messageListJson[i].toString())
-            if (messageDescriptor != null) {
-                messageList.add(messageDescriptor)
             }
         }
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
+    }
+
+    override fun onTimetableSuccess(timetable: MutableMap<SchoolDay, MutableList<SchoolClass>>) {
+        mainView?.generateTimetable(timetable)
+    }
+    override fun onTimetableError(error: KretaError) {
+        when (error) {
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
+                }
+            }
+        }
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
+    }
+
+    override fun onMessageListSuccess(messageList: List<MessageDescriptor>) {
         mainView?.generateMessageDescriptors(messageList.reversed())
     }
-    override fun onMessageListError(error: VolleyError) {
+    override fun onMessageListError(error: KretaError) {
         when (error) {
-            is AuthFailureError -> {mainView?.triggerRefreshToken()}
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
+                }
+            }
         }
-        /*val errorString: String = when(error) {
-            is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
-            is TimeoutError -> Strings.get(R.string.timeout_error_general)
-            is NetworkError -> Strings.get(R.string.network_error_general)
-            is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
-            is ServerError -> Strings.get(R.string.server_error_general)
-            else -> error.toString()
-        }*/
-        val errorString = error.toString()
-        mainView?.displayError(errorString)
+        mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
 
-    override fun onMessageSuccess(messageString: String) {
-        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-        val adapter: JsonAdapter<MessageDescriptor> = moshi.adapter(MessageDescriptor::class.java)
-        val message = adapter.fromJson(messageString)
-        if (message != null) {
-            mainView?.generateMessage(message)
-        }
+    override fun onMessageSuccess(message: MessageDescriptor) {
+        mainView?.generateMessage(message)
     }
-    override fun onMessageError(error: VolleyError) {
+    override fun onMessageError(error: KretaError) {
         when (error) {
-            is AuthFailureError -> {mainView?.triggerRefreshToken()}
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
+                }
+            }
         }
-/*        val errorString: String = when(error) {
-            is AuthFailureError -> Strings.get(R.string.auth_failure_error_general)
-            is TimeoutError -> Strings.get(R.string.timeout_error_general)
-            is NetworkError -> Strings.get(R.string.network_error_general)
-            is NoConnectionError -> Strings.get(R.string.no_connection_error_general)
-            is ServerError -> Strings.get(R.string.server_error_general)
-            else -> error.toString()
-        }*/
-        val errorString = error.toString()
-        mainView?.displayError(errorString)
+        mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
 
-    override fun onRefreshTokensSuccess(tokens: String) {
-        val tokensJson = JSONObject(tokens)
-        mainView?.refreshToken(tokensJson)
+    override fun onRefreshTokensSuccess(tokens: Map<String, String>) {
+        mainView?.refreshToken(tokens)
         mainView?.hideProgress()
     }
-    override fun onRefreshTokensError(error: VolleyError) {
+    override fun onRefreshTokensError(error: KretaError) {
         mainView?.sendToLogin()
     }
 
-    override fun onTestsSuccess(testsString: String) {
-        val returnedTests = mutableListOf<Test>()
-        val testsJson = JSONArray(testsString)
-        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-        val adapter: JsonAdapter<Test> = moshi.adapter(Test::class.java)
-        for (i in 0 until testsJson.length()) {
-            val test = adapter.fromJson(testsJson[i].toString())
-            if (test != null) {
-                returnedTests.add(test)
+    override fun onTestListSuccess(testList: List<Test>) {
+        mainView?.generateTests(testList)
+    }
+    override fun onTestListError(error: KretaError) {
+        when (error) {
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
+                }
             }
         }
-        mainView?.generateTests(returnedTests)
-    }
-    override fun onTestsError(error: VolleyError) {
-        when (error) {
-            is AuthFailureError -> {mainView?.triggerRefreshToken()}
-        }
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
     }
 
-    override fun onStudentHomeworkSuccess(homeworkListString: String) {
-        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-        val adapter: JsonAdapter<StudentHomework> = moshi.adapter(StudentHomework::class.java)
-        val homeworkJSONArray = JSONArray(homeworkListString)
-        if (homeworkJSONArray.length() == 0) {
-            mainView?.collectStudentHomework(null)
-            return
-        }
-        val homeworkList = mutableListOf<StudentHomework?>()
-        for (i in 0 until homeworkJSONArray.length()) {
-            val homeworkString = homeworkJSONArray[i].toString()
-            homeworkList.add(adapter.fromJson(homeworkString))
-        }
-        mainView?.collectStudentHomework(homeworkList)
-    }
-    override fun onStudentHomeworkError(error: VolleyError) {
-        when (error) {
-            is AuthFailureError -> {mainView?.triggerRefreshToken()}
-        }
+    override fun onHomeworkListSuccess(studentHomeworkList: List<StudentHomework>, teacherHomeworkList: List<TeacherHomework>) {
+        mainView?.generateHomeworkList(studentHomeworkList, teacherHomeworkList)
     }
 
-    override fun onTeacherHomeworkSuccess(homeworkString: String) {
-        val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-        val adapter: JsonAdapter<TeacherHomework> = moshi.adapter(TeacherHomework::class.java)
-        val homework = adapter.fromJson(homeworkString)
-        mainView?.collectTeacherHomework(homework)
-    }
-    override fun onTeacherHomeworkError(error: VolleyError) {
+    override fun onHomeworkListError(error: KretaError) {
         when (error) {
-            is AuthFailureError -> {mainView?.triggerRefreshToken()}
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
+                }
+            }
         }
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
     }
-
-    override fun onTokensSuccess(tokens: String) {}
-    override fun onTokensError(error: VolleyError) {}
-    override fun onApiLinkSuccess(link: String) {}
-    override fun onApiLinkError(error: String) {}
-    override fun onInstitutesSuccess(institutes: JSONArray) {}
-    override fun onInstitutesError(error: VolleyError) {}
 }

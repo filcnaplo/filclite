@@ -1,8 +1,8 @@
-package com.thegergo02.minkreta.data.homework
+package com.thegergo02.minkreta.kreta.data.homework
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import com.thegergo02.minkreta.KretaDate
+import com.thegergo02.minkreta.kreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 data class TeacherHomework(

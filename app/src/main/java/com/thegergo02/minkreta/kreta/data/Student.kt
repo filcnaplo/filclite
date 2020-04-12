@@ -1,13 +1,11 @@
-package com.thegergo02.minkreta.data
+package com.thegergo02.minkreta.kreta.data
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import com.thegergo02.minkreta.data.sub.*
+import com.thegergo02.minkreta.kreta.data.sub.*
 
 @JsonClass(generateAdapter = true)
 data class Student (
-    var accessToken: String = "",
-    var refreshToken: String = "",
     @Json(name = "StudentId") val id: Int?,
     @Json(name = "SchoolYearId") val schoolYearId: Int?,
     @Json(name = "Name") val name: String?,

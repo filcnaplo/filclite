@@ -1,23 +1,12 @@
-package com.thegergo02.minkreta
+package com.thegergo02.minkreta.kreta
 
 import android.util.Log
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
-import com.thegergo02.minkreta.data.timetable.SchoolDay
-import com.thegergo02.minkreta.data.timetable.SchoolDayOrder
+import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
+import com.thegergo02.minkreta.kreta.data.timetable.SchoolDayOrder
 import java.time.DayOfWeek
 import java.time.LocalDateTime
-
-class KretaDateAdapter {
-    @FromJson
-    fun fromJson(dateString: String): KretaDate {
-        return KretaDate().fromString(dateString)
-    }
-    @ToJson
-    fun toJson(kretaDate: KretaDate): String {
-        return kretaDate.toString()
-    }
-}
 
 class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
     var year: Int = 1970

@@ -1,8 +1,8 @@
-package com.thegergo02.minkreta.data.message
+package com.thegergo02.minkreta.kreta.data.message
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import com.thegergo02.minkreta.KretaDate
+import com.thegergo02.minkreta.kreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 data class Message(

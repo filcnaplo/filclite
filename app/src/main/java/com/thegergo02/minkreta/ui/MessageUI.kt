@@ -5,11 +5,11 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.thegergo02.minkreta.KretaDate
+import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
-import com.thegergo02.minkreta.data.message.Message
-import com.thegergo02.minkreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.message.Message
+import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 
 class MessageUI {
     companion object {

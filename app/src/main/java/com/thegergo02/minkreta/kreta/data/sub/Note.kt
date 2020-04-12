@@ -1,8 +1,8 @@
-package com.thegergo02.minkreta.data.sub
+package com.thegergo02.minkreta.kreta.data.sub
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import com.thegergo02.minkreta.KretaDate
+import com.thegergo02.minkreta.kreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 class Note (

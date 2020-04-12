@@ -1,13 +1,14 @@
 package com.thegergo02.minkreta.controller
 
 import com.android.volley.VolleyError
-import com.thegergo02.minkreta.ApiHandler
+import com.thegergo02.minkreta.kreta.KretaError
+import com.thegergo02.minkreta.kreta.KretaRequests
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 
-class ApiLinkHelper(private val apiHandler: ApiHandler)
-    : ApiHandler.OnFinishedResult {
+class ApiLinkHelper(private val apiHandler: KretaRequests)
+    : KretaRequests.OnApiLinkResult {
 
     private var currentApiLink = ""
     init {
@@ -21,38 +22,17 @@ class ApiLinkHelper(private val apiHandler: ApiHandler)
         return currentApiLink
     }
 
-    private fun getApiLink(apiType : ApiHandler.ApiType = ApiHandler.ApiType.PROD) {
+    private fun getApiLink(apiType : KretaRequests.ApiType = KretaRequests.ApiType.PROD) {
         val parentListener = this
         GlobalScope.launch {
             apiHandler.getApiLink(parentListener, apiType)
         }
     }
 
-    override fun onApiLinkSuccess(str: String) {
-        currentApiLink = str
+    override fun onApiLinkSuccess(link: String) {
+        currentApiLink = link
     }
-    override fun onApiLinkError(error: String) {
+    override fun onApiLinkError(error: KretaError) {
         currentApiLink = "https://kretaglobalmobileapi.ekreta.hu"
     }
-
-    override fun onInstitutesSuccess(str: JSONArray) {}
-    override fun onInstitutesError(str: VolleyError) {}
-    override fun onTokensSuccess(tokens: String) {}
-    override fun onTokensError(error: VolleyError) {}
-    override fun onStudentSuccess(student: String, accessToken: String, refreshToken: String) {}
-    override fun onStudentError(error: VolleyError) {}
-    override fun onTimetableSuccess(timetable: String) {}
-    override fun onTimetableError(error: VolleyError) {}
-    override fun onMessageListSuccess(messageListString: String) {}
-    override fun onMessageListError(error: VolleyError) {}
-    override fun onMessageSuccess(messageString: String) {}
-    override fun onMessageError(error: VolleyError) {}
-    override fun onRefreshTokensSuccess(tokens: String) {}
-    override fun onRefreshTokensError(error: VolleyError) {}
-    override fun onTestsSuccess(tests: String) {}
-    override fun onTestsError(error: VolleyError) {}
-    override fun onStudentHomeworkSuccess(homeworkString: String) {}
-    override fun onStudentHomeworkError(error: VolleyError) {}
-    override fun onTeacherHomeworkSuccess(homeworkString: String) {}
-    override fun onTeacherHomeworkError(error: VolleyError) {}
 }

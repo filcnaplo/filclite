@@ -1,8 +1,8 @@
-package com.thegergo02.minkreta.data.message
+package com.thegergo02.minkreta.kreta.data.message
 
 import com.squareup.moshi.Json
 
-data class Receiver(
+data class MessageType(
     @Json(name = "azonosito") val id: Int,
     @Json(name = "kod") val code: String?,
     @Json(name = "rovidNev") val shortName: String?,

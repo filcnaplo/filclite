@@ -1,8 +1,8 @@
-package com.thegergo02.minkreta.data.timetable
+package com.thegergo02.minkreta.kreta.data.timetable
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import com.thegergo02.minkreta.KretaDate
+import com.thegergo02.minkreta.kreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 class SchoolClass(
@@ -42,7 +42,8 @@ class SchoolClass(
             ""
         }
         return  "$subject \n" +
-                "${startTime.toFormattedString(KretaDate.KretaDateFormat.TIME)}-${endTime.toFormattedString(KretaDate.KretaDateFormat.TIME)} \n" +
+                "${startTime.toFormattedString(KretaDate.KretaDateFormat.TIME)}-${endTime.toFormattedString(
+                    KretaDate.KretaDateFormat.TIME)} \n" +
                 "$classRoom \n" +
                 "$teacher $deputy"
     }

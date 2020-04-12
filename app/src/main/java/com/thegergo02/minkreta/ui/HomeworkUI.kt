@@ -5,10 +5,10 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.thegergo02.minkreta.KretaDate
+import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
-import com.thegergo02.minkreta.data.homework.StudentHomework
-import com.thegergo02.minkreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
+import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
 
 class HomeworkUI {
     companion object {

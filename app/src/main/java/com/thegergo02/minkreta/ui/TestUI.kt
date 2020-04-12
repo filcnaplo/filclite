@@ -6,7 +6,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.thegergo02.minkreta.R
-import com.thegergo02.minkreta.data.timetable.Test
+import com.thegergo02.minkreta.kreta.data.timetable.Test
 
 class TestUI {
     companion object {

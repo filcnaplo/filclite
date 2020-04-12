@@ -1,19 +1,25 @@
-package com.thegergo02.minkreta
+package com.thegergo02.minkreta.kreta
 
 import android.content.Context
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.thegergo02.minkreta.kreta.data.Institute
+import com.thegergo02.minkreta.kreta.data.Student
+import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
+import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
+import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
+import com.thegergo02.minkreta.kreta.data.timetable.Test
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.json.JSONArray
 import java.util.*
 
-class ApiHandler(ctx: Context) {
+class KretaRequests(ctx: Context) {
     enum class ApiType(val type: String) {
         PROD("PROD"),
         DEV("DEV"),
@@ -21,39 +27,49 @@ class ApiHandler(ctx: Context) {
         TEST("TEST")
     }
 
-    interface OnFinishedResult {
+    interface OnStudentResult {
+        fun onStudentSuccess(student: Student)
+        fun onStudentError(error: KretaError)
+    }
+    interface OnApiLinkResult {
         fun onApiLinkSuccess(link: String)
-        fun onApiLinkError(error: String)
-
-        fun onInstitutesSuccess(institutes: JSONArray)
-        fun onInstitutesError(error: VolleyError)
-
-        fun onTokensSuccess(tokens: String)
-        fun onTokensError(error: VolleyError)
-
-        fun onRefreshTokensSuccess(tokens: String)
-        fun onRefreshTokensError(error: VolleyError)
-
-        fun onStudentSuccess(student: String, accessToken: String, refreshToken: String)
-        fun onStudentError(error: VolleyError)
-
-        fun onTimetableSuccess(timetableString: String)
-        fun onTimetableError(error: VolleyError)
-
-        fun onMessageListSuccess(messageListString: String)
-        fun onMessageListError(error: VolleyError)
-
-        fun onMessageSuccess(messageString: String)
-        fun onMessageError(error: VolleyError)
-
-        fun onTestsSuccess(testsString: String)
-        fun onTestsError(error: VolleyError)
-
-        fun onStudentHomeworkSuccess(homeworkString: String)
-        fun onStudentHomeworkError(error: VolleyError)
-
-        fun onTeacherHomeworkSuccess(homeworkString: String)
-        fun onTeacherHomeworkError(error: VolleyError)
+        fun onApiLinkError(error: KretaError)
+    }
+    interface OnInstitutesResult {
+        fun onInstitutesSuccess(institutes: List<Institute>)
+        fun onInstitutesError(error: KretaError)
+    }
+    interface OnTokensResult {
+        fun onTokensSuccess(tokens: Map<String, String>)
+        fun onTokensError(error: KretaError)
+    }
+    interface OnRefreshTokensResult {
+        fun onRefreshTokensSuccess(tokens: Map<String, String>)
+        fun onRefreshTokensError(error: KretaError)
+    }
+    interface OnTimetableResult {
+        fun onTimetableSuccess(timetable: MutableMap<SchoolDay, MutableList<SchoolClass>>)
+        fun onTimetableError(error: KretaError)
+    }
+    interface OnMessageListResult {
+        fun onMessageListSuccess(messageList: List<MessageDescriptor>)
+        fun onMessageListError(error: KretaError)
+    }
+    interface OnMessageResult {
+        fun onMessageSuccess(messageString: MessageDescriptor)
+        fun onMessageError(error: KretaError)
+    }
+    interface OnTestListResult {
+        fun onTestListSuccess(testList: List<Test>)
+        fun onTestListError(error: KretaError)
+    }
+    interface OnStudentHomeworkResult {
+        fun onStudentHomeworkSuccess(studentHomework: List<StudentHomework?>?)
+        fun onStudentHomeworkError(error: KretaError)
+    }
+    interface OnTeacherHomeworkResult {
+        fun onTeacherHomeworkSuccess(teacherHomework: TeacherHomework?)
+        fun onTeacherHomeworkError(error: KretaError)
     }
 
     private val queue = Volley.newRequestQueue(ctx)
@@ -88,26 +104,36 @@ class ApiHandler(ctx: Context) {
     }
 
     private val API_HOLDER_LINK = "https://kretamobile.blob.core.windows.net/configuration/ConfigurationDescriptor.json"
-    fun getApiLink(listener: OnFinishedResult, apiType : ApiType = ApiType.PROD) {
+    fun getApiLink(listener: OnApiLinkResult, apiType : ApiType = ApiType.PROD) {
         val apiLinksQuery = JsonObjectRequest(Request.Method.GET, API_HOLDER_LINK, null,
                 Response.Listener { response ->
-                    listener.onApiLinkSuccess(response["GlobalMobileApiUrl$apiType"].toString())
+                    val link = response["GlobalMobileApiUrl$apiType"].toString()
+                    if (link != null) {
+                        listener.onApiLinkSuccess(link)
+                    } else {
+                        listener.onApiLinkError(KretaError.ParseError("unknown"))
+                    }
                 },
                 Response.ErrorListener { error ->
-                    listener.onApiLinkError(error.toString())
+                    listener.onApiLinkError(KretaError.VolleyError(error.toString(), error))
                 }
             )
         queue.add(apiLinksQuery)
     }
 
-    fun getInstitutes(listener: OnFinishedResult, apiLink: String) {
+    fun getInstitutes(listener: OnInstitutesResult, apiLink: String) {
         val institutesQuery = object : JsonArrayRequest(
             Method.GET, "${apiLink}/api/v1/Institute", null,
             Response.Listener { response ->
-                listener.onInstitutesSuccess(response)
+                val instituteList = JsonHelper.makeInstitutes(response)
+                if (instituteList != null) {
+                    listener.onInstitutesSuccess(instituteList)
+                } else {
+                    listener.onInstitutesError(KretaError.ParseError("unknown"))
+                }
             },
             Response.ErrorListener { error ->
-                listener.onInstitutesError(error)
+                listener.onInstitutesError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to API_KEY)
@@ -115,14 +141,19 @@ class ApiHandler(ctx: Context) {
         queue.add(institutesQuery)
     }
 
-    fun getTokens(listener: OnFinishedResult, userName: String, password: String, instituteCode: String) {
+    fun getTokens(listener: OnTokensResult, userName: String, password: String, instituteUrl: String, instituteCode: String) {
         val tokensQuery = object : StringRequest(
-            Method.POST, "https://$instituteCode.e-kreta.hu/idp/api/v1/Token",
+            Method.POST, "$instituteUrl/idp/api/v1/Token",
             Response.Listener { response ->
-                listener.onTokensSuccess(response)
+                val tokens = JsonHelper.makeTokens(response)
+                if (tokens != null) {
+                    listener.onTokensSuccess(tokens)
+                } else {
+                    listener.onTokensError(KretaError.ParseError("unknown"))
+                }
             },
             Response.ErrorListener { error ->
-                listener.onTokensError(error)
+                listener.onTokensError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to API_KEY,
@@ -133,14 +164,19 @@ class ApiHandler(ctx: Context) {
         }
         queue.add(tokensQuery)
     }
-    fun refreshToken(listener: OnFinishedResult, instituteCode: String, refreshToken: String) {
+    fun refreshToken(listener: OnRefreshTokensResult, refreshToken: String, instituteUrl: String, instituteCode: String) {
         val tokensQuery = object : StringRequest(
-            Method.POST, "https://$instituteCode.e-kreta.hu/idp/api/v1/Token",
+            Method.POST, "$instituteUrl/idp/api/v1/Token",
             Response.Listener { response ->
-                listener.onRefreshTokensSuccess(response)
+                val tokens = JsonHelper.makeTokens(response)
+                if (tokens != null) {
+                    listener.onRefreshTokensSuccess(tokens)
+                } else {
+                    listener.onRefreshTokensError(KretaError.ParseError("unknown"))
+                }
             },
             Response.ErrorListener { error ->
-                listener.onRefreshTokensError(error)
+                listener.onRefreshTokensError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to API_KEY,
@@ -151,14 +187,19 @@ class ApiHandler(ctx: Context) {
         }
         queue.add(tokensQuery)
     }
-    fun getStudent(listener: OnFinishedResult, accessToken: String, refreshToken: String, instituteCode: String) {
+    fun getStudent(listener: OnStudentResult, accessToken: String, instituteUrl: String) {
         val studentQuery = object : StringRequest(
-            Method.GET, "https://$instituteCode.e-kreta.hu/mapi/api/v1/StudentAmi",
+            Method.GET, "$instituteUrl/mapi/api/v1/StudentAmi",
             Response.Listener { response ->
-                listener.onStudentSuccess(response, accessToken, refreshToken)
+                val student = JsonHelper.makeStudent(response)
+                if (student != null) {
+                    listener.onStudentSuccess(student)
+                } else {
+                    listener.onStudentError(KretaError.ParseError("unknown"))
+                }
             },
             Response.ErrorListener { error ->
-                listener.onStudentError(error)
+                listener.onStudentError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -169,14 +210,19 @@ class ApiHandler(ctx: Context) {
         queue.add(studentQuery)
     }
 
-    fun getTimetable(listener: OnFinishedResult, accessToken: String, instituteCode: String, fromDate: KretaDate, toDate: KretaDate) {
+    fun getTimetable(listener: OnTimetableResult, accessToken: String, instituteUrl: String, fromDate: KretaDate, toDate: KretaDate) {
         val timetableQuery = object : StringRequest(
-            Method.GET, "https://$instituteCode.e-kreta.hu/mapi/api/v1/LessonAmi?fromDate=${fromDate}&toDate=${toDate}",
+            Method.GET, "$instituteUrl/mapi/api/v1/LessonAmi?fromDate=${fromDate}&toDate=${toDate}",
             Response.Listener { response ->
-                listener.onTimetableSuccess(response)
+                val timetable = JsonHelper.makeTimetable(response)
+                if (timetable != null) {
+                    listener.onTimetableSuccess(timetable)
+                } else {
+                    listener.onTimetableError(KretaError.ParseError("unknown"))
+                }
             },
             Response.ErrorListener { error ->
-                listener.onTimetableError(error)
+                listener.onTimetableError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -187,14 +233,19 @@ class ApiHandler(ctx: Context) {
         queue.add(timetableQuery)
     }
 
-    fun getMessageList(listener: OnFinishedResult, accessToken: String) {
+    fun getMessageList(listener: OnMessageListResult, accessToken: String) {
         val messageListQuery = object : StringRequest(
             Method.GET, "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/postaladaelemek/sajat",
             Response.Listener { response ->
-                listener.onMessageListSuccess(response)
+                val messageList = JsonHelper.makeMessageList(response)
+                if (messageList != null) {
+                    listener.onMessageListSuccess(messageList)
+                } else {
+                    listener.onMessageListError(KretaError.ParseError("unknown"))
+                }
             },
             Response.ErrorListener { error ->
-                listener.onMessageListError(error)
+                listener.onMessageListError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -204,14 +255,19 @@ class ApiHandler(ctx: Context) {
         }
         queue.add(messageListQuery)
     }
-    fun getMessage(listener: OnFinishedResult, accessToken: String, messageId: Int) {
+    fun getMessage(listener: OnMessageResult, accessToken: String, messageId: Int) {
         val messageQuery = object : StringRequest(
             Method.GET, "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/postaladaelemek/$messageId",
             Response.Listener { response ->
-                listener.onMessageSuccess(response)
+                val message = JsonHelper.makeMessage(response)
+                if (message != null) {
+                    listener.onMessageSuccess(message)
+                } else {
+                    listener.onMessageError(KretaError.ParseError("unknown"))
+                }
             },
             Response.ErrorListener { error ->
-                listener.onMessageError(error)
+                listener.onMessageError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -238,14 +294,19 @@ class ApiHandler(ctx: Context) {
         queue.add(messageReadQuery)
     }
 
-    fun getTests(listener: OnFinishedResult, accessToken: String, instituteCode: String, fromDate: KretaDate, toDate: KretaDate) {
+    fun getTestList(listener: OnTestListResult, accessToken: String, instituteUrl: String, fromDate: KretaDate, toDate: KretaDate) {
         val testsQuery = object : StringRequest(
-            Method.GET, "https://${instituteCode}.e-kreta.hu/mapi/api/v1/BejelentettSzamonkeresAmi?fromDate=${fromDate}&toDate=${toDate}",
+            Method.GET, "${instituteUrl}/mapi/api/v1/BejelentettSzamonkeresAmi?fromDate=${fromDate}&toDate=${toDate}",
             Response.Listener { response ->
-                listener.onTestsSuccess(response)
+                val testList = JsonHelper.makeTestList(response)
+                if (testList != null) {
+                    listener.onTestListSuccess(testList)
+                } else {
+                    listener.onTestListError(KretaError.ParseError("unknown"))
+                }
             },
             Response.ErrorListener { error ->
-                listener.onTestsError(error)
+                listener.onTestListError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -255,14 +316,16 @@ class ApiHandler(ctx: Context) {
         queue.add(testsQuery)
     }
 
-    private fun makeStudentHomeworkRequest(listener: OnFinishedResult, accessToken: String, instituteCode: String, classHomeworkId: Int): StringRequest {
+    private fun makeStudentHomeworkRequest(homeworkCollector: HomeworkCollector, accessToken: String, instituteUrl: String, classHomeworkId: Int): StringRequest {
         val homeworkQuery = object : StringRequest(
-            Method.GET, "https://${instituteCode}.e-kreta.hu/mapi/api/v1/HaziFeladat/TanuloHaziFeladatLista/${classHomeworkId}",
+            Method.GET, "$instituteUrl/mapi/api/v1/HaziFeladat/TanuloHaziFeladatLista/$classHomeworkId",
             Response.Listener { response ->
-                listener.onStudentHomeworkSuccess(response)
+                val studentHomework = JsonHelper.makeStudentHomework(response)
+                homeworkCollector.getStudentHomeworkListener()
+                    .onStudentHomeworkSuccess(studentHomework)
             },
             Response.ErrorListener { error ->
-                listener.onStudentHomeworkError(error)
+                homeworkCollector.getStudentHomeworkListener().onStudentHomeworkError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -271,14 +334,16 @@ class ApiHandler(ctx: Context) {
         }
         return homeworkQuery
     }
-    private fun makeTeacherHomeworkRequest(listener: OnFinishedResult, accessToken: String, instituteCode: String, classHomeworkId: Int): StringRequest {
+    private fun makeTeacherHomeworkRequest(homeworkCollector: HomeworkCollector, accessToken: String, instituteUrl: String, classHomeworkId: Int): StringRequest {
         val homeworkQuery = object : StringRequest(
-            Method.GET, "https://${instituteCode}.e-kreta.hu/mapi/api/v1/HaziFeladat/TanarHaziFeladat/${classHomeworkId}",
+            Method.GET, "$instituteUrl/mapi/api/v1/HaziFeladat/TanarHaziFeladat/$classHomeworkId",
             Response.Listener { response ->
-                listener.onTeacherHomeworkSuccess(response)
+                val teacherHomework = JsonHelper.makeTeacherHomework(response)
+                homeworkCollector.getTeacherHomeworkListener()
+                    .onTeacherHomeworkSuccess(teacherHomework)
             },
             Response.ErrorListener { error ->
-                listener.onTeacherHomeworkError(error)
+                homeworkCollector.getTeacherHomeworkListener().onTeacherHomeworkError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -287,11 +352,11 @@ class ApiHandler(ctx: Context) {
         }
         return homeworkQuery
     }
-    fun getHomework(listener: OnFinishedResult, accessToken: String, instituteCode: String, classHomeworkIds: List<Int>) {
+    fun getHomework(homeworkCollector: HomeworkCollector, accessToken: String, instituteUrl: String, classHomeworkIds: List<Int>) {
         val homeworkQueries = mutableListOf<StringRequest>()
-        for (i in 0 until classHomeworkIds.size) {
-            homeworkQueries.add(makeStudentHomeworkRequest(listener, accessToken, instituteCode, classHomeworkIds[i]))
-            homeworkQueries.add(makeTeacherHomeworkRequest(listener, accessToken, instituteCode, classHomeworkIds[i]))
+        for (id in classHomeworkIds) {
+            homeworkQueries.add(makeStudentHomeworkRequest(homeworkCollector, accessToken, instituteUrl, id))
+            homeworkQueries.add(makeTeacherHomeworkRequest(homeworkCollector, accessToken, instituteUrl, id))
         }
         for (homeworkQuery in homeworkQueries) {
             queue.add(homeworkQuery)

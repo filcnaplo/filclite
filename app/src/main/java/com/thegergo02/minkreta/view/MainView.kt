@@ -1,12 +1,12 @@
 package com.thegergo02.minkreta.view
 
-import com.thegergo02.minkreta.data.Student
-import com.thegergo02.minkreta.data.homework.StudentHomework
-import com.thegergo02.minkreta.data.homework.TeacherHomework
-import com.thegergo02.minkreta.data.message.MessageDescriptor
-import com.thegergo02.minkreta.data.timetable.SchoolClass
-import com.thegergo02.minkreta.data.timetable.SchoolDay
-import com.thegergo02.minkreta.data.timetable.Test
+import com.thegergo02.minkreta.kreta.data.Student
+import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
+import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
+import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
+import com.thegergo02.minkreta.kreta.data.timetable.Test
 import org.json.JSONObject
 
 interface MainView {
@@ -19,8 +19,7 @@ interface MainView {
     fun generateMessage(message: MessageDescriptor)
     fun generateTests(tests: List<Test>)
     fun triggerRefreshToken()
-    fun refreshToken(tokensJson: JSONObject)
+    fun refreshToken(tokens: Map<String, String>)
     fun sendToLogin()
-    fun collectStudentHomework(homeworkList: List<StudentHomework?>?)
-    fun collectTeacherHomework(homework: TeacherHomework?)
+    fun generateHomeworkList(studentHomeworkList: List<StudentHomework>, teacherHomeworkList: List<TeacherHomework>)
 }
