@@ -66,7 +66,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
     }
     override fun setTokens(tokens: Map<String, String>) {
         val mainIntent = Intent(this, MainActivity::class.java)
-        val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
+        val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
         with (sharedPref.edit()) {
             val institute = instituteNames[inst_code_s.selectedItem.toString()]
             if (institute != null) {

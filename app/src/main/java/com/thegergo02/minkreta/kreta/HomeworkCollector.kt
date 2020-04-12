@@ -26,8 +26,6 @@ class HomeworkCollector(private val listener: OnHomeworkListFinished, private va
     }
 
     override fun onStudentHomeworkSuccess(studentHomework: List<StudentHomework?>?) {
-        Log.w("learn", studentHomeworkSize.toString())
-        Log.w("learn", teacherHomeworkSize.toString())
         if (studentHomework != null) {
             for (homework in studentHomework) {
                 if (homework != null) {
@@ -45,8 +43,6 @@ class HomeworkCollector(private val listener: OnHomeworkListFinished, private va
     }
 
     override fun onTeacherHomeworkSuccess(teacherHomework: TeacherHomework?) {
-        Log.w("teach", studentHomeworkSize.toString())
-        Log.w("teach", teacherHomeworkSize.toString())
         if (teacherHomework != null) {
             teacherHomeworkList.add(teacherHomework)
         }
@@ -60,8 +56,6 @@ class HomeworkCollector(private val listener: OnHomeworkListFinished, private va
     }
 
     private fun homeworkCollectionDone() {
-        Log.w("lel", studentHomeworkSize.toString())
-        Log.w("lel", teacherHomeworkSize.toString())
         if (homeworkIdSize == studentHomeworkSize && homeworkIdSize == teacherHomeworkSize) {
             listener.onHomeworkListSuccess(studentHomeworkList, teacherHomeworkList)
         }

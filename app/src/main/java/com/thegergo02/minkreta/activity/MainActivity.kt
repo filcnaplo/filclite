@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_main)
         controller = MainController(this, KretaRequests(this))
 
-        val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
+        val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
 
         val storedAccessToken = sharedPref.getString("accessToken", null)
         val storedRefreshToken = sharedPref.getString("refreshToken", null)
