@@ -1,2 +1,2 @@
-include ':app', ':kreta'
+include ':app'
 rootProject.name='MinKreta'
