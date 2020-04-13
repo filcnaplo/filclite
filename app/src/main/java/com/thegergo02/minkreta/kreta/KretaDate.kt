@@ -8,7 +8,7 @@ import com.thegergo02.minkreta.kreta.data.timetable.SchoolDayOrder
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 
-class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
+class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, minute: Int = 0, second: Int = 0): Comparable<KretaDate> {
     var year: Int = 1970
     var month: Int = 1
     var day: Int = 1
@@ -16,26 +16,25 @@ class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
     var minute: Int = 0
     var second: Int = 0
     init {
-        year = localDateTime.year
-        month = localDateTime.monthValue
-        day = localDateTime.dayOfMonth
-        hour = localDateTime.hour
-        minute = localDateTime.minute
-        second = localDateTime.second
+       this.year = year
+       this.month = month
+       this.day = day
+       this.hour = hour
+       this.minute = minute
+       this.second = second
     }
 
-    constructor(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, minute: Int = 0, second: Int = 0,
-                localDateTime: LocalDateTime = LocalDateTime.now())
-            : this(localDateTime) {
-        this.year = year
-        this.month = month
-        this.day = day
-        this.hour = hour
-        this.minute = minute
-        this.second = second
+    constructor(localDateTime: LocalDateTime = LocalDateTime.now(), year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, minute: Int = 0, second: Int = 0)
+            : this(year, month, day, hour, second, minute) {
+       this.year = localDateTime.year
+       this.month = localDateTime.monthValue
+       this.day = localDateTime.dayOfMonth
+       this.hour = localDateTime.hour
+       this.minute = localDateTime.minute
+       this.second = localDateTime.second
     }
 
-    constructor(date: String, localDateTime: LocalDateTime = LocalDateTime.now()) : this(localDateTime) {
+    constructor(date: String, year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, minute: Int = 0, second: Int = 0) : this(year, month, day, hour, second, minute) {
         fromString(date)
     }
 
@@ -107,5 +106,21 @@ class KretaDate(localDateTime: LocalDateTime = LocalDateTime.now()) {
 
     fun isToday(): Boolean {
         return (toSchoolDay().toString() == LocalDateTime.now().dayOfWeek.toString())
+    }
+
+    override fun compareTo(other: KretaDate): Int {
+        val differences = listOf(this.year - other.year,
+            this.month - other.month,
+            this.day - other.day,
+            this.hour - other.hour,
+            this.minute - other.minute,
+            this.second - other.second)
+        for (difference in differences) {
+            if (difference == 0) {
+                continue
+            }
+            return difference
+        }
+        return 0
     }
 }
