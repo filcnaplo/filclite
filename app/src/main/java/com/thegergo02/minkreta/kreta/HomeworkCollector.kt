@@ -13,6 +13,12 @@ class HomeworkCollector(private val listener: OnHomeworkListFinished, private va
     private var teacherHomeworkList = mutableListOf<TeacherHomework>()
     private var teacherHomeworkSize = 0
 
+    init {
+        if (homeworkIdSize == 0) {
+            listener.onHomeworkListSuccess(studentHomeworkList, teacherHomeworkList)
+        }
+    }
+
     interface OnHomeworkListFinished {
         fun onHomeworkListSuccess(studentHomeworkList: List<StudentHomework>, teacherHomeworkList: List<TeacherHomework>)
         fun onHomeworkListError(error: KretaError)
