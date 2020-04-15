@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_cl"
     android:layout_width="match_parent"
@@ -58,6 +59,24 @@
                     android:background="@color/colorButtonUnselected"
                     android:text="@string/notes_ma"
                     android:textColor="@color/colorText" />
+
+                <Spinner
+                    android:id="@+id/notes_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="7dp"
+                    android:background="@color/colorPrimaryDark"
+                    android:dropDownWidth="match_parent"
+                    android:minHeight="45dp"
+                    android:scrollbarStyle="outsideInset"
+                    android:scrollbarThumbHorizontal="@color/colorText"
+                    android:scrollbarThumbVertical="@color/colorAccent"
+                    android:scrollbarTrackHorizontal="@color/colorText"
+                    android:scrollbarTrackVertical="@color/colorText"
+                    android:spinnerMode="dropdown"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/login_ll" />
 
                 <LinearLayout
                     android:id="@+id/note_holder_ll"
@@ -142,6 +161,24 @@
                     android:background="@color/colorButtonUnselected"
                     android:text="@string/abs_ma"
                     android:textColor="@color/colorText" />
+
+                <Spinner
+                    android:id="@+id/abs_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="7dp"
+                    android:background="@color/colorPrimaryDark"
+                    android:dropDownWidth="match_parent"
+                    android:minHeight="45dp"
+                    android:scrollbarStyle="outsideInset"
+                    android:scrollbarThumbHorizontal="@color/colorText"
+                    android:scrollbarThumbVertical="@color/colorAccent"
+                    android:scrollbarTrackHorizontal="@color/colorText"
+                    android:scrollbarTrackVertical="@color/colorText"
+                    android:spinnerMode="dropdown"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/login_ll" />
 
                 <LinearLayout
                     android:id="@+id/abs_holder_ll"

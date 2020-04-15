@@ -1,6 +1,7 @@
 package com.thegergo02.minkreta.ui
 
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView

@@ -4,9 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
@@ -18,6 +16,7 @@ import com.thegergo02.minkreta.kreta.data.Student
 import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
 import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
@@ -26,13 +25,15 @@ import com.thegergo02.minkreta.view.MainView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.DayOfWeek
 import java.time.LocalDateTime
+import kotlin.math.abs
 
 
 class MainActivity : AppCompatActivity(), MainView {
     private lateinit var controller: MainController
     private lateinit var cachedStudent: Student
-    private lateinit var itemHolders: Map<Tab, LinearLayout>
-    private lateinit var tabButtons: Map<Tab, Button>
+    private var tabHolders = mutableMapOf<Tab, LinearLayout>()
+    private var tabButtons = mutableMapOf<Tab, Button>()
+    private var tabSortSpinners = mutableMapOf<Tab, Spinner>()
 
     private var canClick = true
 
@@ -71,11 +72,12 @@ class MainActivity : AppCompatActivity(), MainView {
         controller.getStudent(accessToken, instituteUrl)
         showProgress()
         setupHolders()
+        setupSpinners()
         setupClickListeners()
     }
 
     private fun setupHolders() {
-        itemHolders = mutableMapOf<Tab, LinearLayout>(
+        tabHolders = mutableMapOf(
             Tab.Evaluations to eval_holder_ll,
             Tab.Notes to note_holder_ll,
             Tab.Absences to abs_holder_ll,
@@ -84,7 +86,7 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Messages to messages_holder_ll,
             Tab.Tests to tests_holder_ll
         )
-        tabButtons = mutableMapOf<Tab, Button>(
+        tabButtons = mutableMapOf(
             Tab.Evaluations to evals_btt,
             Tab.Notes to notes_btt,
             Tab.Absences to abs_btt,
@@ -92,6 +94,10 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Timetable to timetable_btt,
             Tab.Messages to messages_btt,
             Tab.Tests to tests_btt
+        )
+        tabSortSpinners = mutableMapOf(
+            Tab.Notes to notes_spinner,
+            Tab.Absences to abs_spinner
         )
     }
     private fun setupClickListeners() {
@@ -123,7 +129,6 @@ class MainActivity : AppCompatActivity(), MainView {
                 }
             }
         }
-
         tabButtons[Tab.Evaluations]?.setOnClickListener {
             if (canClick) {
                 switchTab(Tab.Evaluations)
@@ -141,7 +146,7 @@ class MainActivity : AppCompatActivity(), MainView {
         }
         tabButtons[Tab.Homework]?.setOnClickListener {
             if (canClick) {
-                if (itemHolders[Tab.Homework]?.visibility == View.GONE) {
+                if (tabHolders[Tab.Homework]?.visibility == View.GONE) {
                     showProgress()
                     isHomeworkNeeded = true
                     startTimetableRequest()
@@ -152,7 +157,7 @@ class MainActivity : AppCompatActivity(), MainView {
         }
         tabButtons[Tab.Timetable]?.setOnClickListener {
             if (canClick) {
-                if (itemHolders[Tab.Timetable]?.visibility == View.GONE) {
+                if (tabHolders[Tab.Timetable]?.visibility == View.GONE) {
                     showProgress()
                     startTimetableRequest()
                 } else {
@@ -162,7 +167,7 @@ class MainActivity : AppCompatActivity(), MainView {
         }
         tabButtons[Tab.Messages]?.setOnClickListener {
             if (canClick) {
-                if (itemHolders[Tab.Messages]?.visibility == View.GONE) {
+                if (tabHolders[Tab.Messages]?.visibility == View.GONE) {
                     showProgress()
                     controller.getMessageList(accessToken)
                 } else {
@@ -172,7 +177,7 @@ class MainActivity : AppCompatActivity(), MainView {
         }
         tabButtons[Tab.Tests]?.setOnClickListener {
             if (canClick) {
-                if (itemHolders[Tab.Tests]?.visibility == View.GONE) {
+                if (tabHolders[Tab.Tests]?.visibility == View.GONE) {
                     showProgress()
                     controller.getTestList(accessToken, instituteUrl,
                         KretaDate(1970),
@@ -182,6 +187,36 @@ class MainActivity : AppCompatActivity(), MainView {
                     switchTab(Tab.Tests)
                 }
             }
+        }
+    }
+
+    private fun setupItemSelectedListener(spinnerPair: MutableMap.MutableEntry<Tab, Spinner>) {
+        spinnerPair.value.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                when (spinnerPair.value.selectedItem.toString()) {
+                    "" -> {}
+                }
+            }
+        }
+    }
+    private fun setupSpinnerAdapter(spinnerPair: MutableMap.MutableEntry<Tab, Spinner>) {
+        val spinnerDisplayArrayMap = mapOf(
+            Tab.Notes to listOf("Date", "Type", "Teacher"),
+            Tab.Absences to listOf("Subject", "Teacher", "Lesson start time", "Creating time", "Justification state")
+        )
+        val spinnerDisplayList = spinnerDisplayArrayMap[spinnerPair.key]
+        if (spinnerDisplayList != null) {
+            val adapter =
+                ArrayAdapter(this, R.layout.sorter_spinner_item, spinnerDisplayList)
+            adapter.setDropDownViewResource(R.layout.sorter_spinner_dropdown_item)
+            spinnerPair.value.adapter = adapter
+        }
+    }
+    private fun setupSpinners() {
+        for (spinnerPair in tabSortSpinners) {
+            setupSpinnerAdapter(spinnerPair)
+            setupItemSelectedListener(spinnerPair)
         }
     }
 
@@ -228,9 +263,10 @@ class MainActivity : AppCompatActivity(), MainView {
         Tests
     }
     private fun closeTabs(exception: Tab? = null) {
-        for (tabHolder in itemHolders) {
+        for (tabHolder in tabHolders) {
             if (tabHolder.key != exception) {
                 tabHolder.value.visibility = View.GONE
+                tabSortSpinners[tabHolder.key]?.visibility = View.GONE
                 tabButtons[tabHolder.key]?.setBackgroundColor(ContextCompat.getColor(this,
                     R.color.colorButtonUnselected
                 ))
@@ -240,19 +276,25 @@ class MainActivity : AppCompatActivity(), MainView {
     }
     private fun switchTab(newTab: Tab) {
         closeTabs(newTab)
-        val tabHolder = itemHolders[newTab]
+        val tabHolder = tabHolders[newTab]
         val tabButton = tabButtons[newTab]
+        val tabSpinner = tabSortSpinners[newTab]
+        var newVisibility: Int
         if (tabHolder != null && tabButton != null) {
             if (tabHolder.visibility == View.GONE) {
-                tabHolder.visibility = View.VISIBLE
+                newVisibility = View.VISIBLE
                 tabButton.setBackgroundColor(ContextCompat.getColor(this,
                     R.color.colorButtonSelected
                 ))
             } else {
-                tabHolder.visibility = View.GONE
+                newVisibility = View.GONE
                 tabButton.setBackgroundColor(ContextCompat.getColor(this,
                     R.color.colorButtonUnselected
                 ))
+            }
+            tabHolder.visibility = newVisibility
+            if (tabSpinner != null) {
+                tabSpinner.visibility = newVisibility
             }
         }
     }
@@ -263,7 +305,7 @@ class MainActivity : AppCompatActivity(), MainView {
             isHomeworkNeeded = false
         } else {
             TimetableUI.generateTimetable(this, timetable,
-                itemHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller)
+                tabHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller)
             switchTab(Tab.Timetable)
             hideProgress()
         }
@@ -280,7 +322,7 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun generateMessageDescriptors(messages: List<MessageDescriptor>) {
-        MessageUI.generateMessageDescriptors(this, messages, itemHolders[Tab.Messages], controller, accessToken)
+        MessageUI.generateMessageDescriptors(this, messages, tabHolders[Tab.Messages], controller, accessToken)
         switchTab(Tab.Messages)
         hideProgress()
     }
@@ -289,15 +331,15 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun generateTests(testList: List<Test>) {
-        TestUI.generateTests(this, testList, itemHolders[Tab.Tests], details_ll, ::showDetails, ::hideDetails)
+        TestUI.generateTests(this, testList, tabHolders[Tab.Tests], details_ll, ::showDetails, ::hideDetails)
         switchTab(Tab.Tests)
         hideProgress()
     }
 
     override fun generateHomeworkList(studentHomeworkList: List<StudentHomework>, teacherHomeworkList: List<TeacherHomework>) {
-        itemHolders[Tab.Homework]?.removeAllViews()
-        HomeworkUI.generateTeacherHomework(this, teacherHomeworkList, itemHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
-        HomeworkUI.generateStudentHomework(this, studentHomeworkList, itemHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
+        tabHolders[Tab.Homework]?.removeAllViews()
+        HomeworkUI.generateTeacherHomework(this, teacherHomeworkList, tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
+        HomeworkUI.generateStudentHomework(this, studentHomeworkList, tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
         switchTab(Tab.Homework)
         homeworkIds = mutableListOf()
         hideProgress()
@@ -309,11 +351,16 @@ class MainActivity : AppCompatActivity(), MainView {
         name_tt.visibility = View.VISIBLE
         name_tt.text = cachedStudent.name
         EvaluationUI.generateEvaluations(this, cachedStudent,
-            itemHolders[Tab.Evaluations], details_ll, ::showDetails, ::hideDetails)
+            tabHolders[Tab.Evaluations], details_ll, ::showDetails, ::hideDetails)
         NotesUI.generateNotes(this, cachedStudent,
-            itemHolders[Tab.Notes], details_ll, ::showDetails, ::hideDetails)
-        AbsencesUI.generateAbsences(this, cachedStudent,
-            itemHolders[Tab.Absences], details_ll, ::showDetails, ::hideDetails)
+            tabHolders[Tab.Notes], details_ll, ::showDetails, ::hideDetails)
+        val absenceList = cachedStudent.absences
+        if (absenceList != null) {
+            AbsencesUI.generateAbsences(
+                this, absenceList.sortedWith(compareBy(Absence.SortType.Subject.lambda)),
+                tabHolders[Tab.Absences], details_ll, ::showDetails, ::hideDetails
+            )
+        }
         hideProgress()
     }
 

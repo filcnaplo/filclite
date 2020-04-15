@@ -1,8 +1,6 @@
 package com.thegergo02.minkreta.kreta
 
 import android.util.Log
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.ToJson
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDayOrder
 import java.time.DayOfWeek
@@ -42,9 +40,6 @@ class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, m
         val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
         for (i in (0..6)) {
             firstDay.plusDays(i.toLong())
-            Log.w("day", firstDay.dayOfWeek.toString())
-            Log.w("day", schoolDay.toString().toUpperCase())
-            //TODO: FIX TIMETABLE CURRENT DAY COLOR CHANGE FUTURE ME ;)
             if (firstDay.dayOfWeek.toString() == schoolDay.toString().toUpperCase()) {
                 year = firstDay.year
                 month = firstDay.monthValue
@@ -105,16 +100,16 @@ class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, m
     }
 
     fun isToday(): Boolean {
-        return (toSchoolDay().toString() == LocalDateTime.now().dayOfWeek.toString())
+        return (toSchoolDay().toString().toUpperCase() == LocalDateTime.now().dayOfWeek.toString())
     }
 
     override fun compareTo(other: KretaDate): Int {
-        val differences = listOf(this.year - other.year,
-            this.month - other.month,
-            this.day - other.day,
-            this.hour - other.hour,
-            this.minute - other.minute,
-            this.second - other.second)
+        val differences = listOf(other.year - this.year,
+            other.month - this.month,
+            other.day - this.day,
+            other.hour - this.hour,
+            other.minute - this.minute,
+            other.second - this.second)
         for (difference in differences) {
             if (difference == 0) {
                 continue

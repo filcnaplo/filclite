@@ -6,7 +6,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.thegergo02.minkreta.R
-import com.thegergo02.minkreta.kreta.data.Student
+import com.thegergo02.minkreta.kreta.data.sub.Absence
 
 class AbsencesUI {
     companion object {
@@ -17,9 +17,9 @@ class AbsencesUI {
             }
         }
 
-        fun generateAbsences(ctx: Context, cachedStudent: Student, absenceHolder: LinearLayout?, detailsLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
-            if (cachedStudent.absences != null) {
-                for (abs in cachedStudent.absences) {
+        fun generateAbsences(ctx: Context, absenceList: List<Absence>, absenceHolder: LinearLayout?, detailsLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
+            if (absenceList != null) {
+                for (abs in absenceList) {
                     val text = abs.toString()
                     val absOnClickListener = {
                             _: View ->

@@ -1,6 +1,6 @@
 package com.thegergo02.minkreta.kreta.data.timetable
 
-enum class SchoolDay(day: String) {
+enum class SchoolDay(var day: String) {
     Monday("Monday"),
     Tuesday("Tuesday"),
     Wednesday("Wednesday"),

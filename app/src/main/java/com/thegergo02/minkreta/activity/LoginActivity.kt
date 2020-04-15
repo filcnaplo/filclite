@@ -60,8 +60,8 @@ class LoginActivity : AppCompatActivity(), LoginView {
 
         }
         stringInstitutes.sortBy{it}
-        val adapter = ArrayAdapter<String>(this, R.layout.spinner_item, stringInstitutes)
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
+        val adapter = ArrayAdapter(this, R.layout.login_spinner_item, stringInstitutes)
+        adapter.setDropDownViewResource(R.layout.login_spinner_dropdown_item)
         inst_code_s.adapter = adapter
     }
     override fun setTokens(tokens: Map<String, String>) {
