@@ -52,7 +52,7 @@ class KretaRequests(ctx: Context) {
         fun onTimetableError(error: KretaError)
     }
     interface OnMessageListResult {
-        fun onMessageListSuccess(messageList: List<MessageDescriptor>)
+        fun onMessageListSuccess(messageList: List<MessageDescriptor>, sortType: MessageDescriptor.SortType)
         fun onMessageListError(error: KretaError)
     }
     interface OnMessageResult {
@@ -233,13 +233,13 @@ class KretaRequests(ctx: Context) {
         queue.add(timetableQuery)
     }
 
-    fun getMessageList(listener: OnMessageListResult, accessToken: String) {
+    fun getMessageList(listener: OnMessageListResult, accessToken: String, sortType: MessageDescriptor.SortType) {
         val messageListQuery = object : StringRequest(
             Method.GET, "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/postaladaelemek/sajat",
             Response.Listener { response ->
                 val messageList = JsonHelper.makeMessageList(response)
                 if (messageList != null) {
-                    listener.onMessageListSuccess(messageList)
+                    listener.onMessageListSuccess(messageList, sortType)
                 } else {
                     listener.onMessageListError(KretaError.ParseError("unknown"))
                 }

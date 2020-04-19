@@ -21,14 +21,37 @@ class Evaluation(
     @Json(name = "Value") val value: String?,
     @Json(name = "NumberValue") val numberValue: Int?,
     @Json(name = "SeenByTutelaryUTC") val seenByTutelaryUtc: String?,
-    @Json(name = "Teacher") val teacher: String?,
+    @Json(name = "Teacher") val teacher: String,
     @Json(name = "Date") val date: KretaDate?,
-    @Json(name = "CreatingTime") val creatingTime: KretaDate?,
+    @Json(name = "CreatingTime") val creatingTime: KretaDate,
     @Json(name = "Jelleg") val nature: Nature?,
     @Json(name = "JellegNev") val natureName: String?,
     @Json(name = "ErtekFajta") val valueType: Nature?,
     @Json(name = "OsztalyCsoportUid") val classGroupUid: String?
-) {
+): Comparable<Evaluation> {
+    companion object {
+        fun sortTypeFromString(str: String): SortType {
+            val stringToSortType = mapOf(
+                "Creating time" to SortType.CreatingTime,
+                "Form" to SortType.Form,
+                "Value" to SortType.Value,
+                "Mode" to SortType.Mode,
+                "Subject" to SortType.Subject,
+                "Teacher" to SortType.Teacher
+            )
+            return stringToSortType[str] ?: SortType.CreatingTime
+        }
+    }
+
+    enum class SortType(val lambda: (it: Evaluation) -> Comparable<*>) {
+        CreatingTime({it.creatingTime}),
+        Form({it.form ?: ""}),
+        Value({it.value ?: ""}),
+        Mode({it.mode ?: ""}),
+        Subject({it.subject ?: ""}),
+        Teacher({it.teacher})
+    }
+
     override fun toString(): String {
         if (form == "Diligence" || form == "Deportment") {
             return  "$natureName ($teacher) \n" +
@@ -46,5 +69,8 @@ class Evaluation(
                 "$formName \n" +
                 "$theme \n" +
                 "${creatingTime?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+    }
+    override fun compareTo(other: Evaluation): Int {
+        return this.creatingTime.compareTo(other.creatingTime)
     }
 }

@@ -15,8 +15,11 @@ import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.kreta.data.Student
 import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
 import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.message.Message
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
+import com.thegergo02.minkreta.kreta.data.sub.Evaluation
+import com.thegergo02.minkreta.kreta.data.sub.Note
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
@@ -25,7 +28,6 @@ import com.thegergo02.minkreta.view.MainView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.DayOfWeek
 import java.time.LocalDateTime
-import kotlin.math.abs
 
 
 class MainActivity : AppCompatActivity(), MainView {
@@ -97,7 +99,9 @@ class MainActivity : AppCompatActivity(), MainView {
         )
         tabSortSpinners = mutableMapOf(
             Tab.Notes to notes_spinner,
-            Tab.Absences to abs_spinner
+            Tab.Absences to abs_spinner,
+            Tab.Messages to messages_spinner,
+            Tab.Evaluations to evals_spinner
         )
     }
     private fun setupClickListeners() {
@@ -168,8 +172,7 @@ class MainActivity : AppCompatActivity(), MainView {
         tabButtons[Tab.Messages]?.setOnClickListener {
             if (canClick) {
                 if (tabHolders[Tab.Messages]?.visibility == View.GONE) {
-                    showProgress()
-                    controller.getMessageList(accessToken)
+                    refreshMessages(MessageDescriptor.SortType.SendDate)
                 } else {
                     switchTab(Tab.Messages)
                 }
@@ -191,19 +194,76 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     private fun setupItemSelectedListener(spinnerPair: MutableMap.MutableEntry<Tab, Spinner>) {
-        spinnerPair.value.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                when (spinnerPair.value.selectedItem.toString()) {
-                    "" -> {}
+        var onItemSelectedListener: AdapterView.OnItemSelectedListener? = null
+        when (spinnerPair.key) {
+            Tab.Absences -> {
+                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        val sortType = Absence.sortTypeFromString(spinnerPair.value.selectedItem.toString())
+                        refreshAbsences(sortType)
+                    }
                 }
             }
+            Tab.Notes -> {
+                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        val sortType = Note.sortTypeFromString(spinnerPair.value.selectedItem.toString())
+                        refreshNotes(sortType)
+                    }
+                }
+            }
+            Tab.Messages -> {
+                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        val sortType =
+                            MessageDescriptor.sortTypeFromString(spinnerPair.value.selectedItem.toString())
+                        refreshMessages(sortType)
+                    }
+                }
+            }
+            Tab.Evaluations -> {
+                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        val sortType = Evaluation.sortTypeFromString(spinnerPair.value.selectedItem.toString())
+                        refreshEvaluations(sortType)
+                    }
+                }
+            }
+        }
+        if (onItemSelectedListener != null) {
+            spinnerPair.value.onItemSelectedListener = onItemSelectedListener
         }
     }
     private fun setupSpinnerAdapter(spinnerPair: MutableMap.MutableEntry<Tab, Spinner>) {
         val spinnerDisplayArrayMap = mapOf(
             Tab.Notes to listOf("Date", "Type", "Teacher"),
-            Tab.Absences to listOf("Subject", "Teacher", "Lesson start time", "Creating time", "Justification state")
+            Tab.Absences to listOf("Subject", "Teacher", "Lesson start time", "Creating time", "Justification state"),
+            Tab.Messages to listOf("Teacher", "Send date"),
+            Tab.Evaluations to listOf("Creating time", "Form", "Value", "Mode", "Subject", "Teacher")
         )
         val spinnerDisplayList = spinnerDisplayArrayMap[spinnerPair.key]
         if (spinnerDisplayList != null) {
@@ -274,7 +334,7 @@ class MainActivity : AppCompatActivity(), MainView {
         }
         hideDetails()
     }
-    private fun switchTab(newTab: Tab) {
+    private fun switchTab(newTab: Tab, canClose: Boolean = true) {
         closeTabs(newTab)
         val tabHolder = tabHolders[newTab]
         val tabButton = tabButtons[newTab]
@@ -287,10 +347,17 @@ class MainActivity : AppCompatActivity(), MainView {
                     R.color.colorButtonSelected
                 ))
             } else {
-                newVisibility = View.GONE
-                tabButton.setBackgroundColor(ContextCompat.getColor(this,
-                    R.color.colorButtonUnselected
-                ))
+                if (canClose) {
+                    newVisibility = View.GONE
+                    tabButton.setBackgroundColor(
+                        ContextCompat.getColor(
+                            this,
+                            R.color.colorButtonUnselected
+                        )
+                    )
+                } else {
+                    newVisibility = View.VISIBLE
+                }
             }
             tabHolder.visibility = newVisibility
             if (tabSpinner != null) {
@@ -323,7 +390,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun generateMessageDescriptors(messages: List<MessageDescriptor>) {
         MessageUI.generateMessageDescriptors(this, messages, tabHolders[Tab.Messages], controller, accessToken)
-        switchTab(Tab.Messages)
+        switchTab(Tab.Messages, false)
         hideProgress()
     }
     override fun generateMessage(message: MessageDescriptor) {
@@ -345,22 +412,51 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
 
+    private fun refreshEvaluations(sortType: Evaluation.SortType) {
+        val evalList = cachedStudent.evaluations
+        if (evalList != null) {
+            val holder = tabHolders[Tab.Evaluations]
+            holder?.removeAllViews()
+            EvaluationUI.generateEvaluations(
+                this, evalList.sortedWith(compareBy(sortType.lambda)),
+                holder, details_ll, ::showDetails, ::hideDetails
+            )
+        }
+    }
+    private fun refreshMessages(sortType: MessageDescriptor.SortType) {
+        showProgress()
+        controller.getMessageList(accessToken, sortType)
+    }
+    private fun refreshAbsences(sortType: Absence.SortType) {
+        val absenceList = cachedStudent.absences
+        if (absenceList != null) {
+            val holder = tabHolders[Tab.Absences]
+            holder?.removeAllViews()
+            AbsencesUI.generateAbsences(
+                this, absenceList.sortedWith(compareBy(sortType.lambda)),
+                holder, details_ll, ::showDetails, ::hideDetails
+            )
+        }
+    }
+    private fun refreshNotes(sortType: Note.SortType) {
+        val noteList = cachedStudent.notes
+        if (noteList != null) {
+            val holder = tabHolders[Tab.Notes]
+            holder?.removeAllViews()
+            NotesUI.generateNotes(
+                this, noteList.sortedWith(compareBy(sortType.lambda)),
+                holder, details_ll, ::showDetails, ::hideDetails
+            )
+        }
+    }
     private fun refreshUI() {
         showProgress()
         closeTabs()
         name_tt.visibility = View.VISIBLE
         name_tt.text = cachedStudent.name
-        EvaluationUI.generateEvaluations(this, cachedStudent,
-            tabHolders[Tab.Evaluations], details_ll, ::showDetails, ::hideDetails)
-        NotesUI.generateNotes(this, cachedStudent,
-            tabHolders[Tab.Notes], details_ll, ::showDetails, ::hideDetails)
-        val absenceList = cachedStudent.absences
-        if (absenceList != null) {
-            AbsencesUI.generateAbsences(
-                this, absenceList.sortedWith(compareBy(Absence.SortType.Subject.lambda)),
-                tabHolders[Tab.Absences], details_ll, ::showDetails, ::hideDetails
-            )
-        }
+        refreshEvaluations(Evaluation.SortType.CreatingTime)
+        refreshNotes(Note.SortType.CreatingTime)
+        refreshAbsences(Absence.SortType.Subject)
         hideProgress()
     }
 

@@ -35,7 +35,7 @@ class HomeworkUI {
         fun generateTeacherHomework(ctx: Context, homeworkList: List<TeacherHomework>, homeworkHolder: LinearLayout?, detailsLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
             for (homework in homeworkList) {
                 val text =
-                    "${homework.poster} | ${homework.deadline?.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
+                    "${homework.subject} | ${homework.poster} | ${homework.postDate?.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
                 val homeworkOnClickListener = {
                     _: View ->
                     val posterTextView = TextView(ctx)

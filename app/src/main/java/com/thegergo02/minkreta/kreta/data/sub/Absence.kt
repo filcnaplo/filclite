@@ -31,16 +31,24 @@ class Absence (
     @Json(name = "SeenByTutelaryUTC") val seenByTutelaryUtc: String?,
     @Json(name = "OsztalyCsoportUid") val classGroupUid: String?
 ): Comparable<Absence> {
+    companion object {
+        fun sortTypeFromString(str: String): SortType {
+            val stringToSortType = mapOf(
+                "Subject" to SortType.Subject,
+                "Teacher" to SortType.Teacher,
+                "Lesson start time" to SortType.LessonStartTime,
+                "Creating time" to SortType.CreatingTime,
+                "Justification state" to SortType.JustificationState)
+            return stringToSortType[str] ?: SortType.Subject
+        }
+    }
+
     enum class SortType(val lambda: (it: Absence) -> Comparable<*>) {
         CreatingTime({it.creatingTime}),
         LessonStartTime({it.lessonStartTime}),
         JustificationState({it.justificationState ?: ""}),
-        JustficationType({it.justificationType ?: ""}),
         Teacher({it.teacher}),
-        DelayTime({it.delayTime ?: 0}),
         Subject({it.subject}),
-        Type({it.type ?: ""}),
-        Mode({it.mode ?: ""})
     }
 
     override fun toString(): String {

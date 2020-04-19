@@ -11,11 +11,27 @@ class Note (
     @Json(name = "Title") val title: String?,
     @Json(name = "Content") val content: String?,
     @Json(name = "SeenByTutelaryUTC") val seenByTutelaryUtc: String?,
-    @Json(name = "Teacher") val teacher: String?,
+    @Json(name = "Teacher") val teacher: String,
     @Json(name = "Date") val date: KretaDate?,
-    @Json(name = "CreatingTime") val creatingTime: String?,
+    @Json(name = "CreatingTime") val creatingTime: KretaDate,
     @Json(name = "OsztalyCsoportUid") val classGroupUid: String?
-) {
+): Comparable<Note> {
+    companion object {
+        fun sortTypeFromString(str: String): SortType {
+            val stringToSortType = mapOf(
+                "Teacher" to SortType.Teacher,
+                "Creating time" to SortType.CreatingTime,
+                "Justification state" to SortType.Type)
+            return stringToSortType[str] ?: SortType.CreatingTime
+        }
+    }
+
+    enum class SortType(val lambda: (it: Note) -> Comparable<*>) {
+        CreatingTime({it.creatingTime}),
+        Type({it.type ?: ""}),
+        Teacher({it.teacher})
+    }
+
     override fun toString(): String {
         return  "$title \n" +
                 "$teacher (${date?.toFormattedString(KretaDate.KretaDateFormat.DATE)})"
@@ -24,5 +40,8 @@ class Note (
         return  "$title ($type) \n" +
                 "$content \n" +
                 "$teacher (${date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)})"
+    }
+    override fun compareTo(other: Note): Int {
+        return this.creatingTime.compareTo(other.creatingTime)
     }
 }
