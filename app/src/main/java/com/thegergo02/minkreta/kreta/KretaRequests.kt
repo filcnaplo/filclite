@@ -1,6 +1,12 @@
 package com.thegergo02.minkreta.kreta
 
+import android.app.DownloadManager
 import android.content.Context
+import android.net.Uri
+import android.os.Environment
+import android.util.Log
+import android.webkit.MimeTypeMap
+import androidx.core.content.ContextCompat
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
@@ -11,12 +17,15 @@ import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.Student
 import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
 import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.net.URLClassLoader
+import java.net.URLConnection
 import java.util.*
 
 class KretaRequests(ctx: Context) {
@@ -275,6 +284,20 @@ class KretaRequests(ctx: Context) {
                 "User-Agent" to getUserAgent())
         }
         queue.add(messageQuery)
+    }
+    fun downloadAttachment(accessToken: String, downloadManager: DownloadManager, attachment: Attachment) {
+        val uri = Uri.parse("https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/dokumentumok/uzenetek/${attachment.id}")
+        val request = DownloadManager.Request(uri)
+        val mimeMap = MimeTypeMap.getSingleton()
+        request.addRequestHeader("User-Agent", getUserAgent())
+            .addRequestHeader("Authorization", "Bearer $accessToken")
+            .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI + DownloadManager.Request.NETWORK_MOBILE)
+            .setMimeType(mimeMap.getMimeTypeFromExtension(mimeMap.getExtensionFromMimeType(attachment.fileName)) ?: URLConnection.guessContentTypeFromName(attachment.fileName))
+            .setTitle(attachment.fileName)
+            .setDescription(attachment.id.toString())
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/minkreta/${attachment.fileName}")
+        downloadManager.enqueue(request)
     }
     fun setMessageRead(accessToken: String, messageId: Int, isRead: Boolean) {
         val messageReadQuery = object : StringRequest(

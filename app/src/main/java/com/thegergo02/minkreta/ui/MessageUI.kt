@@ -1,15 +1,19 @@
 package com.thegergo02.minkreta.ui
 
+import android.app.ActionBar
 import android.content.Context
 import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
+import com.thegergo02.minkreta.kreta.KretaDate
+import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.Message
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+
 
 class MessageUI {
     companion object {
@@ -17,6 +21,7 @@ class MessageUI {
             ctx: Context,
             message: Message,
             detailsLL: LinearLayout,
+            downloadAttachment: (attachment: Attachment) -> Unit,
             showDetails: () -> Unit,
             hideDetails: () -> Unit
         ) {
@@ -32,7 +37,24 @@ class MessageUI {
                     UIHelper.formatHtml(UIHelper.decodeHtml(message.text))
                 } else { "" }
                 val messageWebView = UIHelper.generateWebView(ctx, htmlString)
-                listOf(subjectTextView, messageWebView, senderTextView)
+                val attachmentLinearLayout = LinearLayout(ctx)
+                for (attachment in message.attachments) {
+                    val onAttachmentClickListener = {
+                            _: View ->
+                        downloadAttachment(attachment)
+                        listOf<View>()
+                    }
+                    val attachmentButton = UIHelper.generateButton(ctx, attachment.fileName, onAttachmentClickListener)
+                    val params = ActionBar.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                    params.setMargins(10, 0, 10, 0)
+                    attachmentButton.layoutParams = params
+                    attachmentButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorButtonSelected))
+                    attachmentLinearLayout.addView(attachmentButton)
+                }
+                listOf(subjectTextView, messageWebView, attachmentLinearLayout, senderTextView)
             }, showDetails, hideDetails, detailsLL)(View(ctx))
         }
 

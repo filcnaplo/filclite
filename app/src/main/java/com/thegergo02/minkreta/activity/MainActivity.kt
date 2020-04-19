@@ -1,5 +1,6 @@
 package com.thegergo02.minkreta.activity
 
+import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +9,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
+import com.livinglifetechway.quickpermissions_kotlin.runWithPermissions
 import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
@@ -15,6 +17,7 @@ import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.kreta.data.Student
 import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
 import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.Message
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
@@ -28,6 +31,7 @@ import com.thegergo02.minkreta.view.MainView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.DayOfWeek
 import java.time.LocalDateTime
+import java.util.jar.Manifest
 
 
 class MainActivity : AppCompatActivity(), MainView {
@@ -262,7 +266,7 @@ class MainActivity : AppCompatActivity(), MainView {
         val spinnerDisplayArrayMap = mapOf(
             Tab.Notes to listOf("Date", "Type", "Teacher"),
             Tab.Absences to listOf("Subject", "Teacher", "Lesson start time", "Creating time", "Justification state"),
-            Tab.Messages to listOf("Teacher", "Send date"),
+            Tab.Messages to listOf("Send date", "Teacher"),
             Tab.Evaluations to listOf("Creating time", "Form", "Value", "Mode", "Subject", "Teacher")
         )
         val spinnerDisplayList = spinnerDisplayArrayMap[spinnerPair.key]
@@ -339,7 +343,7 @@ class MainActivity : AppCompatActivity(), MainView {
         val tabHolder = tabHolders[newTab]
         val tabButton = tabButtons[newTab]
         val tabSpinner = tabSortSpinners[newTab]
-        var newVisibility: Int
+        val newVisibility: Int
         if (tabHolder != null && tabButton != null) {
             if (tabHolder.visibility == View.GONE) {
                 newVisibility = View.VISIBLE
@@ -394,7 +398,7 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
     override fun generateMessage(message: MessageDescriptor) {
-        MessageUI.generateMessage(this, message.message, details_ll, ::showDetails, ::hideDetails)
+        MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::showDetails, ::hideDetails)
     }
 
     override fun generateTests(testList: List<Test>) {
@@ -464,7 +468,6 @@ class MainActivity : AppCompatActivity(), MainView {
         controller.refreshToken(refreshToken, instituteUrl, instituteCode)
     }
     override fun refreshToken(tokens: Map<String, String>) {
-        val mainIntent = Intent(this, MainActivity::class.java)
         val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
         with (sharedPref.edit()) {
             putString("accessToken", tokens["access_token"])
@@ -472,6 +475,13 @@ class MainActivity : AppCompatActivity(), MainView {
             commit()
         }
         initializeActivity()
+    }
+
+    private fun downloadAttachment(attachment: Attachment) {
+        val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        runWithPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+            controller.downloadAttachment(accessToken, downloadManager, attachment)
+        }
     }
 
     override fun sendToLogin() {

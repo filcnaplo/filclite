@@ -12,7 +12,6 @@ data class Message(
     @Json(name = "feladoTitulus") val senderRole: String?,
     @Json(name = "szoveg") val text: String?,
     @Json(name = "targy") val subject: String?,
-    @Json(name = "cimzettLista") val receiverList: List<Receiver>?//,
-    //@Json(name = "csatolmanyok") val attachments: String?
-    //TODO: FIX ATTACHMENTS
+    @Json(name = "cimzettLista") val receiverList: List<Receiver>?,
+    @Json(name = "csatolmanyok") val attachments: List<Attachment>
 )

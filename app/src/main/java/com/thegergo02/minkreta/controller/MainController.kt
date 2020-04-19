@@ -1,5 +1,6 @@
 package com.thegergo02.minkreta.controller
 
+import android.app.DownloadManager
 import com.android.volley.AuthFailureError
 import com.android.volley.VolleyError
 import com.squareup.moshi.JsonAdapter
@@ -16,6 +17,7 @@ import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.kreta.KretaError
 import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.adapter.KretaDateAdapter
+import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -54,6 +56,12 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         val parentListener = this
         GlobalScope.launch {
             apiHandler.getMessage(parentListener, accessToken, messageId)
+        }
+    }
+    fun downloadAttachment(accessToken: String, downloadManager: DownloadManager, attachment: Attachment) {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.downloadAttachment(accessToken, downloadManager, attachment)
         }
     }
     fun setMessageRead(accessToken: String, messageId: Int, isRead: Boolean = true) {
