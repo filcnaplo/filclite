@@ -4,7 +4,6 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
-import android.util.Log
 import android.webkit.MimeTypeMap
 import com.android.volley.Request
 import com.android.volley.Response
@@ -13,8 +12,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.thegergo02.minkreta.kreta.data.Institute
-import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
-import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
@@ -70,13 +68,9 @@ class KretaRequests(ctx: Context) {
         fun onTestListSuccess(testList: List<Test>)
         fun onTestListError(error: KretaError)
     }
-    interface OnStudentHomeworkResult {
-        fun onStudentHomeworkSuccess(studentHomework: List<StudentHomework?>?)
-        fun onStudentHomeworkError(error: KretaError)
-    }
-    interface OnTeacherHomeworkResult {
-        fun onTeacherHomeworkSuccess(teacherHomework: TeacherHomework?)
-        fun onTeacherHomeworkError(error: KretaError)
+    interface OnHomeworkListResult {
+        fun onHomeworkListSuccess(studentHomework: List<Homework>)
+        fun onHomeworkListError(error: KretaError)
     }
 
     private val queue = Volley.newRequestQueue(ctx)
@@ -220,7 +214,7 @@ class KretaRequests(ctx: Context) {
 
     fun getTimetable(listener: OnTimetableResult, accessToken: String, instituteUrl: String, fromDate: KretaDate, toDate: KretaDate) {
         val timetableQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/mapi/api/v1/LessonAmi?fromDate=${fromDate}&toDate=${toDate}",
+            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/OrarendElemek?datumTol=${fromDate.toFormattedString(KretaDate.KretaDateFormat.API_DATE)}&datumIg=${toDate.toFormattedString(KretaDate.KretaDateFormat.API_DATE)}",
             Response.Listener { response ->
                 val timetable = JsonHelper.makeTimetable(response)
                 if (timetable != null) {
@@ -234,7 +228,6 @@ class KretaRequests(ctx: Context) {
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json",
                 "User-Agent" to getUserAgent())
             override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
@@ -338,50 +331,24 @@ class KretaRequests(ctx: Context) {
         queue.add(testsQuery)
     }
 
-    private fun makeStudentHomeworkRequest(homeworkCollector: HomeworkCollector, accessToken: String, instituteUrl: String, classHomeworkId: Int): StringRequest {
+    fun getHomeworkList(listener: OnHomeworkListResult, accessToken: String, instituteUrl: String, fromDate: KretaDate) {
         val homeworkQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/mapi/api/v1/HaziFeladat/TanuloHaziFeladatLista/$classHomeworkId",
+            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/HaziFeladatok?datumTol=$fromDate",
             Response.Listener { response ->
-                val studentHomework = JsonHelper.makeStudentHomework(response)
-                homeworkCollector.getStudentHomeworkListener()
-                    .onStudentHomeworkSuccess(studentHomework)
+                val homeworks = JsonHelper.makeHomeworkList(response)
+                if (homeworks != null) {
+                    listener.onHomeworkListSuccess(homeworks)
+                } else {
+                    listener.onHomeworkListError(KretaError.ParseError("unknown"))
+                }
             },
             Response.ErrorListener { error ->
-                homeworkCollector.getStudentHomeworkListener().onStudentHomeworkError(KretaError.VolleyError(error.toString(), error))
+                listener.onHomeworkListError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json; charset: utf-8",
                 "User-Agent" to getUserAgent())
         }
-        return homeworkQuery
-    }
-    private fun makeTeacherHomeworkRequest(homeworkCollector: HomeworkCollector, accessToken: String, instituteUrl: String, classHomeworkId: Int): StringRequest {
-        val homeworkQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/mapi/api/v1/HaziFeladat/TanarHaziFeladat/$classHomeworkId",
-            Response.Listener { response ->
-                val teacherHomework = JsonHelper.makeTeacherHomework(response)
-                homeworkCollector.getTeacherHomeworkListener()
-                    .onTeacherHomeworkSuccess(teacherHomework)
-            },
-            Response.ErrorListener { error ->
-                homeworkCollector.getTeacherHomeworkListener().onTeacherHomeworkError(KretaError.VolleyError(error.toString(), error))
-            }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json; charset: utf-8",
-                "User-Agent" to getUserAgent())
-        }
-        return homeworkQuery
-    }
-    fun getHomework(homeworkCollector: HomeworkCollector, accessToken: String, instituteUrl: String, classHomeworkIds: List<Int>) {
-        val homeworkQueries = mutableListOf<StringRequest>()
-        for (id in classHomeworkIds) {
-            homeworkQueries.add(makeStudentHomeworkRequest(homeworkCollector, accessToken, instituteUrl, id))
-            homeworkQueries.add(makeTeacherHomeworkRequest(homeworkCollector, accessToken, instituteUrl, id))
-        }
-        for (homeworkQuery in homeworkQueries) {
-            queue.add(homeworkQuery)
-        }
+        queue.add(homeworkQuery)
     }
 }

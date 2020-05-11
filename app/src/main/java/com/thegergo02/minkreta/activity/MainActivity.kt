@@ -14,8 +14,7 @@ import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
-import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
-import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
@@ -43,9 +42,6 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var refreshToken: String
     private lateinit var instituteUrl: String
     private lateinit var instituteCode: String
-
-    private var isHomeworkNeeded = false
-    private var homeworkIds = mutableListOf<Int>()
 
     private var absences = listOf<Absence>()
     private var notes = listOf<Note>()
@@ -75,8 +71,6 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     private fun initializeActivity() {
-        //controller.getStudent(accessToken, instituteUrl)
-        //showProgress()
         setupHolders()
         setupSpinners()
         setupClickListeners()
@@ -171,8 +165,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (canClick) {
                 if (tabHolders[Tab.Homework]?.visibility == View.GONE) {
                     showProgress()
-                    isHomeworkNeeded = true
-                    startTimetableRequest()
+                    controller.getHomeworkList(accessToken, instituteUrl, KretaDate(2020, 5, 10))
                 } else {
                     switchTab(Tab.Homework)
                 }
@@ -381,27 +374,11 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>) {
-        if (isHomeworkNeeded) {
-            populateHomeworkIds(timetable)
-            isHomeworkNeeded = false
-        } else {
-            TimetableUI.generateTimetable(this, timetable,
-                tabHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller)
-            switchTab(Tab.Timetable)
-            hideProgress()
-        }
+        TimetableUI.generateTimetable(this, timetable,
+            tabHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller)
+        switchTab(Tab.Timetable)
+        hideProgress()
     }
-    private fun populateHomeworkIds(timetable: Map<SchoolDay, List<SchoolClass>>) {
-        for (schoolClassList in timetable.values) {
-            for (schoolClass in schoolClassList) {
-                if (schoolClass.teacherHomeworkId != null) {
-                    homeworkIds.add(schoolClass.teacherHomeworkId)
-                }
-            }
-        }
-        controller.getHomework(accessToken, instituteUrl, homeworkIds)
-    }
-
     override fun generateMessageDescriptors(messages: List<MessageDescriptor>) {
         MessageUI.generateMessageDescriptors(this, messages, tabHolders[Tab.Messages], controller, accessToken)
         switchTab(Tab.Messages, false)
@@ -417,12 +394,10 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
 
-    override fun generateHomeworkList(studentHomeworkList: List<StudentHomework>, teacherHomeworkList: List<TeacherHomework>) {
+    override fun generateHomeworkList(homeworks: List<Homework>) {
         tabHolders[Tab.Homework]?.removeAllViews()
-        HomeworkUI.generateTeacherHomework(this, teacherHomeworkList, tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
-        HomeworkUI.generateStudentHomework(this, studentHomeworkList, tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
+        HomeworkUI.generateHomeworkList(this, homeworks, tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
         switchTab(Tab.Homework)
-        homeworkIds = mutableListOf()
         hideProgress()
     }
 

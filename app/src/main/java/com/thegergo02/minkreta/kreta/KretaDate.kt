@@ -87,7 +87,9 @@ class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, m
     enum class KretaDateFormat {
         DATE,
         TIME,
-        DATETIME
+        DATETIME,
+        API_DATE,
+        API_TIME
     }
     fun toFormattedString(format: KretaDateFormat): String {
         val dateString = "${decideZero(year)}. ${decideZero(month)}. ${decideZero(day)}."
@@ -96,6 +98,8 @@ class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, m
             KretaDateFormat.DATE -> dateString
             KretaDateFormat.TIME -> timeString
             KretaDateFormat.DATETIME -> "$dateString $timeString"
+            KretaDateFormat.API_DATE -> "$year-$month-$day"
+            KretaDateFormat.API_TIME -> timeString
         }
     }
 

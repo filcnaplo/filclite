@@ -5,8 +5,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.thegergo02.minkreta.kreta.adapter.KretaDateAdapter
 import com.thegergo02.minkreta.kreta.data.Institute
-import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
-import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
+import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
@@ -52,7 +51,7 @@ class JsonHelper {
             for (i in 0 until timetableJson.length()) {
                 val schoolClass = adapter.fromJson(timetableJson[i].toString())
                 if (schoolClass != null) {
-                    val schoolDay = schoolClass.startTime.toSchoolDay()
+                    val schoolDay = schoolClass.startDate.toSchoolDay()
                     timetable[schoolDay]?.add(schoolClass)
                 }
             }
@@ -105,29 +104,8 @@ class JsonHelper {
             return if (testList.isEmpty()) null else testList
         }
 
-        fun makeTeacherHomework(teacherHomeworkString: String): TeacherHomework? {
-            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-            val adapter: JsonAdapter<TeacherHomework> = moshi.adapter(
-                TeacherHomework::class.java)
-            return adapter.fromJson(teacherHomeworkString)
-        }
-        fun makeStudentHomework(studentHomeworkString: String): List<StudentHomework?>? {
-            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-            val adapter: JsonAdapter<StudentHomework> = moshi.adapter(
-                StudentHomework::class.java)
-            val homeworkJSONArray = JSONArray(studentHomeworkString)
-            if (homeworkJSONArray.length() == 0) {
-                return null
-            }
-            val studentHomeworkList = mutableListOf<StudentHomework?>()
-            for (i in 0 until homeworkJSONArray.length()) {
-                val homeworkString = homeworkJSONArray[i].toString()
-                studentHomeworkList.add(adapter.fromJson(homeworkString))
-            }
-            return if (studentHomeworkList.isEmpty()) null else studentHomeworkList
-        }
         fun makeEvaluationList(evaluationsString: String) : List<Evaluation>? {
-            val evalList = mutableListOf<Evaluation>()
+            val evals = mutableListOf<Evaluation>()
             val evalsJson = JSONArray(evaluationsString)
             val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
             val adapter: JsonAdapter<Evaluation> = moshi.adapter(
@@ -135,10 +113,25 @@ class JsonHelper {
             for (i in 0 until evalsJson.length()) {
                 val eval = adapter.fromJson(evalsJson[i].toString())
                 if (eval != null) {
-                    evalList.add(eval)
+                    evals.add(eval)
                 }
             }
-            return if (evalList.isEmpty()) null else evalList
+            return if (evals.isEmpty()) null else evals
+        }
+
+        fun makeHomeworkList(homeworksString: String) : List<Homework>? {
+            val homeworks = mutableListOf<Homework>()
+            val homeworksJson = JSONArray(homeworksString)
+            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+            val adapter: JsonAdapter<Homework> = moshi.adapter(
+                Homework::class.java)
+            for (i in 0 until homeworksJson.length()) {
+                val homework = adapter.fromJson(homeworksJson[i].toString())
+                if (homework != null) {
+                    homeworks.add(homework)
+                }
+            }
+            return if (homeworks.isEmpty()) null else homeworks
         }
     }
 }

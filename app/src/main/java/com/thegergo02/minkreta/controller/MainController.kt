@@ -2,12 +2,6 @@ package com.thegergo02.minkreta.controller
 
 import android.app.DownloadManager
 import com.android.volley.AuthFailureError
-import com.android.volley.VolleyError
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.thegergo02.minkreta.kreta.HomeworkCollector
-import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
-import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
@@ -15,13 +9,12 @@ import com.thegergo02.minkreta.kreta.data.timetable.Test
 import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.kreta.KretaError
 import com.thegergo02.minkreta.kreta.KretaRequests
-import com.thegergo02.minkreta.kreta.adapter.KretaDateAdapter
+import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.json.JSONArray
 
 class MainController(private var mainView: MainView?, private val apiHandler: KretaRequests)
     :
@@ -31,7 +24,7 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
     KretaRequests.OnMessageListResult,
     KretaRequests.OnMessageResult,
     KretaRequests.OnTestListResult,
-    HomeworkCollector.OnHomeworkListFinished {
+    KretaRequests.OnHomeworkListResult {
 
     fun getEvaluationList(accessToken: String, instituteUrl: String) {
         val parentListener = this
@@ -84,10 +77,10 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         }
     }
 
-    fun getHomework(accessToken: String, instituteUrl: String, homeworkIds: List<Int>) {
-        val homeworkCollector = HomeworkCollector(this, homeworkIds.size)
+    fun getHomeworkList(accessToken: String, instituteUrl: String, fromDate: KretaDate) {
+        val parentListener = this
         GlobalScope.launch {
-            apiHandler.getHomework(homeworkCollector, accessToken, instituteUrl, homeworkIds)
+            apiHandler.getHomeworkList(parentListener, accessToken, instituteUrl, fromDate)
         }
     }
 
@@ -174,8 +167,8 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.hideProgress()
     }
 
-    override fun onHomeworkListSuccess(studentHomeworkList: List<StudentHomework>, teacherHomeworkList: List<TeacherHomework>) {
-        mainView?.generateHomeworkList(studentHomeworkList, teacherHomeworkList)
+    override fun onHomeworkListSuccess(homeworks: List<Homework>) {
+        mainView?.generateHomeworkList(homeworks)
     }
 
     override fun onHomeworkListError(error: KretaError) {
