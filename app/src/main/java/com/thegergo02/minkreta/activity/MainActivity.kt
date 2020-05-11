@@ -14,11 +14,9 @@ import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
-import com.thegergo02.minkreta.kreta.data.Student
 import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
 import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
 import com.thegergo02.minkreta.kreta.data.message.Attachment
-import com.thegergo02.minkreta.kreta.data.message.Message
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
@@ -31,12 +29,10 @@ import com.thegergo02.minkreta.view.MainView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.DayOfWeek
 import java.time.LocalDateTime
-import java.util.jar.Manifest
 
 
 class MainActivity : AppCompatActivity(), MainView {
     private lateinit var controller: MainController
-    private lateinit var cachedStudent: Student
     private var tabHolders = mutableMapOf<Tab, LinearLayout>()
     private var tabButtons = mutableMapOf<Tab, Button>()
     private var tabSortSpinners = mutableMapOf<Tab, Spinner>()
@@ -50,6 +46,10 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private var isHomeworkNeeded = false
     private var homeworkIds = mutableListOf<Int>()
+
+    private var absences = listOf<Absence>()
+    private var notes = listOf<Note>()
+    private var evals = listOf<Evaluation>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,8 +75,8 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     private fun initializeActivity() {
-        controller.getStudent(accessToken, instituteUrl)
-        showProgress()
+        //controller.getStudent(accessToken, instituteUrl)
+        //showProgress()
         setupHolders()
         setupSpinners()
         setupClickListeners()
@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 if (details_ll.visibility == View.GONE) {
                     hideDetails()
                     val nameDetailsTextView = TextView(this)
-                    nameDetailsTextView.text =
+                    /*nameDetailsTextView.text =
                         "(${cachedStudent.id}, ${cachedStudent.schoolYearId}) \n" +
                                 "Place Of Birth: ${cachedStudent.placeOfBirth} \n" +
                                 "Mother's name: ${cachedStudent.mothersName} \n" +
@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity(), MainView {
                                 "InstituteName: ${cachedStudent.instituteName} \n" +
                                 "InstituteCode: ${cachedStudent.instituteCode} \n" +
                                 "Lessons: ${cachedStudent.lessons} \n" +
-                                "Events: ${cachedStudent.events}"
+                                "Events: ${cachedStudent.events}"*/
                     nameDetailsTextView.setTextColor(
                         ContextCompat.getColor(
                             this,
@@ -139,17 +139,32 @@ class MainActivity : AppCompatActivity(), MainView {
         }
         tabButtons[Tab.Evaluations]?.setOnClickListener {
             if (canClick) {
-                switchTab(Tab.Evaluations)
+                if (tabHolders[Tab.Evaluations]?.visibility == View.GONE) {
+                    showProgress()
+                    controller.getEvaluationList(accessToken, instituteUrl)
+                } else {
+                    switchTab(Tab.Evaluations)
+                }
             }
         }
         tabButtons[Tab.Notes]?.setOnClickListener {
             if (canClick) {
-                switchTab(Tab.Notes)
+                if (tabHolders[Tab.Notes]?.visibility == View.GONE) {
+                    showProgress()
+                    //controller.getNoteList()
+                } else {
+                    switchTab(Tab.Notes)
+                }
             }
         }
         tabButtons[Tab.Absences]?.setOnClickListener {
             if (canClick) {
-                switchTab(Tab.Absences)
+                if (tabHolders[Tab.Absences]?.visibility == View.GONE) {
+                    showProgress()
+                    //controller.getAbsenceList()
+                } else {
+                    switchTab(Tab.Absences)
+                }
             }
         }
         tabButtons[Tab.Homework]?.setOnClickListener {
@@ -295,11 +310,6 @@ class MainActivity : AppCompatActivity(), MainView {
         canClick = false
     }
 
-    override fun setStudent(student: Student) {
-        cachedStudent = student
-        refreshUI()
-    }
-
     override fun displayError(error: String) {
         val errorSnack = Snackbar.make(main_cl, error, Snackbar.LENGTH_LONG)
         errorSnack.view.setBackgroundColor(ContextCompat.getColor(this,
@@ -416,13 +426,19 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
 
-    private fun refreshEvaluations(sortType: Evaluation.SortType) {
-        val evalList = cachedStudent.evaluations
-        if (evalList != null) {
+    override fun generateEvaluationList(evaluations: List<Evaluation>) {
+        evals = evaluations
+        refreshEvaluations()
+        switchTab(Tab.Evaluations)
+        hideProgress()
+    }
+
+    private fun refreshEvaluations(sortType: Evaluation.SortType = Evaluation.SortType.CreatingDate) {
+        if (evals != null) {
             val holder = tabHolders[Tab.Evaluations]
             holder?.removeAllViews()
             EvaluationUI.generateEvaluations(
-                this, evalList.sortedWith(compareBy(sortType.lambda)),
+                this, evals.sortedWith(compareBy(sortType.lambda)),
                 holder, details_ll, ::showDetails, ::hideDetails
             )
         }
@@ -432,28 +448,26 @@ class MainActivity : AppCompatActivity(), MainView {
         controller.getMessageList(accessToken, sortType)
     }
     private fun refreshAbsences(sortType: Absence.SortType) {
-        val absenceList = cachedStudent.absences
-        if (absenceList != null) {
+        if (absences != null) {
             val holder = tabHolders[Tab.Absences]
             holder?.removeAllViews()
             AbsencesUI.generateAbsences(
-                this, absenceList.sortedWith(compareBy(sortType.lambda)),
+                this, absences.sortedWith(compareBy(sortType.lambda)),
                 holder, details_ll, ::showDetails, ::hideDetails
             )
         }
     }
     private fun refreshNotes(sortType: Note.SortType) {
-        val noteList = cachedStudent.notes
-        if (noteList != null) {
+        if (notes != null) {
             val holder = tabHolders[Tab.Notes]
             holder?.removeAllViews()
             NotesUI.generateNotes(
-                this, noteList.sortedWith(compareBy(sortType.lambda)),
+                this, notes.sortedWith(compareBy(sortType.lambda)),
                 holder, details_ll, ::showDetails, ::hideDetails
             )
         }
     }
-    private fun refreshUI() {
+    /*private fun refreshUI() {
         showProgress()
         closeTabs()
         name_tt.visibility = View.VISIBLE
@@ -462,10 +476,10 @@ class MainActivity : AppCompatActivity(), MainView {
         refreshNotes(Note.SortType.CreatingTime)
         refreshAbsences(Absence.SortType.Subject)
         hideProgress()
-    }
+    }*/
 
     override fun triggerRefreshToken() {
-        controller.refreshToken(refreshToken, instituteUrl, instituteCode)
+        controller.refreshToken(refreshToken, instituteCode)
     }
     override fun refreshToken(tokens: Map<String, String>) {
         val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
@@ -474,7 +488,7 @@ class MainActivity : AppCompatActivity(), MainView {
             putString("refreshToken", tokens["refresh_token"])
             commit()
         }
-        initializeActivity()
+        initializeActivity() //LONG REFRESH
     }
 
     private fun downloadAttachment(attachment: Attachment) {

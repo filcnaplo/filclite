@@ -47,7 +47,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
             val userName = username_et.text.toString()
             val password = password_et.text.toString()
             if (institute != null) {
-                controller.getTokens(userName, password, institute.url, institute.code)
+                controller.getTokens(userName, password, institute.code)
             }
             showProgress()
         }

@@ -5,10 +5,10 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.thegergo02.minkreta.kreta.adapter.KretaDateAdapter
 import com.thegergo02.minkreta.kreta.data.Institute
-import com.thegergo02.minkreta.kreta.data.Student
 import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
 import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDayOrder
@@ -17,13 +17,6 @@ import org.json.JSONArray
 
 class JsonHelper {
     companion object {
-        fun makeStudent(studentString: String): Student? {
-            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-            val adapter: JsonAdapter<Student> = moshi.adapter(
-                Student::class.java)
-            return adapter.fromJson(studentString)
-        }
-
         fun makeInstitutes(instituteArray: JSONArray): List<Institute>? {
             val moshi: Moshi = Moshi.Builder().build()
             val adapter: JsonAdapter<Institute> = moshi.adapter(Institute::class.java)
@@ -132,6 +125,20 @@ class JsonHelper {
                 studentHomeworkList.add(adapter.fromJson(homeworkString))
             }
             return if (studentHomeworkList.isEmpty()) null else studentHomeworkList
+        }
+        fun makeEvaluationList(evaluationsString: String) : List<Evaluation>? {
+            val evalList = mutableListOf<Evaluation>()
+            val evalsJson = JSONArray(evaluationsString)
+            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+            val adapter: JsonAdapter<Evaluation> = moshi.adapter(
+                Evaluation::class.java)
+            for (i in 0 until evalsJson.length()) {
+                val eval = adapter.fromJson(evalsJson[i].toString())
+                if (eval != null) {
+                    evalList.add(eval)
+                }
+            }
+            return if (evalList.isEmpty()) null else evalList
         }
     }
 }

@@ -6,71 +6,65 @@ import com.thegergo02.minkreta.kreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 class Evaluation(
-    @Json(name = "EvaluationId")  val id: Int?,
-    @Json(name = "Form") val form: String?,
-    @Json(name = "FormName") val formName: String?,
-    @Json(name = "Type") val type: String?,
-    @Json(name = "TypeName") val typeName: String?,
-    @Json(name = "Subject") val subject: String?,
-    @Json(name = "SubjectCategory") val subjectCategory: String?,
-    @Json(name = "SubjectCategoryName") val subjectCategoryName: String?,
-    @Json(name = "Theme") val theme: String?,
-    @Json(name = "IsAtlagbaBeleszamit") val countsIntoAverage: Boolean?,
-    @Json(name = "Mode") val mode: String?,
-    @Json(name = "Weight") val weight: String?,
-    @Json(name = "Value") val value: String?,
-    @Json(name = "NumberValue") val numberValue: Int?,
-    @Json(name = "SeenByTutelaryUTC") val seenByTutelaryUtc: String?,
-    @Json(name = "Teacher") val teacher: String,
-    @Json(name = "Date") val date: KretaDate?,
-    @Json(name = "CreatingTime") val creatingTime: KretaDate,
-    @Json(name = "Jelleg") val nature: Nature?,
-    @Json(name = "JellegNev") val natureName: String?,
+    @Json(name = "Uid")  val uid: String,
+    @Json(name = "Mod") val mode: Nature?,
+    @Json(name = "SulySzazalekErteke") val weight: Int?,
+    @Json(name = "SzovegesErtek") val textValue: String?,
+    @Json(name = "SzovegesErtekRovidNev") val textValueShort: String?,
+    @Json(name = "SzamErtek") val numberValue: Int?,
+    @Json(name = "LattamozasDatuma") val seen: KretaDate?,
+    @Json(name = "KeszitesDatuma") val creatingDate: KretaDate,
+    @Json(name = "RogzitesDatuma") val postDate: KretaDate,
+    @Json(name = "Jelleg") val nature: String?,
     @Json(name = "ErtekFajta") val valueType: Nature?,
-    @Json(name = "OsztalyCsoportUid") val classGroupUid: String?
+    @Json(name = "Tipus") val type: Nature?,
+    @Json(name = "Tantargy") val subject: Subject,
+    @Json(name = "ErtekeloTanarNeve") val teacher: String,
+    @Json(name = "Tema") val theme: String?//,
+    //@Json(name = "OsztalyCsoport") val classGroup: String?
 ): Comparable<Evaluation> {
     companion object {
         fun sortTypeFromString(str: String): SortType {
             val stringToSortType = mapOf(
-                "Creating time" to SortType.CreatingTime,
-                "Form" to SortType.Form,
-                "Value" to SortType.Value,
+                "Creating time" to SortType.CreatingDate,
+                "Form" to SortType.Nature,
+                "Value" to SortType.TextValue,
                 "Mode" to SortType.Mode,
                 "Subject" to SortType.Subject,
                 "Teacher" to SortType.Teacher
             )
-            return stringToSortType[str] ?: SortType.CreatingTime
+            return stringToSortType[str] ?: SortType.CreatingDate
         }
     }
 
     enum class SortType(val lambda: (it: Evaluation) -> Comparable<*>) {
-        CreatingTime({it.creatingTime}),
-        Form({it.form ?: ""}),
-        Value({it.value ?: ""}),
-        Mode({it.mode ?: ""}),
-        Subject({it.subject ?: ""}),
+        CreatingDate({it.creatingDate}),
+        Nature({it.nature ?: ""}),
+        TextValue({it.textValue ?: ""}),
+        Mode({it.mode?.name ?: ""}),
+        Subject({it.subject.name}),
         Teacher({it.teacher})
     }
 
     override fun toString(): String {
-        if (form == "Diligence" || form == "Deportment") {
-            return  "$natureName ($teacher) \n" +
-                    "${date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+        if (nature == "Diligence" || nature == "Deportment") {
+            return  "$nature ($teacher) \n" +
+                    "${creatingDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
         }
-        return  "$subject ($teacher) \n" +
-                "$value ($weight) \n" +
-                "$theme \n" +
-                "${date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+        return  "${subject.name} ($teacher) \n" +
+                "$textValue ($weight%) \n" +
+                "${theme ?: ""} \n" +
+                "${creatingDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
     }
     fun toDetailedString(): String {
-        return  "$subject ($teacher)\n" +
-                "$value ($weight) \n" +
-                "$typeName \n" +
-                "$formName \n" +
-                "$theme \n" +
-                "${creatingTime?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+        return  "${subject.name} ($teacher)\n" +
+                "$textValue ($weight%) \n" +
+                "${type?.name} \n" +
+                "$nature \n" +
+                "${theme ?: ""} \n" +
+                "${creatingDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
     }
     override fun compareTo(other: Evaluation): Int {
-        return this.creatingTime.compareTo(other.creatingTime)
+        return this.creatingDate.compareTo(other.creatingDate)
     }
 }

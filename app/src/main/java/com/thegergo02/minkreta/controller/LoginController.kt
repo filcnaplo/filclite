@@ -22,10 +22,10 @@ class LoginController(private var loginView: LoginView?, private val apiHandler:
         }
     }
 
-    fun getTokens(userName: String, password: String, instituteUrl: String, instituteCode: String) {
+    fun getTokens(userName: String, password: String, instituteCode: String) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getTokens(parentListener, userName, password, instituteUrl, instituteCode)
+            apiHandler.getTokens(parentListener, userName, password, instituteCode)
         }
     }
 

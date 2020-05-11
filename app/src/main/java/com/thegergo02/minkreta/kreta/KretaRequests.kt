@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import android.webkit.MimeTypeMap
-import androidx.core.content.ContextCompat
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
@@ -14,17 +13,16 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.thegergo02.minkreta.kreta.data.Institute
-import com.thegergo02.minkreta.kreta.data.Student
 import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
 import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.net.URLClassLoader
 import java.net.URLConnection
 import java.util.*
 
@@ -36,9 +34,9 @@ class KretaRequests(ctx: Context) {
         TEST("TEST")
     }
 
-    interface OnStudentResult {
-        fun onStudentSuccess(student: Student)
-        fun onStudentError(error: KretaError)
+    interface OnEvaluationListResult {
+        fun onEvaluationListSuccess(evals: List<Evaluation>)
+        fun onEvaluationListError(error: KretaError)
     }
     interface OnApiLinkResult {
         fun onApiLinkSuccess(link: String)
@@ -83,9 +81,10 @@ class KretaRequests(ctx: Context) {
 
     private val queue = Volley.newRequestQueue(ctx)
     private val API_KEY = "7856d350-1fda-45f5-822d-e1a2f3f1acf0"
-    private val CLIENT_ID = "919e0c1c-76a2-4646-a2fb-7085bbbf3c56"
+    private val CLIENT_ID = "KRETA-ELLENORZO-MOBILE"
+    private val LOGIN_API = "https://idp.e-kreta.hu"
     private var userAgent = ""
-    private val FALLBACK_USER_AGENT = "Kreta.Ellenorzo/2.9.10.2020031602 (Android; <codename> 0.0)"
+    private val FALLBACK_USER_AGENT = "hu.ekreta.student/<version>/<codename>"
 
    init {
        GlobalScope.launch {
@@ -93,14 +92,14 @@ class KretaRequests(ctx: Context) {
        }
    }
 
-    private val USER_AGENT_LINK = "https://www.filcnaplo.hu/settings.json"
+    private val USER_AGENT_LINK = "https://www.filcnaplo.hu/PLEASERELEASEV3USERAGENTFILCTHX"
     private fun setUserAgent() {
         val userAgentQuery = JsonObjectRequest(Request.Method.GET, USER_AGENT_LINK, null,
             Response.Listener { response ->
                 userAgent = response["KretaUserAgent"].toString().replace("(Android; <codename> 0.0)", "(Android; ${UUID.randomUUID()} ${(5..9)}.${2..9})")
             },
             Response.ErrorListener { error ->
-                userAgent = FALLBACK_USER_AGENT.replace("(Android; <codename> 0.0)", "(Android; ${UUID.randomUUID()} ${(5..9)}.${2..9})")
+                userAgent = FALLBACK_USER_AGENT.replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
             }
         )
         queue.add(userAgentQuery)
@@ -112,7 +111,7 @@ class KretaRequests(ctx: Context) {
         return userAgent
     }
 
-    private val API_HOLDER_LINK = "https://kretamobile.blob.core.windows.net/configuration/ConfigurationDescriptor.json"
+    private val API_HOLDER_LINK = "MAYBE DEPRECATED"
     fun getApiLink(listener: OnApiLinkResult, apiType : ApiType = ApiType.PROD) {
         val apiLinksQuery = JsonObjectRequest(Request.Method.GET, API_HOLDER_LINK, null,
                 Response.Listener { response ->
@@ -132,7 +131,7 @@ class KretaRequests(ctx: Context) {
 
     fun getInstitutes(listener: OnInstitutesResult, apiLink: String) {
         val institutesQuery = object : JsonArrayRequest(
-            Method.GET, "${apiLink}/api/v1/Institute", null,
+            Method.GET, "${apiLink}/api/v3/Institute", null,
             Response.Listener { response ->
                 val instituteList = JsonHelper.makeInstitutes(response)
                 if (instituteList != null) {
@@ -150,9 +149,9 @@ class KretaRequests(ctx: Context) {
         queue.add(institutesQuery)
     }
 
-    fun getTokens(listener: OnTokensResult, userName: String, password: String, instituteUrl: String, instituteCode: String) {
+    fun getTokens(listener: OnTokensResult, userName: String, password: String, instituteCode: String) {
         val tokensQuery = object : StringRequest(
-            Method.POST, "$instituteUrl/idp/api/v1/Token",
+            Method.POST, "$LOGIN_API/connect/token",
             Response.Listener { response ->
                 val tokens = JsonHelper.makeTokens(response)
                 if (tokens != null) {
@@ -173,9 +172,9 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(tokensQuery)
     }
-    fun refreshToken(listener: OnRefreshTokensResult, refreshToken: String, instituteUrl: String, instituteCode: String) {
+    fun refreshToken(listener: OnRefreshTokensResult, refreshToken: String, instituteCode: String) {
         val tokensQuery = object : StringRequest(
-            Method.POST, "$instituteUrl/idp/api/v1/Token",
+            Method.POST, "$LOGIN_API/connect/token",
             Response.Listener { response ->
                 val tokens = JsonHelper.makeTokens(response)
                 if (tokens != null) {
@@ -196,19 +195,19 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(tokensQuery)
     }
-    fun getStudent(listener: OnStudentResult, accessToken: String, instituteUrl: String) {
-        val studentQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/mapi/api/v1/StudentAmi",
+    fun getEvaluationList(listener: OnEvaluationListResult, accessToken: String, instituteUrl: String) {
+        val evalQuery = object : StringRequest(
+            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Ertekelesek",
             Response.Listener { response ->
-                val student = JsonHelper.makeStudent(response)
-                if (student != null) {
-                    listener.onStudentSuccess(student)
+                val evals = JsonHelper.makeEvaluationList(response)
+                if (evals != null) {
+                    listener.onEvaluationListSuccess(evals)
                 } else {
-                    listener.onStudentError(KretaError.ParseError("unknown"))
+                    listener.onEvaluationListError(KretaError.ParseError("unknown"))
                 }
             },
             Response.ErrorListener { error ->
-                listener.onStudentError(KretaError.VolleyError(error.toString(), error))
+                listener.onEvaluationListError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -216,7 +215,7 @@ class KretaRequests(ctx: Context) {
                 "User-Agent" to getUserAgent())
             override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
-        queue.add(studentQuery)
+        queue.add(evalQuery)
     }
 
     fun getTimetable(listener: OnTimetableResult, accessToken: String, instituteUrl: String, fromDate: KretaDate, toDate: KretaDate) {

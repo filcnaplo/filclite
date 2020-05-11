@@ -6,7 +6,6 @@ import com.android.volley.VolleyError
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.thegergo02.minkreta.kreta.HomeworkCollector
-import com.thegergo02.minkreta.kreta.data.Student
 import com.thegergo02.minkreta.kreta.data.homework.StudentHomework
 import com.thegergo02.minkreta.kreta.data.homework.TeacherHomework
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
@@ -18,13 +17,15 @@ import com.thegergo02.minkreta.kreta.KretaError
 import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.adapter.KretaDateAdapter
 import com.thegergo02.minkreta.kreta.data.message.Attachment
+import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 
 class MainController(private var mainView: MainView?, private val apiHandler: KretaRequests)
-    : KretaRequests.OnStudentResult,
+    :
+    KretaRequests.OnEvaluationListResult,
     KretaRequests.OnRefreshTokensResult,
     KretaRequests.OnTimetableResult,
     KretaRequests.OnMessageListResult,
@@ -32,10 +33,10 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
     KretaRequests.OnTestListResult,
     HomeworkCollector.OnHomeworkListFinished {
 
-    fun getStudent(accessToken: String, instituteCode: String) {
+    fun getEvaluationList(accessToken: String, instituteUrl: String) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getStudent(parentListener, accessToken, instituteCode)
+            apiHandler.getEvaluationList(parentListener, accessToken, instituteUrl)
         }
     }
 
@@ -59,7 +60,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         }
     }
     fun downloadAttachment(accessToken: String, downloadManager: DownloadManager, attachment: Attachment) {
-        val parentListener = this
         GlobalScope.launch {
             apiHandler.downloadAttachment(accessToken, downloadManager, attachment)
         }
@@ -70,10 +70,10 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         }
     }
 
-    fun refreshToken(refreshToken: String, instituteUrl: String, instituteCode: String) {
+    fun refreshToken(refreshToken: String, instituteCode: String) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.refreshToken(parentListener, refreshToken, instituteUrl, instituteCode)
+            apiHandler.refreshToken(parentListener, refreshToken, instituteCode)
         }
     }
 
@@ -91,10 +91,10 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         }
     }
 
-    override fun onStudentSuccess(student: Student) {
-        mainView?.setStudent(student)
+    override fun onEvaluationListSuccess(evals: List<Evaluation>) {
+        mainView?.generateEvaluationList(evals)
     }
-    override fun onStudentError(error: KretaError) {
+    override fun onEvaluationListError(error: KretaError) {
         when (error) {
             is KretaError.VolleyError -> {
                 when (error.volleyError) {

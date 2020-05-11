@@ -33,6 +33,6 @@ class ApiLinkHelper(private val apiHandler: KretaRequests)
         currentApiLink = link
     }
     override fun onApiLinkError(error: KretaError) {
-        currentApiLink = "https://kretaglobalmobileapi.ekreta.hu"
+        currentApiLink = "https://kretaglobalmobileapi2.ekreta.hu"
     }
 }
