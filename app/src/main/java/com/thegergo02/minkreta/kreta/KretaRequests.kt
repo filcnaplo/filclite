@@ -236,7 +236,7 @@ class KretaRequests(ctx: Context) {
 
     fun getMessageList(listener: OnMessageListResult, accessToken: String, sortType: MessageDescriptor.SortType) {
         val messageListQuery = object : StringRequest(
-            Method.GET, "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/postaladaelemek/sajat",
+            Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/sajat",
             Response.Listener { response ->
                 val messageList = JsonHelper.makeMessageList(response)
                 if (messageList != null) {
@@ -258,7 +258,7 @@ class KretaRequests(ctx: Context) {
     }
     fun getMessage(listener: OnMessageResult, accessToken: String, messageId: Int) {
         val messageQuery = object : StringRequest(
-            Method.GET, "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/postaladaelemek/$messageId",
+            Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/$messageId",
             Response.Listener { response ->
                 val message = JsonHelper.makeMessage(response)
                 if (message != null) {
@@ -278,7 +278,7 @@ class KretaRequests(ctx: Context) {
         queue.add(messageQuery)
     }
     fun downloadAttachment(accessToken: String, downloadManager: DownloadManager, attachment: Attachment) {
-        val uri = Uri.parse("https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/dokumentumok/uzenetek/${attachment.id}")
+        val uri = Uri.parse("https://eugyintezes.e-kreta.hu/api/v1/dokumentumok/uzenetek/${attachment.id}")
         val request = DownloadManager.Request(uri)
         val mimeMap = MimeTypeMap.getSingleton()
         request.addRequestHeader("User-Agent", getUserAgent())
@@ -291,10 +291,10 @@ class KretaRequests(ctx: Context) {
             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/minkreta/${attachment.fileName}")
         downloadManager.enqueue(request)
     }
-    fun setMessageRead(accessToken: String, messageId: Int, isRead: Boolean) {
+    fun setMessageRead(accessToken: String, messageId: Int, isRead: Boolean) { //TODO: DOESN'T WORK
         val messageReadQuery = object : StringRequest(
             Method.POST,
-            "https://eugyintezes.e-kreta.hu/integration-kretamobile-api/v1/kommunikacio/uzenetek/olvasott",
+            "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/uzenetek/olvasott",
             Response.Listener {},
             Response.ErrorListener {}
         ) {
