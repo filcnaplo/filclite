@@ -17,7 +17,7 @@ interface MainView {
     fun displayError(error: String)
     fun generateMessageDescriptors(messages: List<MessageDescriptor>)
     fun generateMessage(message: MessageDescriptor)
-    fun generateTests(tests: List<Test>)
+    fun generateTestList(tests: List<Test>)
     fun generateEvaluationList(evaluations: List<Evaluation>)
     fun triggerRefreshToken()
     fun refreshToken(tokens: Map<String, String>)
@@ -25,5 +25,5 @@ interface MainView {
     fun generateHomeworkList(homeworks: List<Homework>)
     fun generateStudentDetails(studentDetails: StudentDetails)
     fun generateNoteList(notes: List<Note>)
-    fun generateAbsenceList(notes: List<Absence>)
+    fun generateAbsenceList(absences: List<Absence>)
 }

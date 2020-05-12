@@ -181,7 +181,7 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
     }
 
     override fun onTestListSuccess(testList: List<Test>) {
-        mainView?.generateTests(testList)
+        mainView?.generateTestList(testList)
     }
     override fun onTestListError(error: KretaError) {
         when (error) {

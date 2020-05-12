@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity(), MainView {
     private var abs = listOf<Absence>()
     private var notes = listOf<Note>()
     private var evals = listOf<Evaluation>()
+    private var homeworks = listOf<Homework>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,7 +102,8 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Notes to notes_spinner,
             Tab.Absences to abs_spinner,
             Tab.Messages to messages_spinner,
-            Tab.Evaluations to evals_spinner
+            Tab.Evaluations to evals_spinner,
+            Tab.Homework to homework_spinner
         )
     }
     private fun setupClickListeners() {
@@ -247,6 +249,20 @@ class MainActivity : AppCompatActivity(), MainView {
                     }
                 }
             }
+            Tab.Homework -> {
+                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        val sortType = Homework.sortTypeFromString(spinnerPair.value.selectedItem.toString())
+                        refreshHomeworks(sortType)
+                    }
+                }
+            }
         }
         if (onItemSelectedListener != null) {
             spinnerPair.value.onItemSelectedListener = onItemSelectedListener
@@ -257,7 +273,8 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Notes to listOf("Date", "Type", "Teacher"),
             Tab.Absences to listOf("Subject", "Teacher", "Lesson start time", "Creating time", "Justification state"),
             Tab.Messages to listOf("Send date", "Teacher"),
-            Tab.Evaluations to listOf("Creating time", "Form", "Value", "Mode", "Subject", "Teacher")
+            Tab.Evaluations to listOf("Creating time", "Form", "Value", "Mode", "Subject", "Teacher"),
+            Tab.Homework to listOf("Post date", "Deadline", "Teacher", "Subject")
         )
         val spinnerDisplayList = spinnerDisplayArrayMap[spinnerPair.key]
         if (spinnerDisplayList != null) {
@@ -370,7 +387,7 @@ class MainActivity : AppCompatActivity(), MainView {
         MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::showDetails, ::hideDetails)
     }
 
-    override fun generateTests(testList: List<Test>) {
+    override fun generateTestList(testList: List<Test>) {
         tabHolders[Tab.Tests]?.removeAllViews()
         TestUI.generateTests(this, testList, tabHolders[Tab.Tests], details_ll, ::showDetails, ::hideDetails)
         switchTab(Tab.Tests)
@@ -384,9 +401,9 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
 
-    override fun generateHomeworkList(homeworks: List<Homework>) {
-        tabHolders[Tab.Homework]?.removeAllViews()
-        HomeworkUI.generateHomeworkList(this, homeworks, tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
+    override fun generateHomeworkList(homeworksS: List<Homework>) {
+        homeworks = homeworksS
+        refreshHomeworks()
         switchTab(Tab.Homework)
         hideProgress()
     }
@@ -422,6 +439,11 @@ class MainActivity : AppCompatActivity(), MainView {
         }
     }
 
+    private fun refreshHomeworks(sortType: Homework.SortType = Homework.SortType.PostDate) {
+        val holder = tabHolders[Tab.Homework]
+        holder?.removeAllViews()
+        HomeworkUI.generateHomeworkList(this, homeworks.sortedWith(compareBy(sortType.lambda)), tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
+    }
     private fun refreshEvaluations(sortType: Evaluation.SortType = Evaluation.SortType.CreatingDate) {
         val holder = tabHolders[Tab.Evaluations]
         holder?.removeAllViews()

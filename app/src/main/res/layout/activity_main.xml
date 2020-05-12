@@ -258,6 +258,24 @@
                     android:text="@string/homework_ma"
                     android:textColor="@color/colorText" />
 
+                <Spinner
+                    android:id="@+id/homework_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="7dp"
+                    android:background="@color/colorPrimaryDark"
+                    android:dropDownWidth="match_parent"
+                    android:minHeight="45dp"
+                    android:scrollbarStyle="outsideInset"
+                    android:scrollbarThumbHorizontal="@color/colorText"
+                    android:scrollbarThumbVertical="@color/colorAccent"
+                    android:scrollbarTrackHorizontal="@color/colorText"
+                    android:scrollbarTrackVertical="@color/colorText"
+                    android:spinnerMode="dropdown"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/login_ll" />
+
                 <LinearLayout
                     android:id="@+id/homework_holder_ll"
                     android:layout_width="match_parent"

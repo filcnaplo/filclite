@@ -13,8 +13,7 @@ class HomeworkUI {
     companion object {
         fun generateHomeworkList(ctx: Context, homeworks: List<Homework>, homeworkHolder: LinearLayout?, detailsLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit) {
             for (homework in homeworks) {
-                val text =
-                    "${homework.subject} | ${homework.teacher} | ${homework.postDate?.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
+                val text = homework.toString()
                 val homeworkOnClickListener = {
                     _: View ->
                     val posterTextView = TextView(ctx)
@@ -24,7 +23,7 @@ class HomeworkUI {
                         UIHelper.formatHtml(UIHelper.decodeHtml(homework.text)) } else { "" }
                     val postDateTextView = TextView(ctx)
                     postDateTextView.text =
-                        "${homework.postDate?.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
+                        "${homework.postDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}-${homework.deadlineDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
                     postDateTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                     val homeworkWebView = UIHelper.generateWebView(ctx, htmlString)
                     listOf(posterTextView, homeworkWebView, postDateTextView)
