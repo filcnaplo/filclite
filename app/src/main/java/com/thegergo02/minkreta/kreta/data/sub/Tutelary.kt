@@ -5,8 +5,8 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class Tutelary(
-    @Json(name = "TutelaryId") val id: Int?,
-    @Json(name = "Name") val name: String?,
-    @Json(name = "Email") val email: String?,
-    @Json(name = "PhoneNumber") val phoneNumber: String?
+    @Json(name = "Uid") val uid: Int,
+    @Json(name = "Nev") val name: String?,
+    @Json(name = "EmailCim") val email: String?,
+    @Json(name = "Telefonszam") val phoneNumber: String?
 )

@@ -14,6 +14,7 @@ import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
+import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
@@ -74,6 +75,7 @@ class MainActivity : AppCompatActivity(), MainView {
         setupHolders()
         setupSpinners()
         setupClickListeners()
+        controller.getStudentDetails(accessToken, instituteUrl)
     }
 
     private fun setupHolders() {
@@ -103,32 +105,13 @@ class MainActivity : AppCompatActivity(), MainView {
         )
     }
     private fun setupClickListeners() {
+        canClick = true
         name_tt.setOnClickListener {
             if (canClick) {
                 if (details_ll.visibility == View.GONE) {
-                    hideDetails()
-                    val nameDetailsTextView = TextView(this)
-                    /*nameDetailsTextView.text =
-                        "(${cachedStudent.id}, ${cachedStudent.schoolYearId}) \n" +
-                                "Place Of Birth: ${cachedStudent.placeOfBirth} \n" +
-                                "Mother's name: ${cachedStudent.mothersName} \n" +
-                                "AddressDataList: ${cachedStudent.addressDataList} \n" +
-                                "DateOfBirthUTC: ${cachedStudent.DateOfBirthUtc} \n" +
-                                "InstituteName: ${cachedStudent.instituteName} \n" +
-                                "InstituteCode: ${cachedStudent.instituteCode} \n" +
-                                "Lessons: ${cachedStudent.lessons} \n" +
-                                "Events: ${cachedStudent.events}"*/
-                    nameDetailsTextView.setTextColor(
-                        ContextCompat.getColor(
-                            this,
-                            R.color.colorText
-                        )
-                    )
-                    details_ll.addView(nameDetailsTextView)
-                    showDetails()
-                } else {
-                    hideDetails()
+                    controller.getStudentDetails(accessToken, instituteUrl)
                 }
+                hideDetails()
             }
         }
         tabButtons[Tab.Evaluations]?.setOnClickListener {
@@ -165,7 +148,9 @@ class MainActivity : AppCompatActivity(), MainView {
             if (canClick) {
                 if (tabHolders[Tab.Homework]?.visibility == View.GONE) {
                     showProgress()
-                    controller.getHomeworkList(accessToken, instituteUrl, KretaDate(2020, 5, 10))
+                    val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
+                    val startDate = KretaDate(firstDay)
+                    controller.getHomeworkList(accessToken, instituteUrl, startDate)
                 } else {
                     switchTab(Tab.Homework)
                 }
@@ -406,6 +391,23 @@ class MainActivity : AppCompatActivity(), MainView {
         refreshEvaluations()
         switchTab(Tab.Evaluations)
         hideProgress()
+    }
+
+    override fun generateStudentDetails(studentDetails: StudentDetails) {
+        if (name_tt.text == "") {
+            name_tt.text = studentDetails.toString()
+        } else {
+            val nameDetailsTextView = TextView(this)
+            nameDetailsTextView.text = studentDetails.toDetailedString()
+            nameDetailsTextView.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.colorText
+                )
+            )
+            details_ll.addView(nameDetailsTextView)
+            showDetails()
+        }
     }
 
     private fun refreshEvaluations(sortType: Evaluation.SortType = Evaluation.SortType.CreatingDate) {

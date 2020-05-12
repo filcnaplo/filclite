@@ -69,8 +69,12 @@ class KretaRequests(ctx: Context) {
         fun onTestListError(error: KretaError)
     }
     interface OnHomeworkListResult {
-        fun onHomeworkListSuccess(studentHomework: List<Homework>)
+        fun onHomeworkListSuccess(homeworks: List<Homework>)
         fun onHomeworkListError(error: KretaError)
+    }
+    interface OnStudentDetailsResult {
+        fun onStudentDetailsSuccess(student: StudentDetails)
+        fun onStudentDetailsError(error: KretaError)
     }
 
     private val queue = Volley.newRequestQueue(ctx)
@@ -350,5 +354,26 @@ class KretaRequests(ctx: Context) {
                 "User-Agent" to getUserAgent())
         }
         queue.add(homeworkQuery)
+    }
+
+    fun getStudentDetails(listener: OnStudentDetailsResult, accessToken: String, instituteUrl: String) {
+        val studentDetailsQuery = object : StringRequest(
+            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/TanuloAdatlap",
+            Response.Listener { response ->
+                val studentDetails = JsonHelper.makeStudentDetails(response)
+                if (studentDetails != null) {
+                    listener.onStudentDetailsSuccess(studentDetails)
+                } else {
+                    listener.onStudentDetailsError(KretaError.ParseError("unknown"))
+                }
+            },
+            Response.ErrorListener { error ->
+                listener.onStudentDetailsError(KretaError.VolleyError(error.toString(), error))
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "User-Agent" to getUserAgent())
+        }
+        queue.add(studentDetailsQuery)
     }
 }

@@ -9,6 +9,7 @@ import com.thegergo02.minkreta.kreta.data.timetable.Test
 import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.kreta.KretaError
 import com.thegergo02.minkreta.kreta.KretaRequests
+import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
@@ -24,7 +25,9 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
     KretaRequests.OnMessageListResult,
     KretaRequests.OnMessageResult,
     KretaRequests.OnTestListResult,
-    KretaRequests.OnHomeworkListResult {
+    KretaRequests.OnHomeworkListResult,
+    KretaRequests.OnStudentDetailsResult
+{
 
     fun getEvaluationList(accessToken: String, instituteUrl: String) {
         val parentListener = this
@@ -81,6 +84,13 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         val parentListener = this
         GlobalScope.launch {
             apiHandler.getHomeworkList(parentListener, accessToken, instituteUrl, fromDate)
+        }
+    }
+
+    fun getStudentDetails(accessToken: String, instituteUrl: String) {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.getStudentDetails(parentListener, accessToken, instituteUrl)
         }
     }
 
@@ -170,8 +180,22 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
     override fun onHomeworkListSuccess(homeworks: List<Homework>) {
         mainView?.generateHomeworkList(homeworks)
     }
-
     override fun onHomeworkListError(error: KretaError) {
+        when (error) {
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
+                }
+            }
+        }
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
+    }
+
+    override fun onStudentDetailsSuccess(studentDetails: StudentDetails) {
+        mainView?.generateStudentDetails(studentDetails)
+    }
+    override fun onStudentDetailsError(error: KretaError) {
         when (error) {
             is KretaError.VolleyError -> {
                 when (error.volleyError) {

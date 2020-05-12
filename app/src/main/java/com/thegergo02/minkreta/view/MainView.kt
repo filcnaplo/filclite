@@ -1,5 +1,6 @@
 package com.thegergo02.minkreta.view
 
+import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
@@ -20,4 +21,5 @@ interface MainView {
     fun refreshToken(tokens: Map<String, String>)
     fun sendToLogin()
     fun generateHomeworkList(homeworks: List<Homework>)
+    fun generateStudentDetails(studentDetails: StudentDetails)
 }

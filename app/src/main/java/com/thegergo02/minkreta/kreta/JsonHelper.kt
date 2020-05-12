@@ -133,5 +133,12 @@ class JsonHelper {
             }
             return if (homeworks.isEmpty()) null else homeworks
         }
+
+        fun makeStudentDetails(studentDetailsString: String): StudentDetails? {
+            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+            val adapter: JsonAdapter<StudentDetails> = moshi.adapter(
+                StudentDetails::class.java)
+            return adapter.fromJson(studentDetailsString)
+        }
     }
 }

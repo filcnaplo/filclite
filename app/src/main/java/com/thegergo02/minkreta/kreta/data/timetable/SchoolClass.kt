@@ -9,7 +9,7 @@ import com.thegergo02.minkreta.kreta.data.sub.Subject
 
 @JsonClass(generateAdapter = true)
 class SchoolClass(
-    @Json(name = "Uid")  val id: Int,
+    @Json(name = "Uid")  val uid: String,
     @Json(name = "Allapot")  val state: Nature,
     @Json(name = "BejelentettSzamonkeresUids")  val testUids: List<String>,
     @Json(name = "Datum")  val date: KretaDate,
@@ -18,7 +18,7 @@ class SchoolClass(
     @Json(name = "KezdetIdopont")  val startDate: KretaDate,
     @Json(name = "Nev")  val name: String,
     @Json(name = "Oraszam")  val count: Int,
-    @Json(name = "OraEvesSorszama")  val yearCount: Int,
+    @Json(name = "OraEvesSorszama")  val yearCount: Int?,
     @Json(name = "OsztalyCsoport")  val classGroup: ClassGroup,
     @Json(name = "HaziFeladatUid")  val homeworkUid: String?,
     @Json(name = "TanarNeve")  val teacher: String,
