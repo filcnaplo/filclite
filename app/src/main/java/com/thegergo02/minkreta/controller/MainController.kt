@@ -11,6 +11,7 @@ import com.thegergo02.minkreta.kreta.KretaError
 import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
+import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
@@ -30,7 +31,8 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
     KretaRequests.OnHomeworkListResult,
     KretaRequests.OnStudentDetailsResult,
     KretaRequests.OnNoteListResult,
-    KretaRequests.OnAbsenceListResult
+    KretaRequests.OnAbsenceListResult,
+    KretaRequests.OnHomeworkCommentListResult
 {
 
     fun getEvaluationList(accessToken: String, instituteUrl: String) {
@@ -70,6 +72,12 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         }
     }
 
+    fun sendHomeworkComment(accessToken: String, instituteUrl: String, homeworkUid: String, text: String) {
+        GlobalScope.launch {
+            apiHandler.sendHomeworkComment(accessToken, instituteUrl, homeworkUid, text)
+        }
+    }
+
     fun refreshToken(refreshToken: String, instituteCode: String) {
         val parentListener = this
         GlobalScope.launch {
@@ -95,6 +103,13 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         val parentListener = this
         GlobalScope.launch {
             apiHandler.getHomeworkList(parentListener, accessToken, instituteUrl, fromDate)
+        }
+    }
+
+    fun getHomeworkCommentList(accessToken: String, instituteUrl: String, homeworkUid: String) {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.getHomeworkCommentList(parentListener, accessToken, instituteUrl, homeworkUid)
         }
     }
 
@@ -214,6 +229,21 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateHomeworkList(homeworks)
     }
     override fun onHomeworkListError(error: KretaError) {
+        when (error) {
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
+                }
+            }
+        }
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
+    }
+
+    override fun onHomeworkCommentListSuccess(homeworkComments: List<HomeworkComment>) {
+        mainView?.generateHomeworkCommentList(homeworkComments)
+    }
+    override fun onHomeworkCommentListError(error: KretaError) {
         when (error) {
             is KretaError.VolleyError -> {
                 when (error.volleyError) {

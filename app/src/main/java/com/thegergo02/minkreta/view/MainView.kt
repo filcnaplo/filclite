@@ -2,6 +2,7 @@ package com.thegergo02.minkreta.view
 
 import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
+import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
@@ -26,4 +27,5 @@ interface MainView {
     fun generateStudentDetails(studentDetails: StudentDetails)
     fun generateNoteList(notes: List<Note>)
     fun generateAbsenceList(absences: List<Absence>)
+    fun generateHomeworkCommentList(homeworkComments: List<HomeworkComment>)
 }

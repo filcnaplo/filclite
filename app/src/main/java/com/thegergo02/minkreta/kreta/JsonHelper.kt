@@ -6,6 +6,7 @@ import com.squareup.moshi.Types
 import com.thegergo02.minkreta.kreta.adapter.KretaDateAdapter
 import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.homework.Homework
+import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
@@ -149,6 +150,21 @@ class JsonHelper {
                 }
             }
             return if (homeworks.isEmpty()) null else homeworks
+        }
+
+        fun makeHomeworkCommentList(homeworkCommentsString: String) : List<HomeworkComment>? {
+            val homeworkComments = mutableListOf<HomeworkComment>()
+            val homeworkCommentsJson = JSONArray(homeworkCommentsString)
+            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+            val adapter: JsonAdapter<HomeworkComment> = moshi.adapter(
+                HomeworkComment::class.java)
+            for (i in 0 until homeworkCommentsJson.length()) {
+                val comment = adapter.fromJson(homeworkCommentsJson[i].toString())
+                if (comment != null) {
+                    homeworkComments.add(comment)
+                }
+            }
+            return if (homeworkComments.isEmpty()) null else homeworkComments
         }
 
         fun makeAbsenceList(absencesString: String) : List<Absence>? {

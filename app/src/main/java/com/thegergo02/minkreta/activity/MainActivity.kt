@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +17,7 @@ import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
+import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
@@ -408,6 +410,10 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
 
+    override fun generateHomeworkCommentList(homeworkComments: List<HomeworkComment>) {
+        HomeworkUI.generateHomeworkCommentList(this, homeworkComments, details_ll)
+    }
+
     override fun generateEvaluationList(evaluations: List<Evaluation>) {
         evals = evaluations
         refreshEvaluations()
@@ -442,7 +448,8 @@ class MainActivity : AppCompatActivity(), MainView {
     private fun refreshHomeworks(sortType: Homework.SortType = Homework.SortType.PostDate) {
         val holder = tabHolders[Tab.Homework]
         holder?.removeAllViews()
-        HomeworkUI.generateHomeworkList(this, homeworks.sortedWith(compareBy(sortType.lambda)), tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails)
+        HomeworkUI.generateHomeworkList(this, homeworks.sortedWith(compareBy(sortType.lambda)), tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails,
+            ::triggerGetHomeworkCommentList, ::sendHomeworkComment)
     }
     private fun refreshEvaluations(sortType: Evaluation.SortType = Evaluation.SortType.CreatingDate) {
         val holder = tabHolders[Tab.Evaluations]
@@ -485,6 +492,12 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun triggerRefreshToken() {
         controller.refreshToken(refreshToken, instituteCode)
+    }
+    private fun triggerGetHomeworkCommentList(homeworkUid: String) {
+        controller.getHomeworkCommentList(accessToken, instituteUrl, homeworkUid)
+    }
+    private fun sendHomeworkComment(homeworkUid: String, text: String) {
+        controller.sendHomeworkComment(accessToken, instituteUrl, homeworkUid, text)
     }
     override fun refreshToken(tokens: Map<String, String>) {
         val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return

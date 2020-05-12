@@ -13,6 +13,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.homework.Homework
+import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
@@ -77,6 +78,10 @@ class KretaRequests(ctx: Context) {
     interface OnHomeworkListResult {
         fun onHomeworkListSuccess(homeworks: List<Homework>)
         fun onHomeworkListError(error: KretaError)
+    }
+    interface OnHomeworkCommentListResult {
+        fun onHomeworkCommentListSuccess(homeworkComments: List<HomeworkComment>)
+        fun onHomeworkCommentListError(error: KretaError)
     }
     interface OnAbsenceListResult {
         fun onAbsenceListSuccess(homeworks: List<Absence>)
@@ -408,6 +413,40 @@ class KretaRequests(ctx: Context) {
                 "User-Agent" to getUserAgent())
         }
         queue.add(homeworkQuery)
+    }
+    fun getHomeworkCommentList(listener: OnHomeworkCommentListResult, accessToken: String, instituteUrl: String, homeworkUid: String) {
+        val homeworkCommentQuery = object : StringRequest(
+            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/HaziFeladatok/$homeworkUid/Kommentek",
+            Response.Listener { response ->
+                val comments = JsonHelper.makeHomeworkCommentList(response)
+                if (comments != null) {
+                    listener.onHomeworkCommentListSuccess(comments)
+                }
+            },
+            Response.ErrorListener { error ->
+                listener.onHomeworkCommentListError(KretaError.VolleyError(error.toString(), error))
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "User-Agent" to getUserAgent())
+        }
+        queue.add(homeworkCommentQuery)
+    }
+    fun sendHomeworkComment(accessToken: String, instituteUrl: String, homeworkUid: String, text: String) {
+        val sendHomeworkCommentQuery = object : StringRequest(
+            Method.POST,
+            "$instituteUrl/ellenorzo/V3/Sajat/Orak/TanitasiOrak/HaziFeladatok/Kommentek",
+            Response.Listener {},
+            Response.ErrorListener {}
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf(
+                "Authorization" to "Bearer $accessToken",
+                "User-Agent" to getUserAgent()
+            )
+            override fun getBodyContentType(): String = "application/json; charset=utf-8"
+            override fun getBody(): ByteArray = "{\"HaziFeladatUid\":$homeworkUid,\"FeladatSzovege\":\"$text\"}".toByteArray()
+        }
+        queue.add(sendHomeworkCommentQuery)
     }
 
     fun getStudentDetails(listener: OnStudentDetailsResult, accessToken: String, instituteUrl: String) {
