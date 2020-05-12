@@ -313,9 +313,9 @@ class KretaRequests(ctx: Context) {
         queue.add(messageReadQuery)
     }
 
-    fun getTestList(listener: OnTestListResult, accessToken: String, instituteUrl: String, fromDate: KretaDate, toDate: KretaDate) {
+    fun getTestList(listener: OnTestListResult, accessToken: String, instituteUrl: String) {
         val testsQuery = object : StringRequest(
-            Method.GET, "${instituteUrl}/mapi/api/v1/BejelentettSzamonkeresAmi?fromDate=${fromDate}&toDate=${toDate}",
+            Method.GET, "${instituteUrl}/ellenorzo/V3/Sajat/BejelentettSzamonkeresek",
             Response.Listener { response ->
                 val testList = JsonHelper.makeTestList(response)
                 if (testList != null) {

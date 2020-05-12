@@ -179,10 +179,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (canClick) {
                 if (tabHolders[Tab.Tests]?.visibility == View.GONE) {
                     showProgress()
-                    controller.getTestList(accessToken, instituteUrl,
-                        KretaDate(1970),
-                        KretaDate()
-                    )
+                    controller.getTestList(accessToken, instituteUrl)
                 } else {
                     switchTab(Tab.Tests)
                 }

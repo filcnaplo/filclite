@@ -73,10 +73,10 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         }
     }
 
-    fun getTestList(accessToken: String, instituteUrl: String, fromDate: KretaDate, toDate: KretaDate) {
+    fun getTestList(accessToken: String, instituteUrl: String) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getTestList(parentListener, accessToken, instituteUrl, fromDate, toDate)
+            apiHandler.getTestList(parentListener, accessToken, instituteUrl)
         }
     }
 
