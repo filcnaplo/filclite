@@ -6,29 +6,29 @@ import com.thegergo02.minkreta.kreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 class Note (
-    @Json(name = "NoteId")  val id: Int?,
-    @Json(name = "Type") val type: String?,
-    @Json(name = "Title") val title: String?,
-    @Json(name = "Content") val content: String?,
-    @Json(name = "SeenByTutelaryUTC") val seenByTutelaryUtc: String?,
-    @Json(name = "Teacher") val teacher: String,
-    @Json(name = "Date") val date: KretaDate?,
-    @Json(name = "CreatingTime") val creatingTime: KretaDate,
-    @Json(name = "OsztalyCsoportUid") val classGroupUid: String?
+    @Json(name = "Uid") val uid: String,
+    @Json(name = "Cim") val title: String,
+    @Json(name = "Datum") val date: KretaDate,
+    @Json(name = "KeszitesDatuma") val creatingDate: KretaDate,
+    @Json(name = "KeszitoTanarNeve") val teacher: String,
+    @Json(name = "LattamozasDatuma") val seenDate: KretaDate?,
+    @Json(name = "OsztalyCsoport") val classGroup: ClassGroup?,
+    @Json(name = "Tartalom") val text: String,
+    @Json(name = "Tipus") val type: Nature
 ): Comparable<Note> {
     companion object {
         fun sortTypeFromString(str: String): SortType {
             val stringToSortType = mapOf(
                 "Teacher" to SortType.Teacher,
-                "Creating time" to SortType.CreatingTime,
+                "Creating time" to SortType.Date,
                 "Justification state" to SortType.Type)
-            return stringToSortType[str] ?: SortType.CreatingTime
+            return stringToSortType[str] ?: SortType.Date
         }
     }
 
     enum class SortType(val lambda: (it: Note) -> Comparable<*>) {
-        CreatingTime({it.creatingTime}),
-        Type({it.type ?: ""}),
+        Date({it.date}),
+        Type({it.type.name ?: ""}),
         Teacher({it.teacher})
     }
 
@@ -37,11 +37,11 @@ class Note (
                 "$teacher (${date?.toFormattedString(KretaDate.KretaDateFormat.DATE)})"
     }
     fun toDetailedString(): String {
-        return  "$title ($type) \n" +
-                "$content \n" +
+        return  "$title (${type.description}) \n" +
+                "$text \n" +
                 "$teacher (${date?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)})"
     }
     override fun compareTo(other: Note): Int {
-        return this.creatingTime.compareTo(other.creatingTime)
+        return this.date.compareTo(other.date)
     }
 }

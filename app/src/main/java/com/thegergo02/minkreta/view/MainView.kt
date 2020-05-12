@@ -3,7 +3,9 @@ package com.thegergo02.minkreta.view
 import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
+import com.thegergo02.minkreta.kreta.data.sub.Note
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
@@ -22,4 +24,6 @@ interface MainView {
     fun sendToLogin()
     fun generateHomeworkList(homeworks: List<Homework>)
     fun generateStudentDetails(studentDetails: StudentDetails)
+    fun generateNoteList(notes: List<Note>)
+    fun generateAbsenceList(notes: List<Absence>)
 }

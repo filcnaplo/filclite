@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var instituteUrl: String
     private lateinit var instituteCode: String
 
-    private var absences = listOf<Absence>()
+    private var abs = listOf<Absence>()
     private var notes = listOf<Note>()
     private var evals = listOf<Evaluation>()
 
@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (canClick) {
                 if (tabHolders[Tab.Notes]?.visibility == View.GONE) {
                     showProgress()
-                    //controller.getNoteList()
+                    controller.getNoteList(accessToken, instituteUrl)
                 } else {
                     switchTab(Tab.Notes)
                 }
@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (canClick) {
                 if (tabHolders[Tab.Absences]?.visibility == View.GONE) {
                     showProgress()
-                    //controller.getAbsenceList()
+                    controller.getAbsenceList(accessToken, instituteUrl)
                 } else {
                     switchTab(Tab.Absences)
                 }
@@ -371,8 +371,16 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun generateTests(testList: List<Test>) {
+        tabHolders[Tab.Tests]?.removeAllViews()
         TestUI.generateTests(this, testList, tabHolders[Tab.Tests], details_ll, ::showDetails, ::hideDetails)
         switchTab(Tab.Tests)
+        hideProgress()
+    }
+
+    override fun generateNoteList(notesS: List<Note>) {
+        notes = notesS
+        refreshNotes()
+        switchTab(Tab.Notes)
         hideProgress()
     }
 
@@ -387,6 +395,13 @@ class MainActivity : AppCompatActivity(), MainView {
         evals = evaluations
         refreshEvaluations()
         switchTab(Tab.Evaluations)
+        hideProgress()
+    }
+
+    override fun generateAbsenceList(absences: List<Absence>) {
+        abs = absences
+        refreshAbsences()
+        switchTab(Tab.Absences)
         hideProgress()
     }
 
@@ -408,38 +423,32 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     private fun refreshEvaluations(sortType: Evaluation.SortType = Evaluation.SortType.CreatingDate) {
-        if (evals != null) {
-            val holder = tabHolders[Tab.Evaluations]
-            holder?.removeAllViews()
-            EvaluationUI.generateEvaluations(
-                this, evals.sortedWith(compareBy(sortType.lambda)),
-                holder, details_ll, ::showDetails, ::hideDetails
-            )
-        }
+        val holder = tabHolders[Tab.Evaluations]
+        holder?.removeAllViews()
+        EvaluationUI.generateEvaluations(
+            this, evals.sortedWith(compareBy(sortType.lambda)),
+            holder, details_ll, ::showDetails, ::hideDetails
+        )
     }
     private fun refreshMessages(sortType: MessageDescriptor.SortType) {
         showProgress()
         controller.getMessageList(accessToken, sortType)
     }
-    private fun refreshAbsences(sortType: Absence.SortType) {
-        if (absences != null) {
-            val holder = tabHolders[Tab.Absences]
-            holder?.removeAllViews()
-            AbsencesUI.generateAbsences(
-                this, absences.sortedWith(compareBy(sortType.lambda)),
-                holder, details_ll, ::showDetails, ::hideDetails
-            )
-        }
+    private fun refreshAbsences(sortType: Absence.SortType = Absence.SortType.Date) {
+        val holder = tabHolders[Tab.Absences]
+        holder?.removeAllViews()
+        AbsencesUI.generateAbsences(
+            this, abs.sortedWith(compareBy(sortType.lambda)),
+            holder, details_ll, ::showDetails, ::hideDetails
+        )
     }
-    private fun refreshNotes(sortType: Note.SortType) {
-        if (notes != null) {
-            val holder = tabHolders[Tab.Notes]
-            holder?.removeAllViews()
-            NotesUI.generateNotes(
-                this, notes.sortedWith(compareBy(sortType.lambda)),
-                holder, details_ll, ::showDetails, ::hideDetails
-            )
-        }
+    private fun refreshNotes(sortType: Note.SortType = Note.SortType.Date) {
+        val holder = tabHolders[Tab.Notes]
+        holder?.removeAllViews()
+        NotesUI.generateNotes(
+            this, notes.sortedWith(compareBy(sortType.lambda)),
+            holder, details_ll, ::showDetails, ::hideDetails
+        )
     }
     /*private fun refreshUI() {
         showProgress()

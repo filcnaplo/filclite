@@ -15,7 +15,9 @@ import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
+import com.thegergo02.minkreta.kreta.data.sub.Note
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
@@ -68,9 +70,17 @@ class KretaRequests(ctx: Context) {
         fun onTestListSuccess(testList: List<Test>)
         fun onTestListError(error: KretaError)
     }
+    interface OnNoteListResult {
+        fun onNoteListSuccess(testList: List<Note>)
+        fun onNoteListError(error: KretaError)
+    }
     interface OnHomeworkListResult {
         fun onHomeworkListSuccess(homeworks: List<Homework>)
         fun onHomeworkListError(error: KretaError)
+    }
+    interface OnAbsenceListResult {
+        fun onAbsenceListSuccess(homeworks: List<Absence>)
+        fun onAbsenceListError(error: KretaError)
     }
     interface OnStudentDetailsResult {
         fun onStudentDetailsSuccess(student: StudentDetails)
@@ -214,6 +224,50 @@ class KretaRequests(ctx: Context) {
             override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
         queue.add(evalQuery)
+    }
+    fun getNoteList(listener: OnNoteListResult, accessToken: String, instituteUrl: String) {
+        val evalQuery = object : StringRequest(
+            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Feljegyzesek",
+            Response.Listener { response ->
+                val notes = JsonHelper.makeNoteList(response)
+                if (notes != null) {
+                    listener.onNoteListSuccess(notes)
+                } else {
+                    listener.onNoteListError(KretaError.ParseError("unknown"))
+                }
+            },
+            Response.ErrorListener { error ->
+                listener.onNoteListError(KretaError.VolleyError(error.toString(), error))
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "Accept" to "application/json",
+                "User-Agent" to getUserAgent())
+            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
+        }
+        queue.add(evalQuery)
+    }
+    fun getAbsenceList(listener: OnAbsenceListResult, accessToken: String, instituteUrl: String) {
+        val absenceQuery = object : StringRequest(
+            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Mulasztasok",
+            Response.Listener { response ->
+                val absences = JsonHelper.makeAbsenceList(response)
+                if (absences != null) {
+                    listener.onAbsenceListSuccess(absences)
+                } else {
+                    listener.onAbsenceListError(KretaError.ParseError("unknown"))
+                }
+            },
+            Response.ErrorListener { error ->
+                listener.onAbsenceListError(KretaError.VolleyError(error.toString(), error))
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "Accept" to "application/json",
+                "User-Agent" to getUserAgent())
+            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
+        }
+        queue.add(absenceQuery)
     }
 
     fun getTimetable(listener: OnTimetableResult, accessToken: String, instituteUrl: String, fromDate: KretaDate, toDate: KretaDate) {

@@ -12,7 +12,9 @@ import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.Attachment
+import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
+import com.thegergo02.minkreta.kreta.data.sub.Note
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,7 +28,9 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
     KretaRequests.OnMessageResult,
     KretaRequests.OnTestListResult,
     KretaRequests.OnHomeworkListResult,
-    KretaRequests.OnStudentDetailsResult
+    KretaRequests.OnStudentDetailsResult,
+    KretaRequests.OnNoteListResult,
+    KretaRequests.OnAbsenceListResult
 {
 
     fun getEvaluationList(accessToken: String, instituteUrl: String) {
@@ -80,10 +84,24 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         }
     }
 
+    fun getNoteList(accessToken: String, instituteUrl: String) {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.getNoteList(parentListener, accessToken, instituteUrl)
+        }
+    }
+
     fun getHomeworkList(accessToken: String, instituteUrl: String, fromDate: KretaDate) {
         val parentListener = this
         GlobalScope.launch {
             apiHandler.getHomeworkList(parentListener, accessToken, instituteUrl, fromDate)
+        }
+    }
+
+    fun getAbsenceList(accessToken: String, instituteUrl: String) {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.getAbsenceList(parentListener, accessToken, instituteUrl)
         }
     }
 
@@ -177,10 +195,40 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.hideProgress()
     }
 
+    override fun onNoteListSuccess(notes: List<Note>) {
+        mainView?.generateNoteList(notes)
+    }
+    override fun onNoteListError(error: KretaError) {
+        when (error) {
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
+                }
+            }
+        }
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
+    }
+
     override fun onHomeworkListSuccess(homeworks: List<Homework>) {
         mainView?.generateHomeworkList(homeworks)
     }
     override fun onHomeworkListError(error: KretaError) {
+        when (error) {
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
+                }
+            }
+        }
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
+    }
+
+    override fun onAbsenceListSuccess(absences: List<Absence>) {
+        mainView?.generateAbsenceList(absences)
+    }
+    override fun onAbsenceListError(error: KretaError) {
         when (error) {
             is KretaError.VolleyError -> {
                 when (error.volleyError) {

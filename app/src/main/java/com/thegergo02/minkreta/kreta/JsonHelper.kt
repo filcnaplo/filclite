@@ -7,7 +7,9 @@ import com.thegergo02.minkreta.kreta.adapter.KretaDateAdapter
 import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
+import com.thegergo02.minkreta.kreta.data.sub.Note
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDayOrder
@@ -119,6 +121,21 @@ class JsonHelper {
             return if (evals.isEmpty()) null else evals
         }
 
+        fun makeNoteList(notesString: String) : List<Note>? {
+            val notes = mutableListOf<Note>()
+            val notesJson = JSONArray(notesString)
+            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+            val adapter: JsonAdapter<Note> = moshi.adapter(
+                Note::class.java)
+            for (i in 0 until notesJson.length()) {
+                val note = adapter.fromJson(notesJson[i].toString())
+                if (note != null) {
+                    notes.add(note)
+                }
+            }
+            return if (notes.isEmpty()) null else notes
+        }
+
         fun makeHomeworkList(homeworksString: String) : List<Homework>? {
             val homeworks = mutableListOf<Homework>()
             val homeworksJson = JSONArray(homeworksString)
@@ -132,6 +149,21 @@ class JsonHelper {
                 }
             }
             return if (homeworks.isEmpty()) null else homeworks
+        }
+
+        fun makeAbsenceList(absencesString: String) : List<Absence>? {
+            val absences = mutableListOf<Absence>()
+            val absencesJson = JSONArray(absencesString)
+            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+            val adapter: JsonAdapter<Absence> = moshi.adapter(
+                Absence::class.java)
+            for (i in 0 until absencesJson.length()) {
+                val absence = adapter.fromJson(absencesJson[i].toString())
+                if (absence != null) {
+                    absences.add(absence)
+                }
+            }
+            return if (absences.isEmpty()) null else absences
         }
 
         fun makeStudentDetails(studentDetailsString: String): StudentDetails? {
