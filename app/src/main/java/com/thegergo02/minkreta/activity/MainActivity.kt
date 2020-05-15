@@ -481,16 +481,6 @@ class MainActivity : AppCompatActivity(), MainView {
             holder, details_ll, ::showDetails, ::hideDetails
         )
     }
-    /*private fun refreshUI() {
-        showProgress()
-        closeTabs()
-        name_tt.visibility = View.VISIBLE
-        name_tt.text = cachedStudent.name
-        refreshEvaluations(Evaluation.SortType.CreatingTime)
-        refreshNotes(Note.SortType.CreatingTime)
-        refreshAbsences(Absence.SortType.Subject)
-        hideProgress()
-    }*/
 
     override fun triggerRefreshToken() {
         controller.refreshToken(refreshToken, instituteCode)
@@ -508,7 +498,7 @@ class MainActivity : AppCompatActivity(), MainView {
             putString("refreshToken", tokens["refresh_token"])
             commit()
         }
-        initializeActivity() //TODO: LONG REFRESH
+        //initializeActivity() //TODO: LONG REFRESH
     }
 
     private fun downloadAttachment(attachment: Attachment) {

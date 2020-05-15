@@ -2,6 +2,7 @@ package com.thegergo02.minkreta.ui
 
 import android.content.Context
 import android.graphics.Paint
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.EditText
