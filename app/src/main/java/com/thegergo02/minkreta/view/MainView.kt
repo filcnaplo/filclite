@@ -28,4 +28,5 @@ interface MainView {
     fun generateNoteList(notes: List<Note>)
     fun generateAbsenceList(absences: List<Absence>)
     fun generateHomeworkCommentList(homeworkComments: List<HomeworkComment>)
+    fun refreshCommentList(homeworkUid: String)
 }

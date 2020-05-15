@@ -30,7 +30,7 @@ class HomeworkUI {
                     val posterTextView = TextView(ctx)
                     posterTextView.text = homework.teacher
                     posterTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
-                    var htmlString = UIHelper.formatHtml(UIHelper.decodeHtml(homework.text))
+                    val htmlString = UIHelper.formatHtml(UIHelper.decodeHtml(homework.text))
                     val postDateTextView = TextView(ctx)
                     postDateTextView.text =
                         "${homework.postDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}-${homework.deadlineDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
@@ -45,6 +45,7 @@ class HomeworkUI {
                     val homeworkCommentOnListener = {
                         _: View ->
                         sendHomeworkComment(homework.uid, homeworkEditText.text.toString())
+                        homeworkEditText.text = null
                         listOf<View>()
                     }
                     val homeworkCommentButton = UIHelper.generateButton(ctx, "SEND", homeworkCommentOnListener, {}, {}, detailsLL, R.color.colorText, R.color.colorAccent)
@@ -55,9 +56,12 @@ class HomeworkUI {
                 homeworkHolder?.addView(homeworkButton)
             }
         }
-        fun generateHomeworkCommentList(ctx: Context, comments: List<HomeworkComment>, detailsLL: LinearLayout) {
+        fun generateHomeworkCommentList(ctx: Context, comments: List<HomeworkComment>, detailsLL: LinearLayout, homeworkCommentHolder: LinearLayout): LinearLayout {
+            homeworkCommentHolder.removeAllViews()
+            val commentHolder = LinearLayout(ctx)
+            commentHolder.orientation = LinearLayout.VERTICAL
             for (comment in comments) {
-                val posterTextView = TextView(ctx);
+                val posterTextView = TextView(ctx)
                 posterTextView.text = comment.author
                 posterTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                 val contentTextView = TextView(ctx)
@@ -68,10 +72,12 @@ class HomeworkUI {
                 dateTextView.text = comment.postDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)
                 dateTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                 dateTextView.gravity = Gravity.RIGHT
-                detailsLL.addView(posterTextView)
-                detailsLL.addView(contentTextView)
-                detailsLL.addView(dateTextView)
+                commentHolder.addView(posterTextView)
+                commentHolder.addView(contentTextView)
+                commentHolder.addView(dateTextView)
             }
+            detailsLL.addView(commentHolder)
+            return commentHolder
         }
     }
 }

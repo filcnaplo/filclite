@@ -91,6 +91,10 @@ class KretaRequests(ctx: Context) {
         fun onStudentDetailsSuccess(student: StudentDetails)
         fun onStudentDetailsError(error: KretaError)
     }
+    interface OnSendHomeworkResult {
+        fun onSendHomeworkSuccess(homeworkUid: String)
+        fun onSendHomeworkError(error: KretaError)
+    }
 
     private val queue = Volley.newRequestQueue(ctx)
     private val API_KEY = "7856d350-1fda-45f5-822d-e1a2f3f1acf0"
@@ -432,12 +436,16 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(homeworkCommentQuery)
     }
-    fun sendHomeworkComment(accessToken: String, instituteUrl: String, homeworkUid: String, text: String) {
+    fun sendHomeworkComment(listener: OnSendHomeworkResult, accessToken: String, instituteUrl: String, homeworkUid: String, text: String) {
         val sendHomeworkCommentQuery = object : StringRequest(
             Method.POST,
             "$instituteUrl/ellenorzo/V3/Sajat/Orak/TanitasiOrak/HaziFeladatok/Kommentek",
-            Response.Listener {},
-            Response.ErrorListener {}
+            Response.Listener {
+                listener.onSendHomeworkSuccess(homeworkUid)
+            },
+            Response.ErrorListener { error ->
+                listener.onSendHomeworkError(KretaError.VolleyError(error.toString(), error))
+            }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf(
                 "Authorization" to "Bearer $accessToken",

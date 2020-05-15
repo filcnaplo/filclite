@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity(), MainView {
     private var notes = listOf<Note>()
     private var evals = listOf<Evaluation>()
     private var homeworks = listOf<Homework>()
+    private lateinit var homeworkCommentHolder: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +79,7 @@ class MainActivity : AppCompatActivity(), MainView {
         setupHolders()
         setupSpinners()
         setupClickListeners()
+        homeworkCommentHolder = LinearLayout(this)
         controller.getStudentDetails(accessToken, instituteUrl)
     }
 
@@ -389,29 +391,29 @@ class MainActivity : AppCompatActivity(), MainView {
         MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::showDetails, ::hideDetails)
     }
 
-    override fun generateTestList(testList: List<Test>) {
+    override fun generateTestList(tests: List<Test>) {
         tabHolders[Tab.Tests]?.removeAllViews()
-        TestUI.generateTests(this, testList, tabHolders[Tab.Tests], details_ll, ::showDetails, ::hideDetails)
+        TestUI.generateTests(this, tests, tabHolders[Tab.Tests], details_ll, ::showDetails, ::hideDetails)
         switchTab(Tab.Tests)
         hideProgress()
     }
 
-    override fun generateNoteList(notesS: List<Note>) {
-        notes = notesS
+    override fun generateNoteList(notes: List<Note>) {
+        this.notes = notes
         refreshNotes()
         switchTab(Tab.Notes)
         hideProgress()
     }
 
-    override fun generateHomeworkList(homeworksS: List<Homework>) {
-        homeworks = homeworksS
+    override fun generateHomeworkList(homeworks: List<Homework>) {
+        this.homeworks = homeworks
         refreshHomeworks()
         switchTab(Tab.Homework)
         hideProgress()
     }
 
     override fun generateHomeworkCommentList(homeworkComments: List<HomeworkComment>) {
-        HomeworkUI.generateHomeworkCommentList(this, homeworkComments, details_ll)
+        homeworkCommentHolder = HomeworkUI.generateHomeworkCommentList(this, homeworkComments, details_ll, homeworkCommentHolder)
     }
 
     override fun generateEvaluationList(evaluations: List<Evaluation>) {
@@ -506,7 +508,7 @@ class MainActivity : AppCompatActivity(), MainView {
             putString("refreshToken", tokens["refresh_token"])
             commit()
         }
-        initializeActivity() //LONG REFRESH
+        initializeActivity() //TODO: LONG REFRESH
     }
 
     private fun downloadAttachment(attachment: Attachment) {
@@ -520,6 +522,10 @@ class MainActivity : AppCompatActivity(), MainView {
         val loginIntent = Intent(this, LoginActivity::class.java)
         startActivity(loginIntent)
         finish()
+    }
+
+    override fun refreshCommentList(homeworkUid: String) {
+        controller.getHomeworkCommentList(accessToken, instituteUrl, homeworkUid)
     }
 
     private fun startTimetableRequest() {

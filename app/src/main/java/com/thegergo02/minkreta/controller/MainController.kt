@@ -32,7 +32,8 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
     KretaRequests.OnStudentDetailsResult,
     KretaRequests.OnNoteListResult,
     KretaRequests.OnAbsenceListResult,
-    KretaRequests.OnHomeworkCommentListResult
+    KretaRequests.OnHomeworkCommentListResult,
+    KretaRequests.OnSendHomeworkResult
 {
 
     fun getEvaluationList(accessToken: String, instituteUrl: String) {
@@ -73,8 +74,9 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
     }
 
     fun sendHomeworkComment(accessToken: String, instituteUrl: String, homeworkUid: String, text: String) {
+        val parentListener = this
         GlobalScope.launch {
-            apiHandler.sendHomeworkComment(accessToken, instituteUrl, homeworkUid, text)
+            apiHandler.sendHomeworkComment(parentListener, accessToken, instituteUrl, homeworkUid, text)
         }
     }
 
@@ -274,6 +276,21 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateStudentDetails(studentDetails)
     }
     override fun onStudentDetailsError(error: KretaError) {
+        when (error) {
+            is KretaError.VolleyError -> {
+                when (error.volleyError) {
+                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
+                }
+            }
+        }
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
+    }
+
+    override fun onSendHomeworkSuccess(homeworkUid: String) {
+        mainView?.refreshCommentList(homeworkUid)
+    }
+    override fun onSendHomeworkError(error: KretaError) {
         when (error) {
             is KretaError.VolleyError -> {
                 when (error.volleyError) {
