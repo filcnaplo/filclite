@@ -97,26 +97,28 @@ class KretaRequests(ctx: Context) {
     }
 
     private val queue = Volley.newRequestQueue(ctx)
-    private val API_KEY = "7856d350-1fda-45f5-822d-e1a2f3f1acf0"
-    private val CLIENT_ID = "KRETA-ELLENORZO-MOBILE"
-    private val LOGIN_API = "https://idp.e-kreta.hu"
-    private var userAgent = ""
-    private val FALLBACK_USER_AGENT = "hu.ekreta.student/<version>/<codename>"
+    private var apiKey = "7856d350-1fda-45f5-822d-e1a2f3f1acf0"
+    private var clientId = "KRETA-ELLENORZO-MOBILE"
+    private var loginUrl = "https://idp.e-kreta.hu"
+    private var userAgent = "hu.ekreta.student/<version>/<codename>"
 
-   init {
-       GlobalScope.launch {
-           setUserAgent()
-       }
-   }
+    init {
+        GlobalScope.launch {
+               setUserAgent()
+        }
+    }
 
-    private val USER_AGENT_LINK = "https://www.filcnaplo.hu/PLEASERELEASEV3USERAGENTFILCTHX"
+    private val USER_AGENT_LINK = "https://thegergo02.github.io/settings.json"
     private fun setUserAgent() {
         val userAgentQuery = JsonObjectRequest(Request.Method.GET, USER_AGENT_LINK, null,
             Response.Listener { response ->
-                userAgent = response["KretaUserAgent"].toString().replace("(Android; <codename> 0.0)", "(Android; ${UUID.randomUUID()} ${(5..9)}.${2..9})")
+                userAgent = response["kretaUserAgent"].toString().replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
+                apiKey = response["apiKey"].toString()
+                clientId = response["clientId"].toString()
+                loginUrl = response["loginUrl"].toString()
             },
-            Response.ErrorListener { error ->
-                userAgent = FALLBACK_USER_AGENT.replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
+            Response.ErrorListener {
+                userAgent = userAgent.replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
             }
         )
         queue.add(userAgentQuery)
@@ -133,11 +135,7 @@ class KretaRequests(ctx: Context) {
         val apiLinksQuery = JsonObjectRequest(Request.Method.GET, API_HOLDER_LINK, null,
                 Response.Listener { response ->
                     val link = response["GlobalMobileApiUrl$apiType"].toString()
-                    if (link != null) {
-                        listener.onApiLinkSuccess(link)
-                    } else {
-                        listener.onApiLinkError(KretaError.ParseError("unknown"))
-                    }
+                    listener.onApiLinkSuccess(link)
                 },
                 Response.ErrorListener { error ->
                     listener.onApiLinkError(KretaError.VolleyError(error.toString(), error))
@@ -161,14 +159,14 @@ class KretaRequests(ctx: Context) {
                 listener.onInstitutesError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to API_KEY)
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to apiKey)
         }
         queue.add(institutesQuery)
     }
 
     fun getTokens(listener: OnTokensResult, userName: String, password: String, instituteCode: String) {
         val tokensQuery = object : StringRequest(
-            Method.POST, "$LOGIN_API/connect/token",
+            Method.POST, "$loginUrl/connect/token",
             Response.Listener { response ->
                 val tokens = JsonHelper.makeTokens(response)
                 if (tokens != null) {
@@ -181,17 +179,17 @@ class KretaRequests(ctx: Context) {
                 listener.onTokensError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to API_KEY,
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to apiKey,
                 "Accept" to "application/json",
                 "User-Agent" to getUserAgent())
             override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
-            override fun getBody(): ByteArray = "password=$password&institute_code=$instituteCode&grant_type=password&client_id=$CLIENT_ID&userName=$userName".toByteArray()
+            override fun getBody(): ByteArray = "password=$password&institute_code=$instituteCode&grant_type=password&client_id=$clientId&userName=$userName".toByteArray()
         }
         queue.add(tokensQuery)
     }
     fun refreshToken(listener: OnRefreshTokensResult, refreshToken: String, instituteCode: String) {
         val tokensQuery = object : StringRequest(
-            Method.POST, "$LOGIN_API/connect/token",
+            Method.POST, "$loginUrl/connect/token",
             Response.Listener { response ->
                 val tokens = JsonHelper.makeTokens(response)
                 if (tokens != null) {
@@ -204,11 +202,11 @@ class KretaRequests(ctx: Context) {
                 listener.onRefreshTokensError(KretaError.VolleyError(error.toString(), error))
             }
         ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to API_KEY,
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to apiKey,
                 "Accept" to "application/json",
                 "User-Agent" to getUserAgent())
             override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
-            override fun getBody(): ByteArray = "refresh_token=$refreshToken&institute_code=$instituteCode&grant_type=refresh_token&client_id=$CLIENT_ID".toByteArray()
+            override fun getBody(): ByteArray = "refresh_token=$refreshToken&institute_code=$instituteCode&grant_type=refresh_token&client_id=$clientId".toByteArray()
         }
         queue.add(tokensQuery)
     }
