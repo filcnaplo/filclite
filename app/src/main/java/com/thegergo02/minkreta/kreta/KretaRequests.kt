@@ -28,20 +28,9 @@ import java.net.URLConnection
 import java.util.*
 
 class KretaRequests(ctx: Context) {
-    enum class ApiType(val type: String) {
-        PROD("PROD"),
-        DEV("DEV"),
-        UAT("UAT"),
-        TEST("TEST")
-    }
-
     interface OnEvaluationListResult {
         fun onEvaluationListSuccess(evals: List<Evaluation>)
         fun onEvaluationListError(error: KretaError)
-    }
-    interface OnApiLinkResult {
-        fun onApiLinkSuccess(link: String)
-        fun onApiLinkError(error: KretaError)
     }
     interface OnInstitutesResult {
         fun onInstitutesSuccess(institutes: List<Institute>)
@@ -97,20 +86,22 @@ class KretaRequests(ctx: Context) {
     }
 
     private val queue = Volley.newRequestQueue(ctx)
+
+    private var userAgent = "hu.ekreta.student/<version>/<codename>"
     private var apiKey = "7856d350-1fda-45f5-822d-e1a2f3f1acf0"
     private var clientId = "KRETA-ELLENORZO-MOBILE"
     private var loginUrl = "https://idp.e-kreta.hu"
-    private var userAgent = "hu.ekreta.student/<version>/<codename>"
+    private var apiUrl = "https://kretaglobalmobileapi2.ekreta.hu"
 
     init {
         GlobalScope.launch {
-               setUserAgent()
+               getKretaDetails()
         }
     }
 
-    private val USER_AGENT_LINK = "https://thegergo02.github.io/settings.json"
-    private fun setUserAgent() {
-        val userAgentQuery = JsonObjectRequest(Request.Method.GET, USER_AGENT_LINK, null,
+    private val KRETA_DETAILS_URL = "https://thegergo02.github.io/settings.json"
+    private fun getKretaDetails() {
+        val userAgentQuery = JsonObjectRequest(Request.Method.GET, KRETA_DETAILS_URL, null,
             Response.Listener { response ->
                 userAgent = response["kretaUserAgent"].toString().replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
                 apiKey = response["apiKey"].toString()
@@ -130,23 +121,9 @@ class KretaRequests(ctx: Context) {
         return userAgent
     }
 
-    private val API_HOLDER_LINK = "MAYBE DEPRECATED"
-    fun getApiLink(listener: OnApiLinkResult, apiType : ApiType = ApiType.PROD) {
-        val apiLinksQuery = JsonObjectRequest(Request.Method.GET, API_HOLDER_LINK, null,
-                Response.Listener { response ->
-                    val link = response["GlobalMobileApiUrl$apiType"].toString()
-                    listener.onApiLinkSuccess(link)
-                },
-                Response.ErrorListener { error ->
-                    listener.onApiLinkError(KretaError.VolleyError(error.toString(), error))
-                }
-            )
-        queue.add(apiLinksQuery)
-    }
-
-    fun getInstitutes(listener: OnInstitutesResult, apiLink: String) {
+    fun getInstitutes(listener: OnInstitutesResult) {
         val institutesQuery = object : JsonArrayRequest(
-            Method.GET, "${apiLink}/api/v3/Institute", null,
+            Method.GET, "${apiUrl}/api/v3/Institute", null,
             Response.Listener { response ->
                 val instituteList = JsonHelper.makeInstitutes(response)
                 if (instituteList != null) {
@@ -364,7 +341,7 @@ class KretaRequests(ctx: Context) {
             Response.ErrorListener {}
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf(
-                "Authorization" to "Bearer ${accessToken}",
+                "Authorization" to "Bearer $accessToken",
                 "Accept" to "application/json",
                 "User-Agent" to getUserAgent()
             )
