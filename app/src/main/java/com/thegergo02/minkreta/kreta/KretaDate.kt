@@ -67,7 +67,7 @@ class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, m
     }
     private fun decideZero(num: Int): String {
         return if (num < 10) {
-            "0${num}"
+            "0$num"
         } else {
             num.toString()
         }

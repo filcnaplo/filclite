@@ -13,9 +13,20 @@ import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
+import java.time.LocalDateTime
 
 class HomeworkUI {
     companion object {
+        private fun getColorFromDeadline(homework: Homework): Int {
+            val now = KretaDate(LocalDateTime.now())
+            return if (homework.deadlineDate.year == now.year && homework.deadlineDate.month == now.month && homework.deadlineDate.day == now.day) {
+                R.color.colorHomeworkAlmostLate
+            } else if (homework.deadlineDate > now) {
+                R.color.colorHomeworkLate
+            } else {
+                R.color.colorHomeworkNotLate
+            }
+        }
         fun generateHomeworkList(ctx: Context,
                                  homeworks: List<Homework>,
                                  homeworkHolder: LinearLayout?,
@@ -35,7 +46,7 @@ class HomeworkUI {
                     val postDateTextView = TextView(ctx)
                     postDateTextView.text =
                         "${homework.postDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}-${homework.deadlineDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
-                    postDateTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
+                    postDateTextView.setTextColor(ContextCompat.getColor(ctx, getColorFromDeadline(homework)))
                     val homeworkWebView = UIHelper.generateWebView(ctx, htmlString)
                     val homeworkEditText = EditText(ctx)
                     homeworkEditText.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
@@ -53,7 +64,7 @@ class HomeworkUI {
                     getHomeworkCommentListResult(homework.uid)
                     listOf(posterTextView, homeworkWebView, postDateTextView, homeworkEditText, homeworkCommentButton)
                 }
-                val homeworkButton = UIHelper.generateButton(ctx, text, homeworkOnClickListener, showDetails, hideDetails, detailsLL)
+                val homeworkButton = UIHelper.generateButton(ctx, text, homeworkOnClickListener, showDetails, hideDetails, detailsLL, getColorFromDeadline(homework))
                 homeworkHolder?.addView(homeworkButton)
             }
         }

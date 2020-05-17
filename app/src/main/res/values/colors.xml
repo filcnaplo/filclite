@@ -22,4 +22,8 @@
 
     <color name="colorButtonUnselected">#000000</color>
     <color name="colorButtonSelected">#b71c1c</color>
+
+    <color name="colorHomeworkLate">#D50000</color>
+    <color name="colorHomeworkAlmostLate">#FFEB3B</color>
+    <color name="colorHomeworkNotLate">#00C853</color>
 </resources>
