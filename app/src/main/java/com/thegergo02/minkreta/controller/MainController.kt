@@ -225,8 +225,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateStudentDetails(studentDetails)
     }
     override fun onStudentDetailsError(error: KretaError) {
-        mainView?.displayError(error.errorString)
-        mainView?.hideProgress()
+        getStudentDetails()
     }
 
     override fun onSendHomeworkSuccess(homeworkUid: String) {
