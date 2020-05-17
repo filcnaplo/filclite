@@ -104,7 +104,9 @@ class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, m
     }
 
     fun isToday(): Boolean {
-        return (toSchoolDay().toString().toUpperCase() == LocalDateTime.now().dayOfWeek.toString())
+        val dateTime = toLocalDateTime()
+        val now = LocalDateTime.now()
+        return (dateTime.year == now.year && dateTime.month == now.month && dateTime.dayOfMonth == now.dayOfMonth)
     }
 
     override fun compareTo(other: KretaDate): Int {
