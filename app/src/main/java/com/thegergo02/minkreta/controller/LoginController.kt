@@ -1,5 +1,6 @@
 package com.thegergo02.minkreta.controller
 
+import android.content.Context
 import com.thegergo02.minkreta.kreta.KretaError
 import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.data.Institute
@@ -7,8 +8,10 @@ import com.thegergo02.minkreta.view.LoginView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class LoginController(private var loginView: LoginView?, private val apiHandler: KretaRequests)
+class LoginController(ctx: Context, private val loginView: LoginView?)
     : KretaRequests.OnInstitutesResult, KretaRequests.OnTokensResult {
+
+    private val apiHandler = KretaRequests(ctx)
 
     fun getInstitutes() {
         val parentListener = this

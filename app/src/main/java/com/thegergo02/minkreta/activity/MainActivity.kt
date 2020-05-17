@@ -41,11 +41,6 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private var canClick = true
 
-    private lateinit var accessToken: String
-    private lateinit var refreshToken: String
-    private lateinit var instituteUrl: String
-    private lateinit var instituteCode: String
-
     private var abs = listOf<Absence>()
     private var notes = listOf<Note>()
     private var evals = listOf<Evaluation>()
@@ -55,20 +50,13 @@ class MainActivity : AppCompatActivity(), MainView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        controller = MainController(this, KretaRequests(this))
 
         val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
-
-        val storedAccessToken = sharedPref.getString("accessToken", null)
-        val storedRefreshToken = sharedPref.getString("refreshToken", null)
-        val storedInstituteUrl = sharedPref.getString("instituteUrl", null)
-        val storedInstituteCode = sharedPref.getString("instituteCode", null)
-
-        if (storedAccessToken != null && storedRefreshToken != null && storedInstituteUrl != null && storedInstituteCode != null) {
-            accessToken = storedAccessToken
-            refreshToken = storedRefreshToken
-            instituteUrl = storedInstituteUrl
-            instituteCode = storedInstituteCode
+        val accessToken = sharedPref.getString("accessToken", null)
+        val refreshToken = sharedPref.getString("refreshToken", null)
+        val instituteCode = sharedPref.getString("instituteCode", null)
+        if (accessToken != null && refreshToken != null && instituteCode != null) {
+            controller = MainController(this, this, accessToken, refreshToken, instituteCode)
         } else {
             sendToLogin()
         }
@@ -80,7 +68,7 @@ class MainActivity : AppCompatActivity(), MainView {
         setupSpinners()
         setupClickListeners()
         homeworkCommentHolder = LinearLayout(this)
-        controller.getStudentDetails(accessToken, instituteUrl)
+        controller.getStudentDetails()
     }
 
     private fun setupHolders() {
@@ -115,7 +103,7 @@ class MainActivity : AppCompatActivity(), MainView {
         name_tt.setOnClickListener {
             if (canClick) {
                 if (details_ll.visibility == View.GONE) {
-                    controller.getStudentDetails(accessToken, instituteUrl)
+                    controller.getStudentDetails()
                 }
                 hideDetails()
             }
@@ -124,7 +112,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (canClick) {
                 if (tabHolders[Tab.Evaluations]?.visibility == View.GONE) {
                     showProgress()
-                    controller.getEvaluationList(accessToken, instituteUrl)
+                    controller.getEvaluationList()
                 } else {
                     switchTab(Tab.Evaluations)
                 }
@@ -134,7 +122,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (canClick) {
                 if (tabHolders[Tab.Notes]?.visibility == View.GONE) {
                     showProgress()
-                    controller.getNoteList(accessToken, instituteUrl)
+                    controller.getNoteList()
                 } else {
                     switchTab(Tab.Notes)
                 }
@@ -144,7 +132,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (canClick) {
                 if (tabHolders[Tab.Absences]?.visibility == View.GONE) {
                     showProgress()
-                    controller.getAbsenceList(accessToken, instituteUrl)
+                    controller.getAbsenceList()
                 } else {
                     switchTab(Tab.Absences)
                 }
@@ -156,7 +144,7 @@ class MainActivity : AppCompatActivity(), MainView {
                     showProgress()
                     val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
                     val startDate = KretaDate(firstDay)
-                    controller.getHomeworkList(accessToken, instituteUrl, startDate)
+                    controller.getHomeworkList(startDate)
                 } else {
                     switchTab(Tab.Homework)
                 }
@@ -185,7 +173,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (canClick) {
                 if (tabHolders[Tab.Tests]?.visibility == View.GONE) {
                     showProgress()
-                    controller.getTestList(accessToken, instituteUrl)
+                    controller.getTestList()
                 } else {
                     switchTab(Tab.Tests)
                 }
@@ -383,7 +371,7 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
     override fun generateMessageDescriptors(messages: List<MessageDescriptor>) {
-        MessageUI.generateMessageDescriptors(this, messages, tabHolders[Tab.Messages], controller, accessToken)
+        MessageUI.generateMessageDescriptors(this, messages, tabHolders[Tab.Messages], controller)
         switchTab(Tab.Messages, false)
         hideProgress()
     }
@@ -463,7 +451,7 @@ class MainActivity : AppCompatActivity(), MainView {
     }
     private fun refreshMessages(sortType: MessageDescriptor.SortType) {
         showProgress()
-        controller.getMessageList(accessToken, sortType)
+        controller.getMessageList(sortType)
     }
     private fun refreshAbsences(sortType: Absence.SortType = Absence.SortType.Date) {
         val holder = tabHolders[Tab.Absences]
@@ -482,14 +470,11 @@ class MainActivity : AppCompatActivity(), MainView {
         )
     }
 
-    override fun triggerRefreshToken() {
-        controller.refreshToken(refreshToken, instituteCode)
-    }
     private fun triggerGetHomeworkCommentList(homeworkUid: String) {
-        controller.getHomeworkCommentList(accessToken, instituteUrl, homeworkUid)
+        controller.getHomeworkCommentList(homeworkUid)
     }
     private fun sendHomeworkComment(homeworkUid: String, text: String) {
-        controller.sendHomeworkComment(accessToken, instituteUrl, homeworkUid, text)
+        controller.sendHomeworkComment(homeworkUid, text)
     }
     override fun refreshToken(tokens: Map<String, String>) {
         val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
@@ -498,13 +483,12 @@ class MainActivity : AppCompatActivity(), MainView {
             putString("refreshToken", tokens["refresh_token"])
             commit()
         }
-        //initializeActivity() //TODO: LONG REFRESH
     }
 
     private fun downloadAttachment(attachment: Attachment) {
         val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         runWithPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) {
-            controller.downloadAttachment(accessToken, downloadManager, attachment)
+            controller.downloadAttachment(downloadManager, attachment)
         }
     }
 
@@ -515,18 +499,13 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun refreshCommentList(homeworkUid: String) {
-        controller.getHomeworkCommentList(accessToken, instituteUrl, homeworkUid)
+        controller.getHomeworkCommentList(homeworkUid)
     }
 
     private fun startTimetableRequest() {
         val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
         val startDate = KretaDate(firstDay)
         val endDate = KretaDate(firstDay.plusDays(6))
-        controller.getTimetable(
-            accessToken,
-            instituteUrl,
-            startDate,
-            endDate
-        )
+        controller.getTimetable(startDate, endDate)
     }
 }

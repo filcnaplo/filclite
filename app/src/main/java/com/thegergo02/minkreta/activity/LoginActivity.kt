@@ -32,7 +32,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
             finish()
         }
 
-        controller = LoginController(this, KretaRequests(this))
+        controller = LoginController(this, this)
         controller.getInstitutes()
         showProgress()
         inst_code_s?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {

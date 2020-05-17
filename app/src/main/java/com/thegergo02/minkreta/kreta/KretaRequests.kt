@@ -4,9 +4,12 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import android.webkit.MimeTypeMap
+import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
@@ -28,6 +31,20 @@ import java.net.URLConnection
 import java.util.*
 
 class KretaRequests(ctx: Context) {
+    private var accessToken = ""
+    private var refreshToken = ""
+    private var instituteCode = ""
+    private var instituteUrl = ""
+    private lateinit var tokenListener: OnRefreshTokensResult
+
+    constructor(ctx: Context, listener: OnRefreshTokensResult, accessToken: String, refreshToken: String, instituteCode: String) : this(ctx) {
+        this.accessToken = accessToken
+        this.refreshToken = refreshToken
+        this.instituteCode = instituteCode
+        this.instituteUrl = "https://$instituteCode.e-kreta.hu"
+        tokenListener = listener
+    }
+
     interface OnEvaluationListResult {
         fun onEvaluationListSuccess(evals: List<Evaluation>)
         fun onEvaluationListError(error: KretaError)
@@ -95,7 +112,7 @@ class KretaRequests(ctx: Context) {
 
     init {
         GlobalScope.launch {
-               getKretaDetails()
+            getKretaDetails()
         }
     }
 
@@ -119,6 +136,13 @@ class KretaRequests(ctx: Context) {
             continue
         }
         return userAgent
+    }
+
+    private fun isRefreshTokenNeeded(error: VolleyError): Boolean {
+        return when(error) {
+            is AuthFailureError -> true
+            else -> false
+        }
     }
 
     fun getInstitutes(listener: OnInstitutesResult) {
@@ -164,15 +188,15 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(tokensQuery)
     }
-    fun refreshToken(listener: OnRefreshTokensResult, refreshToken: String, instituteCode: String) {
+    fun refreshToken(listener: OnRefreshTokensResult) {
         val tokensQuery = object : StringRequest(
             Method.POST, "$loginUrl/connect/token",
             Response.Listener { response ->
                 val tokens = JsonHelper.makeTokens(response)
                 if (tokens != null) {
+                    accessToken = tokens["access_token"].toString()
+                    refreshToken = tokens["refresh_token"].toString()
                     listener.onRefreshTokensSuccess(tokens)
-                } else {
-                    listener.onRefreshTokensError(KretaError.ParseError("unknown"))
                 }
             },
             Response.ErrorListener { error ->
@@ -187,7 +211,7 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(tokensQuery)
     }
-    fun getEvaluationList(listener: OnEvaluationListResult, accessToken: String, instituteUrl: String) {
+    fun getEvaluationList(listener: OnEvaluationListResult) {
         val evalQuery = object : StringRequest(
             Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Ertekelesek",
             Response.Listener { response ->
@@ -200,16 +224,18 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onEvaluationListError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
                 "Accept" to "application/json",
                 "User-Agent" to getUserAgent())
-            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
         queue.add(evalQuery)
     }
-    fun getNoteList(listener: OnNoteListResult, accessToken: String, instituteUrl: String) {
+    fun getNoteList(listener: OnNoteListResult) {
         val evalQuery = object : StringRequest(
             Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Feljegyzesek",
             Response.Listener { response ->
@@ -222,6 +248,9 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onNoteListError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -231,7 +260,7 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(evalQuery)
     }
-    fun getAbsenceList(listener: OnAbsenceListResult, accessToken: String, instituteUrl: String) {
+    fun getAbsenceList(listener: OnAbsenceListResult) {
         val absenceQuery = object : StringRequest(
             Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Mulasztasok",
             Response.Listener { response ->
@@ -244,6 +273,9 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onAbsenceListError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -254,7 +286,7 @@ class KretaRequests(ctx: Context) {
         queue.add(absenceQuery)
     }
 
-    fun getTimetable(listener: OnTimetableResult, accessToken: String, instituteUrl: String, fromDate: KretaDate, toDate: KretaDate) {
+    fun getTimetable(listener: OnTimetableResult, fromDate: KretaDate, toDate: KretaDate) {
         val timetableQuery = object : StringRequest(
             Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/OrarendElemek?datumTol=${fromDate.toFormattedString(KretaDate.KretaDateFormat.API_DATE)}&datumIg=${toDate.toFormattedString(KretaDate.KretaDateFormat.API_DATE)}",
             Response.Listener { response ->
@@ -267,6 +299,9 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onTimetableError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -276,7 +311,7 @@ class KretaRequests(ctx: Context) {
         queue.add(timetableQuery)
     }
 
-    fun getMessageList(listener: OnMessageListResult, accessToken: String, sortType: MessageDescriptor.SortType) {
+    fun getMessageList(listener: OnMessageListResult, sortType: MessageDescriptor.SortType) {
         val messageListQuery = object : StringRequest(
             Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/sajat",
             Response.Listener { response ->
@@ -289,6 +324,9 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onMessageListError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -298,7 +336,7 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(messageListQuery)
     }
-    fun getMessage(listener: OnMessageResult, accessToken: String, messageId: Int) {
+    fun getMessage(listener: OnMessageResult, messageId: Int) {
         val messageQuery = object : StringRequest(
             Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/$messageId",
             Response.Listener { response ->
@@ -311,6 +349,9 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onMessageError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -319,7 +360,7 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(messageQuery)
     }
-    fun downloadAttachment(accessToken: String, downloadManager: DownloadManager, attachment: Attachment) {
+    fun downloadAttachment(downloadManager: DownloadManager, attachment: Attachment) {
         val uri = Uri.parse("https://eugyintezes.e-kreta.hu/api/v1/dokumentumok/uzenetek/${attachment.id}")
         val request = DownloadManager.Request(uri)
         val mimeMap = MimeTypeMap.getSingleton()
@@ -333,7 +374,7 @@ class KretaRequests(ctx: Context) {
             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/minkreta/${attachment.fileName}")
         downloadManager.enqueue(request)
     }
-    fun setMessageRead(accessToken: String, messageId: Int, isRead: Boolean) { //TODO: DOESN'T WORK
+    fun setMessageRead(messageId: Int, isRead: Boolean) { //TODO: DOESN'T WORK
         val messageReadQuery = object : StringRequest(
             Method.POST,
             "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/uzenetek/olvasott",
@@ -351,7 +392,7 @@ class KretaRequests(ctx: Context) {
         queue.add(messageReadQuery)
     }
 
-    fun getTestList(listener: OnTestListResult, accessToken: String, instituteUrl: String) {
+    fun getTestList(listener: OnTestListResult) {
         val testsQuery = object : StringRequest(
             Method.GET, "${instituteUrl}/ellenorzo/V3/Sajat/BejelentettSzamonkeresek",
             Response.Listener { response ->
@@ -364,6 +405,9 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onTestListError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -373,7 +417,7 @@ class KretaRequests(ctx: Context) {
         queue.add(testsQuery)
     }
 
-    fun getHomeworkList(listener: OnHomeworkListResult, accessToken: String, instituteUrl: String, fromDate: KretaDate) {
+    fun getHomeworkList(listener: OnHomeworkListResult, fromDate: KretaDate) {
         val homeworkQuery = object : StringRequest(
             Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/HaziFeladatok?datumTol=$fromDate",
             Response.Listener { response ->
@@ -386,6 +430,9 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onHomeworkListError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -393,7 +440,7 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(homeworkQuery)
     }
-    fun getHomeworkCommentList(listener: OnHomeworkCommentListResult, accessToken: String, instituteUrl: String, homeworkUid: String) {
+    fun getHomeworkCommentList(listener: OnHomeworkCommentListResult, homeworkUid: String) {
         val homeworkCommentQuery = object : StringRequest(
             Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/HaziFeladatok/$homeworkUid/Kommentek",
             Response.Listener { response ->
@@ -404,6 +451,9 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onHomeworkCommentListError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
@@ -411,7 +461,7 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(homeworkCommentQuery)
     }
-    fun sendHomeworkComment(listener: OnSendHomeworkResult, accessToken: String, instituteUrl: String, homeworkUid: String, text: String) {
+    fun sendHomeworkComment(listener: OnSendHomeworkResult, homeworkUid: String, text: String) {
         val sendHomeworkCommentQuery = object : StringRequest(
             Method.POST,
             "$instituteUrl/ellenorzo/V3/Sajat/Orak/TanitasiOrak/HaziFeladatok/Kommentek",
@@ -420,6 +470,9 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onSendHomeworkError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf(
@@ -432,7 +485,7 @@ class KretaRequests(ctx: Context) {
         queue.add(sendHomeworkCommentQuery)
     }
 
-    fun getStudentDetails(listener: OnStudentDetailsResult, accessToken: String, instituteUrl: String) {
+    fun getStudentDetails(listener: OnStudentDetailsResult) {
         val studentDetailsQuery = object : StringRequest(
             Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/TanuloAdatlap",
             Response.Listener { response ->
@@ -445,6 +498,9 @@ class KretaRequests(ctx: Context) {
             },
             Response.ErrorListener { error ->
                 listener.onStudentDetailsError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",

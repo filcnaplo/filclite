@@ -1,6 +1,8 @@
 package com.thegergo02.minkreta.controller
 
 import android.app.DownloadManager
+import android.content.Context
+import android.util.Log
 import com.android.volley.AuthFailureError
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
@@ -20,7 +22,7 @@ import com.thegergo02.minkreta.view.MainView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class MainController(private var mainView: MainView?, private val apiHandler: KretaRequests)
+class MainController(ctx: Context, private var mainView: MainView?, accessToken: String, refreshToken: String, instituteCode: String)
     :
     KretaRequests.OnEvaluationListResult,
     KretaRequests.OnRefreshTokensResult,
@@ -36,96 +38,91 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
     KretaRequests.OnSendHomeworkResult
 {
 
-    fun getEvaluationList(accessToken: String, instituteUrl: String) {
+    private val apiHandler = KretaRequests(ctx, this, accessToken, refreshToken, instituteCode)
+
+    fun getEvaluationList() {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getEvaluationList(parentListener, accessToken, instituteUrl)
+            apiHandler.getEvaluationList(parentListener)
         }
     }
 
-    fun getTimetable(accessToken: String, instituteCode: String, fromDate: KretaDate, toDate: KretaDate) {
+    fun getTimetable(fromDate: KretaDate, toDate: KretaDate) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getTimetable(parentListener, accessToken, instituteCode, fromDate, toDate)
+            apiHandler.getTimetable(parentListener, fromDate, toDate)
         }
     }
 
-    fun getMessageList(accessToken: String, sortType: MessageDescriptor.SortType) {
+    fun getMessageList(sortType: MessageDescriptor.SortType) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getMessageList(parentListener, accessToken, sortType)
+            apiHandler.getMessageList(parentListener, sortType)
         }
     }
-    fun getMessage(accessToken: String, messageId: Int) {
+    fun getMessage(messageId: Int) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getMessage(parentListener, accessToken, messageId)
+            apiHandler.getMessage(parentListener, messageId)
         }
     }
-    fun downloadAttachment(accessToken: String, downloadManager: DownloadManager, attachment: Attachment) {
+    fun downloadAttachment(downloadManager: DownloadManager, attachment: Attachment) {
         GlobalScope.launch {
-            apiHandler.downloadAttachment(accessToken, downloadManager, attachment)
+            apiHandler.downloadAttachment(downloadManager, attachment)
         }
     }
-    fun setMessageRead(accessToken: String, messageId: Int, isRead: Boolean = true) {
+    fun setMessageRead(messageId: Int, isRead: Boolean = true) {
         GlobalScope.launch {
-            apiHandler.setMessageRead(accessToken, messageId, isRead)
+            apiHandler.setMessageRead(messageId, isRead)
         }
     }
 
-    fun sendHomeworkComment(accessToken: String, instituteUrl: String, homeworkUid: String, text: String) {
+    fun sendHomeworkComment(homeworkUid: String, text: String) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.sendHomeworkComment(parentListener, accessToken, instituteUrl, homeworkUid, text)
+            apiHandler.sendHomeworkComment(parentListener, homeworkUid, text)
         }
     }
 
-    fun refreshToken(refreshToken: String, instituteCode: String) {
+    fun getTestList() {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.refreshToken(parentListener, refreshToken, instituteCode)
+            apiHandler.getTestList(parentListener)
         }
     }
 
-    fun getTestList(accessToken: String, instituteUrl: String) {
+    fun getNoteList() {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getTestList(parentListener, accessToken, instituteUrl)
+            apiHandler.getNoteList(parentListener)
         }
     }
 
-    fun getNoteList(accessToken: String, instituteUrl: String) {
+    fun getHomeworkList(fromDate: KretaDate) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getNoteList(parentListener, accessToken, instituteUrl)
+            apiHandler.getHomeworkList(parentListener, fromDate)
         }
     }
 
-    fun getHomeworkList(accessToken: String, instituteUrl: String, fromDate: KretaDate) {
+    fun getHomeworkCommentList(homeworkUid: String) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getHomeworkList(parentListener, accessToken, instituteUrl, fromDate)
+            apiHandler.getHomeworkCommentList(parentListener, homeworkUid)
         }
     }
 
-    fun getHomeworkCommentList(accessToken: String, instituteUrl: String, homeworkUid: String) {
+    fun getAbsenceList() {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getHomeworkCommentList(parentListener, accessToken, instituteUrl, homeworkUid)
+            apiHandler.getAbsenceList(parentListener)
         }
     }
 
-    fun getAbsenceList(accessToken: String, instituteUrl: String) {
+    fun getStudentDetails() {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getAbsenceList(parentListener, accessToken, instituteUrl)
-        }
-    }
-
-    fun getStudentDetails(accessToken: String, instituteUrl: String) {
-        val parentListener = this
-        GlobalScope.launch {
-            apiHandler.getStudentDetails(parentListener, accessToken, instituteUrl)
+            apiHandler.getStudentDetails(parentListener)
         }
     }
 
@@ -133,13 +130,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateEvaluationList(evals)
     }
     override fun onEvaluationListError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
@@ -148,13 +138,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateTimetable(timetable)
     }
     override fun onTimetableError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
@@ -163,13 +146,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateMessageDescriptors(messageList.reversed().sortedWith(compareBy(sortType.lambda)))
     }
     override fun onMessageListError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
@@ -178,13 +154,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateMessage(message)
     }
     override fun onMessageError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
@@ -201,13 +170,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateTestList(testList)
     }
     override fun onTestListError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
@@ -216,13 +178,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateNoteList(notes)
     }
     override fun onNoteListError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
@@ -231,13 +186,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateHomeworkList(homeworks)
     }
     override fun onHomeworkListError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
@@ -246,13 +194,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateHomeworkCommentList(homeworkComments)
     }
     override fun onHomeworkCommentListError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
@@ -261,13 +202,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateAbsenceList(absences)
     }
     override fun onAbsenceListError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
@@ -276,13 +210,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.generateStudentDetails(studentDetails)
     }
     override fun onStudentDetailsError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }
@@ -291,13 +218,6 @@ class MainController(private var mainView: MainView?, private val apiHandler: Kr
         mainView?.refreshCommentList(homeworkUid)
     }
     override fun onSendHomeworkError(error: KretaError) {
-        when (error) {
-            is KretaError.VolleyError -> {
-                when (error.volleyError) {
-                    is AuthFailureError -> {mainView?.triggerRefreshToken()}
-                }
-            }
-        }
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }

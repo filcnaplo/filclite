@@ -31,7 +31,7 @@ class MessageUI {
                 subjectTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                 val senderTextView = TextView(ctx)
                 senderTextView.text = "${message.senderName} (${message.senderRole}) \n" +
-                        "${message.sendDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+                        message.sendDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)
                 senderTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                 val htmlString = if (message.text != null) {
                     UIHelper.formatHtml(UIHelper.decodeHtml(message.text))
@@ -62,8 +62,7 @@ class MessageUI {
             ctx: Context,
             messageDescriptors: List<MessageDescriptor>,
             messageDescriptorsHolder: LinearLayout?,
-            controller: MainController,
-            accessToken: String
+            controller: MainController
         ) {
             messageDescriptorsHolder?.removeAllViews()
             for (messageDescriptor in messageDescriptors) {
@@ -78,8 +77,8 @@ class MessageUI {
                 val messageOnClickListener = {
                     _: View ->
                     if (message.id != null) {
-                        controller.getMessage(accessToken, messageDescriptor.id)
-                        controller.setMessageRead(accessToken, message.id)
+                        controller.getMessage(messageDescriptor.id)
+                        controller.setMessageRead(message.id)
                     }
                     null
                 }

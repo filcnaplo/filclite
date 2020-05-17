@@ -20,7 +20,6 @@ interface MainView {
     fun generateMessage(message: MessageDescriptor)
     fun generateTestList(tests: List<Test>)
     fun generateEvaluationList(evaluations: List<Evaluation>)
-    fun triggerRefreshToken()
     fun refreshToken(tokens: Map<String, String>)
     fun sendToLogin()
     fun generateHomeworkList(homeworks: List<Homework>)
