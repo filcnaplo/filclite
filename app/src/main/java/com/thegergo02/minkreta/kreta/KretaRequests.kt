@@ -4,7 +4,6 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
-import android.util.Log
 import android.webkit.MimeTypeMap
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
@@ -22,6 +21,7 @@ import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.kreta.data.sub.Note
+import com.thegergo02.minkreta.kreta.data.sub.Notice
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
@@ -80,6 +80,10 @@ class KretaRequests(ctx: Context) {
     interface OnNoteListResult {
         fun onNoteListSuccess(testList: List<Note>)
         fun onNoteListError(error: KretaError)
+    }
+    interface OnNoticeListResult {
+        fun onNoticeListSuccess(testList: List<Notice>)
+        fun onNoticeListError(error: KretaError)
     }
     interface OnHomeworkListResult {
         fun onHomeworkListSuccess(homeworks: List<Homework>)
@@ -236,7 +240,7 @@ class KretaRequests(ctx: Context) {
         queue.add(evalQuery)
     }
     fun getNoteList(listener: OnNoteListResult) {
-        val evalQuery = object : StringRequest(
+        val noteQuery = object : StringRequest(
             Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Feljegyzesek",
             Response.Listener { response ->
                 val notes = JsonHelper.makeNoteList(response)
@@ -258,7 +262,32 @@ class KretaRequests(ctx: Context) {
                 "User-Agent" to getUserAgent())
             override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
-        queue.add(evalQuery)
+        queue.add(noteQuery)
+    }
+    fun getNoticeList(listener: OnNoticeListResult) {
+        val noticeQuery = object : StringRequest(
+            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/FaliujsagElemek",
+            Response.Listener { response ->
+                val notice = JsonHelper.makeNoticeList(response)
+                if (notice != null) {
+                    listener.onNoticeListSuccess(notice)
+                } else {
+                    listener.onNoticeListError(KretaError.ParseError("unknown"))
+                }
+            },
+            Response.ErrorListener { error ->
+                listener.onNoticeListError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "Accept" to "application/json",
+                "User-Agent" to getUserAgent())
+            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
+        }
+        queue.add(noticeQuery)
     }
     fun getAbsenceList(listener: OnAbsenceListResult) {
         val absenceQuery = object : StringRequest(

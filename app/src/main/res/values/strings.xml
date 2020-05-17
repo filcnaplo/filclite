@@ -22,6 +22,7 @@
     <!--MAIN ACTIVITY-->
     <string name="evals_ma">Evaluations</string>
     <string name="notes_ma">Notes</string>
+    <string name="noticeboard_ma">Noticeboard</string>
     <string name="abs_ma">Absences</string>
     <string name="homework_ma">Homework</string>
     <string name="timetable_ma">Timetable</string>

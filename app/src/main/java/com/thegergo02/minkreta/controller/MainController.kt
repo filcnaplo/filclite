@@ -2,8 +2,6 @@ package com.thegergo02.minkreta.controller
 
 import android.app.DownloadManager
 import android.content.Context
-import android.util.Log
-import com.android.volley.AuthFailureError
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
@@ -18,6 +16,7 @@ import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.kreta.data.sub.Note
+import com.thegergo02.minkreta.kreta.data.sub.Notice
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -35,7 +34,8 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     KretaRequests.OnNoteListResult,
     KretaRequests.OnAbsenceListResult,
     KretaRequests.OnHomeworkCommentListResult,
-    KretaRequests.OnSendHomeworkResult
+    KretaRequests.OnSendHomeworkResult,
+    KretaRequests.OnNoticeListResult
 {
 
     private val apiHandler = KretaRequests(ctx, this, accessToken, refreshToken, instituteCode)
@@ -95,6 +95,13 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         val parentListener = this
         GlobalScope.launch {
             apiHandler.getNoteList(parentListener)
+        }
+    }
+
+    fun getNoticeList() {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.getNoticeList(parentListener)
         }
     }
 
@@ -178,6 +185,14 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateNoteList(notes)
     }
     override fun onNoteListError(error: KretaError) {
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
+    }
+
+    override fun onNoticeListSuccess(notices: List<Notice>) {
+        mainView?.generateNoticeList(notices)
+    }
+    override fun onNoticeListError(error: KretaError) {
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }

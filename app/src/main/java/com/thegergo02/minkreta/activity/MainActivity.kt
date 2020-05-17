@@ -23,6 +23,7 @@ import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.kreta.data.sub.Note
+import com.thegergo02.minkreta.kreta.data.sub.Notice
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity(), MainView {
     private var notes = listOf<Note>()
     private var evals = listOf<Evaluation>()
     private var homeworks = listOf<Homework>()
+    private var notices = listOf<Notice>()
     private lateinit var homeworkCommentHolder: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +81,8 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Homework to homework_holder_ll,
             Tab.Timetable to timetable_holder_ll,
             Tab.Messages to messages_holder_ll,
-            Tab.Tests to tests_holder_ll
+            Tab.Tests to tests_holder_ll,
+            Tab.Noticeboard to noticeboard_holder_ll
         )
         tabButtons = mutableMapOf(
             Tab.Evaluations to evals_btt,
@@ -88,14 +91,16 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Homework to homework_btt,
             Tab.Timetable to timetable_btt,
             Tab.Messages to messages_btt,
-            Tab.Tests to tests_btt
+            Tab.Tests to tests_btt,
+            Tab.Noticeboard to noticeboard_btt
         )
         tabSortSpinners = mutableMapOf(
             Tab.Notes to notes_spinner,
             Tab.Absences to abs_spinner,
             Tab.Messages to messages_spinner,
             Tab.Evaluations to evals_spinner,
-            Tab.Homework to homework_spinner
+            Tab.Homework to homework_spinner,
+            Tab.Noticeboard to noticeboard_spinner
         )
     }
     private fun setupClickListeners() {
@@ -125,6 +130,16 @@ class MainActivity : AppCompatActivity(), MainView {
                     controller.getNoteList()
                 } else {
                     switchTab(Tab.Notes)
+                }
+            }
+        }
+        tabButtons[Tab.Noticeboard]?.setOnClickListener {
+            if (canClick) {
+                if (tabHolders[Tab.Noticeboard]?.visibility == View.GONE) {
+                    showProgress()
+                    controller.getNoticeList()
+                } else {
+                    switchTab(Tab.Noticeboard)
                 }
             }
         }
@@ -212,6 +227,20 @@ class MainActivity : AppCompatActivity(), MainView {
                     }
                 }
             }
+            Tab.Noticeboard -> {
+                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        val sortType = Notice.sortTypeFromString(spinnerPair.value.selectedItem.toString())
+                        refreshNotices(sortType)
+                    }
+                }
+            }
             Tab.Messages -> {
                 onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                     override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -266,7 +295,8 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Absences to listOf("Subject", "Teacher", "Lesson start time", "Creating time", "Justification state"),
             Tab.Messages to listOf("Send date", "Teacher"),
             Tab.Evaluations to listOf("Creating time", "Form", "Value", "Mode", "Subject", "Teacher"),
-            Tab.Homework to listOf("Post date", "Deadline", "Teacher", "Subject")
+            Tab.Homework to listOf("Post date", "Deadline", "Teacher", "Subject"),
+            Tab.Noticeboard to listOf("Valid from", "Valid until", "Title")
         )
         val spinnerDisplayList = spinnerDisplayArrayMap[spinnerPair.key]
         if (spinnerDisplayList != null) {
@@ -318,7 +348,8 @@ class MainActivity : AppCompatActivity(), MainView {
         Homework,
         Timetable,
         Messages,
-        Tests
+        Tests,
+        Noticeboard
     }
     private fun closeTabs(exception: Tab? = null) {
         for (tabHolder in tabHolders) {
@@ -390,6 +421,13 @@ class MainActivity : AppCompatActivity(), MainView {
         this.notes = notes
         refreshNotes()
         switchTab(Tab.Notes)
+        hideProgress()
+    }
+
+    override fun generateNoticeList(notices: List<Notice>) {
+        this.notices = notices
+        refreshNotices()
+        switchTab(Tab.Noticeboard)
         hideProgress()
     }
 
@@ -466,6 +504,14 @@ class MainActivity : AppCompatActivity(), MainView {
         holder?.removeAllViews()
         NotesUI.generateNotes(
             this, notes.sortedWith(compareBy(sortType.lambda)),
+            holder, details_ll, ::showDetails, ::hideDetails
+        )
+    }
+    private fun refreshNotices(sortType: Notice.SortType = Notice.SortType.ValidFrom) {
+        val holder = tabHolders[Tab.Noticeboard]
+        holder?.removeAllViews()
+        NoticeUI.generateNoticeList(
+            this, notices.sortedWith(compareBy(sortType.lambda)),
             holder, details_ll, ::showDetails, ::hideDetails
         )
     }

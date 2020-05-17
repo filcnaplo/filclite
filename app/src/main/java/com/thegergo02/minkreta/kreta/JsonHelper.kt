@@ -11,6 +11,7 @@ import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.kreta.data.sub.Note
+import com.thegergo02.minkreta.kreta.data.sub.Notice
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDayOrder
@@ -135,6 +136,21 @@ class JsonHelper {
                 }
             }
             return if (notes.isEmpty()) null else notes
+        }
+
+        fun makeNoticeList(noticeString: String) : List<Notice>? {
+            val notices = mutableListOf<Notice>()
+            val noticesJson = JSONArray(noticeString)
+            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+            val adapter: JsonAdapter<Notice> = moshi.adapter(
+                Notice::class.java)
+            for (i in 0 until noticesJson.length()) {
+                val notice = adapter.fromJson(noticesJson[i].toString())
+                if (notice != null) {
+                    notices.add(notice)
+                }
+            }
+            return if (notices.isEmpty()) null else notices
         }
 
         fun makeHomeworkList(homeworksString: String) : List<Homework>? {
