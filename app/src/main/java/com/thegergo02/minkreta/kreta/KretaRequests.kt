@@ -18,6 +18,7 @@ import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.message.Receiver
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.kreta.data.sub.Note
@@ -28,6 +29,7 @@ import com.thegergo02.minkreta.kreta.data.timetable.Test
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.URLConnection
+import java.time.LocalDateTime
 import java.util.*
 
 class KretaRequests(ctx: Context) {
@@ -101,9 +103,13 @@ class KretaRequests(ctx: Context) {
         fun onStudentDetailsSuccess(student: StudentDetails)
         fun onStudentDetailsError(error: KretaError)
     }
-    interface OnSendHomeworkResult {
+    interface OnSendHomeworkCommentResult {
         fun onSendHomeworkSuccess(homeworkUid: String)
         fun onSendHomeworkError(error: KretaError)
+    }
+    interface OnSendMessageResult {
+        fun onSendMessageSuccess()
+        fun onSendMessageError(error: KretaError)
     }
 
     private val queue = Volley.newRequestQueue(ctx)
@@ -365,6 +371,34 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(messageListQuery)
     }
+    fun sendMessage(listener: OnSendMessageResult, receivers: List<Receiver>, attachments: List<Attachment>, subject: String, content: String, replyId: Int? = null) {
+        var receiversText = ""
+        var attachmentText = ""
+        var replyText = if (replyId != null) { ",\"elozoUzenetAzonosito\":$replyId" } else { "" }
+        for (receiver in receivers) {
+            receiversText += "$receiver,"
+        }
+        for (attachment in attachments) {
+            attachmentText += "$attachment,"
+        }
+        val sendMessageQuery = object : StringRequest(
+            Method.POST, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/uzenetek",
+            Response.Listener { listener.onSendMessageSuccess() },
+            Response.ErrorListener { error ->
+                listener.onSendMessageError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "X-Uzenet-Lokalizacio" to "hu-HU",
+                "User-Agent" to getUserAgent())
+            override fun getBodyContentType(): String = "application/json; charset=utf-8"
+            override fun getBody(): ByteArray = "{\"cimzettLista\":[$receiversText],\"csatolmanyok\":[$attachmentText], \"targy\":\"$subject\", \"szoveg\":\"$content\" $replyText}".toByteArray()
+        }
+        queue.add(sendMessageQuery)
+    }
     fun getMessage(listener: OnMessageResult, messageId: Int) {
         val messageQuery = object : StringRequest(
             Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/$messageId",
@@ -490,7 +524,7 @@ class KretaRequests(ctx: Context) {
         }
         queue.add(homeworkCommentQuery)
     }
-    fun sendHomeworkComment(listener: OnSendHomeworkResult, homeworkUid: String, text: String) {
+    fun sendHomeworkComment(listener: OnSendHomeworkCommentResult, homeworkUid: String, text: String) {
         val sendHomeworkCommentQuery = object : StringRequest(
             Method.POST,
             "$instituteUrl/ellenorzo/V3/Sajat/Orak/TanitasiOrak/HaziFeladatok/Kommentek",

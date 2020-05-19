@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/message_cl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    tools:context=".activity.LoginActivity">
+
+    <Spinner
+        android:id="@+id/receiver_s"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:layout_weight="1"
+        android:background="@color/colorPrimary"
+        android:dropDownWidth="match_parent"
+        android:minHeight="45dp"
+        android:scrollbarStyle="outsideInset"
+        android:scrollbarThumbHorizontal="@color/colorText"
+        android:scrollbarThumbVertical="@color/colorAccent"
+        android:scrollbarTrackHorizontal="@color/colorText"
+        android:scrollbarTrackVertical="@color/colorText"
+        android:spinnerMode="dropdown"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/subject_mea"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_marginTop="10dp"
+        android:autofillHints="subject"
+        android:background="@color/colorPrimary"
+        android:ems="10"
+        android:hint="@string/subject_mea"
+        android:inputType="textPersonName"
+        android:textColor="@color/colorText"
+        android:textColorHint="@color/colorText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/receiver_s"
+        tools:layout_conversion_absoluteHeight="45dp"
+        tools:layout_conversion_absoluteWidth="213dp" />
+
+    <EditText
+        android:id="@+id/message_mea"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:autofillHints="message"
+        android:background="@color/colorPrimary"
+        android:ems="10"
+        android:hint="@string/message_mea"
+        android:inputType="textMultiLine"
+        android:longClickable="true"
+        android:singleLine="false"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/colorText"
+        android:textColorHint="@color/colorText"
+        android:gravity="top|left"
+        app:layout_constraintBottom_toTopOf="@+id/message_btt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subject_mea"
+        tools:layout_conversion_absoluteHeight="45dp"
+        tools:layout_conversion_absoluteWidth="213dp" />
+
+    <Button
+        android:id="@+id/message_btt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="75dp"
+        android:background="@color/colorAccent"
+        android:text="@string/send_mea"
+        android:textColor="@color/colorText"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,12 +2,15 @@ package com.thegergo02.minkreta.ui
 
 import android.app.ActionBar
 import android.content.Context
+import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.thegergo02.minkreta.R
+import com.thegergo02.minkreta.activity.MainActivity
+import com.thegergo02.minkreta.activity.MessageActivity
 import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.kreta.data.message.Attachment
@@ -65,6 +68,14 @@ class MessageUI {
             controller: MainController
         ) {
             messageDescriptorsHolder?.removeAllViews()
+            val sendMessageOnClickListener = {
+                _: View ->
+                val messageIntent = Intent(ctx, MessageActivity::class.java)
+                ctx.startActivity(messageIntent)
+                null
+            }
+            val sendMessageButton = UIHelper.generateButton(ctx, ctx.getString(R.string.send_ma), sendMessageOnClickListener)
+            messageDescriptorsHolder?.addView(sendMessageButton)
             for (messageDescriptor in messageDescriptors) {
                 val message = messageDescriptor.message
                 val text =

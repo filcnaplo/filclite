@@ -34,7 +34,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     KretaRequests.OnNoteListResult,
     KretaRequests.OnAbsenceListResult,
     KretaRequests.OnHomeworkCommentListResult,
-    KretaRequests.OnSendHomeworkResult,
+    KretaRequests.OnSendHomeworkCommentResult,
     KretaRequests.OnNoticeListResult
 {
 

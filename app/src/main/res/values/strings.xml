@@ -29,4 +29,10 @@
     <string name="messages_ma">Messages</string>
     <string name="tests_ma">Tests</string>
     <string name="back_ma">Back</string>
+    <string name="send_ma">Send message</string>
+
+    <!--MESSAGE ACTIVITY-->
+    <string name="send_mea">Send</string>
+    <string name="subject_mea">Subject</string>
+    <string name="message_mea">Message</string>
 </resources>
