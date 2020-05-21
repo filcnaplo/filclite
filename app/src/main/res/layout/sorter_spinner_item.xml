@@ -7,6 +7,6 @@
     android:layout_height="wrap_content"
     android:gravity="left"
     android:textColor="@color/colorText"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/colorPrimary"
     android:padding="10sp"
     />

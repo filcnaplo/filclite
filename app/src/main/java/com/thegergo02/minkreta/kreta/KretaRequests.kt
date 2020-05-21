@@ -112,6 +112,10 @@ class KretaRequests(ctx: Context) {
         fun onWorkersSuccess(workers: List<Worker>)
         fun onWorkersError(error: KretaError)
     }
+    interface OnSendableReceiverTypesResult {
+        fun onSendableReceiverTypesSuccess(types: List<Type>)
+        fun onSendableReceiverTypesError(error: KretaError)
+    }
 
     private val queue = Volley.newRequestQueue(ctx)
 
@@ -618,5 +622,28 @@ class KretaRequests(ctx: Context) {
                 "User-Agent" to getUserAgent())
         }
         queue.add(teachersQuery)
+    }
+    fun getSendableReceiverTypes(listener: OnSendableReceiverTypesResult) {
+        val sendableReceiverTypesQuery = object : StringRequest(
+            Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/cimezhetotipusok",
+            Response.Listener { response ->
+                val workers = JsonHelper.makeTypes(response)
+                if (workers != null) {
+                    listener.onSendableReceiverTypesSuccess(workers)
+                } else {
+                    listener.onSendableReceiverTypesError(KretaError.ParseError("unknown"))
+                }
+            },
+            Response.ErrorListener { error ->
+                listener.onSendableReceiverTypesError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "User-Agent" to getUserAgent())
+        }
+        queue.add(sendableReceiverTypesQuery)
     }
 }

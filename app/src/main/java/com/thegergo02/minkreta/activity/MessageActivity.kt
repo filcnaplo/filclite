@@ -3,32 +3,29 @@ package com.thegergo02.minkreta.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.R
-import com.thegergo02.minkreta.controller.LoginController
-import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.controller.MessageController
 import com.thegergo02.minkreta.kreta.KretaRequests
-import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.Receiver
+import com.thegergo02.minkreta.kreta.data.sub.Evaluation
+import com.thegergo02.minkreta.kreta.data.sub.Type
 import com.thegergo02.minkreta.ui.UIHelper
-import com.thegergo02.minkreta.view.LoginView
 import com.thegergo02.minkreta.view.MessageView
-import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_message.*
 
 class MessageActivity : AppCompatActivity(), MessageView {
     private lateinit var controller: MessageController
-    private var receivers = mutableListOf<Receiver>()
     private var attachments = mutableListOf<Attachment>()
     private var replyId: Int? = null
+
+    private var receiverTypes = listOf<Type>()
+    private var receivers = mutableListOf<Receiver>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,12 +43,73 @@ class MessageActivity : AppCompatActivity(), MessageView {
             finish()
         }
         message_btt.setOnClickListener {
-            controller.sendMessage(receivers, attachments, subject_mea.text.toString(), message_mea.text.toString(), replyId)
+            controller.sendMessage(
+                receivers,
+                attachments,
+                subject_mea.text.toString(),
+                message_mea.text.toString(),
+                replyId
+            )
         }
+        val adapterReceiverType =
+            ArrayAdapter(this, R.layout.sorter_spinner_item, listOf("Loading receiver types..."))
+        adapterReceiverType.setDropDownViewResource(R.layout.sorter_spinner_dropdown_item)
+        val adapterReceivers =
+            ArrayAdapter(this, R.layout.sorter_spinner_item, listOf("Choose a receiver type first..."))
+        adapterReceivers.setDropDownViewResource(R.layout.sorter_spinner_dropdown_item)
+        receivertype_s.adapter = adapterReceiverType
+        receivertype_s.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                //ARISZTOKRETA FEJLESZTO (X3NIXBOI), COWARE APPS, ALDJON MEG AZ URISTEN
+                val bridgeMap = mapOf(
+                    1 to 9,
+                    2 to 8,
+                    3 to 7,
+                    4 to 1,
+                    5 to 2,
+                    6 to 10,
+                    7 to 11
+                )
+                if (!receiverTypes.isEmpty()) {
+                    controller.getReceivers(
+                        KretaRequests.ReceiverType.values()
+                            .firstOrNull { it.type.id == bridgeMap[receiverTypes[position].id] }
+                            ?: KretaRequests.ReceiverType.Teacher)
+                }
+            }
+        }
+
+        receiver_s.adapter = adapterReceivers
+        controller.getSendableReceiverTypes()
     }
 
     override fun generateReceiverList(receivers: List<Receiver>) {
+        val receiverStrings = mutableListOf<String>()
+        for (receiver in receivers) {
+            receiverStrings.add(receiver.name)
+        }
+        val adapterReceiver =
+            ArrayAdapter(this, R.layout.sorter_spinner_item, receiverStrings)
+        adapterReceiver.setDropDownViewResource(R.layout.sorter_spinner_dropdown_item)
+        receiver_s.adapter = adapterReceiver
+    }
 
+    override fun generateSendableReceiverTypes(types: List<Type>) {
+        this.receiverTypes = types
+        val typeStrings = mutableListOf<String>()
+        for (type in types) {
+            typeStrings.add(type.name)
+        }
+        val adapterReceiverType =
+            ArrayAdapter(this, R.layout.sorter_spinner_item, typeStrings)
+        adapterReceiverType.setDropDownViewResource(R.layout.sorter_spinner_dropdown_item)
+        receivertype_s.adapter = adapterReceiverType
     }
 
     override fun displayError(error: String) {

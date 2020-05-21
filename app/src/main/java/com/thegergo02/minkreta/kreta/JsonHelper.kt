@@ -218,5 +218,20 @@ class JsonHelper {
             }
             return if (workers.isEmpty()) null else workers
         }
+
+        fun makeTypes(typesString: String): List<Type>? {
+            val types = mutableListOf<Type>()
+            val typesJson = JSONArray(typesString)
+            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+            val adapter: JsonAdapter<Type> = moshi.adapter(
+                Type::class.java)
+            for (i in 0 until typesJson.length()) {
+                val type = adapter.fromJson(typesJson[i].toString())
+                if (type != null) {
+                    types.add(type)
+                }
+            }
+            return if (types.isEmpty()) null else types
+        }
     }
 }
