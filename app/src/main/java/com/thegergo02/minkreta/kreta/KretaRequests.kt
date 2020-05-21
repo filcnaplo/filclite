@@ -19,17 +19,14 @@ import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.message.Receiver
-import com.thegergo02.minkreta.kreta.data.sub.Absence
-import com.thegergo02.minkreta.kreta.data.sub.Evaluation
-import com.thegergo02.minkreta.kreta.data.sub.Note
-import com.thegergo02.minkreta.kreta.data.sub.Notice
+import com.thegergo02.minkreta.kreta.data.message.Worker
+import com.thegergo02.minkreta.kreta.data.sub.*
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.URLConnection
-import java.time.LocalDateTime
 import java.util.*
 
 class KretaRequests(ctx: Context) {
@@ -110,6 +107,10 @@ class KretaRequests(ctx: Context) {
     interface OnSendMessageResult {
         fun onSendMessageSuccess()
         fun onSendMessageError(error: KretaError)
+    }
+    interface OnWorkersResult {
+        fun onWorkersSuccess(workers: List<Worker>)
+        fun onWorkersError(error: KretaError)
     }
 
     private val queue = Volley.newRequestQueue(ctx)
@@ -437,10 +438,10 @@ class KretaRequests(ctx: Context) {
             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/minkreta/${attachment.fileName}")
         downloadManager.enqueue(request)
     }
-    fun setMessageRead(messageId: Int, isRead: Boolean) { //TODO: DOESN'T WORK
+    fun setMessageRead(messageId: Int, isRead: Boolean) {
         val messageReadQuery = object : StringRequest(
             Method.POST,
-            "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/uzenetek/olvasott",
+            "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/olvasott",
             Response.Listener {},
             Response.ErrorListener {}
         ) {
@@ -450,7 +451,7 @@ class KretaRequests(ctx: Context) {
                 "User-Agent" to getUserAgent()
             )
             override fun getBodyContentType(): String = "application/json; charset=utf-8"
-            override fun getBody(): ByteArray = "{\"isOlvasott\": ${isRead},\"uzenetAzonositoLista\": [${messageId}] }".toByteArray()
+            override fun getBody(): ByteArray = "{\"isOlvasott\": ${isRead},\"postaladaElemAzonositoLista\": [${messageId}] }".toByteArray()
         }
         queue.add(messageReadQuery)
     }
@@ -570,5 +571,52 @@ class KretaRequests(ctx: Context) {
                 "User-Agent" to getUserAgent())
         }
         queue.add(studentDetailsQuery)
+    }
+    enum class ReceiverType(val endpoint: String?, val type: Type) {
+        Guardian(null,
+            Type(1, "GONDVISELO", "Gondviselő", "Gondviselő", "Gondviselő")),
+        Student(null,
+            Type(2, "TANULO", "Tanuló", "Tanuló", "Tanuló")),
+        ClassTutelary("kreta/gondviselok/osztaly",
+            Type(3, "OSZTALY_SZULO", "Osztály - Szülő", "Osztály - Szülő", "Osztály - Szülő")),
+        ClassStudent("kreta/tanulok/osztalyok",
+            Type(4, "OSZTALY_TANULO", "Osztály - Tanuló", "Osztály - Tanuló", "Osztály - Tanuló")),
+        ClassGroupTutelary( "kreta/gondviselok/tanoraicsoport",
+            Type(5, "TANORAICSOPORT_SZULO", "Tanórai csoport - Szülő", "Tanórai csoport - Szülő", "Tanórai csoport - Szülő")),
+        ClassGroupStudent( "kreta/tanulok/tanoraicsoportok",
+            Type(6, "TANORAICSOPORT_TANULO", "Tanórai csoport - Tanuló", "Tanórai csoport - Tanuló", "Tanórai csoport - Tanuló")),
+        Principal("kreta/alkalmazottak/igazgatosag",
+            Type(7, "IGAZGATOSAG", "Igazgatóság", "Igazgatóság", "Igazgatóság")),
+        ClassroomTeacher("kreta/alkalmazottak/oszalyfonok",
+            Type(8, "OSZTALYFONOK", "Osztályfőnök", "Osztályfőnök", "Osztályfőnök")),
+        Teacher("kreta/alkalmazottak/tanar",
+            Type(9, "TANAR", "Tanár", "Tanár", "Tanár")),
+        Admin("kreta/alkalmazottak/adminisztrator",
+            Type(10, "ADMIN", "Adminisztrátor", "Adminisztrátor", "Adminisztrátor")),
+        SzmkRepresentative("kommunikacio/szmkkepviselok/cimezheto",
+            Type(11, "SZMK_KEPVISELO", "SZMK képviselő", "SZMK képviselő", "SZMK képviselő"))
+    }
+    fun getReceivers(listener: OnWorkersResult, type: ReceiverType) {
+        val teachersQuery = object : StringRequest(
+            Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/${type.endpoint}",
+            Response.Listener { response ->
+                val workers = JsonHelper.makeWorkers(response, type.type)
+                if (workers != null) {
+                    listener.onWorkersSuccess(workers)
+                } else {
+                    listener.onWorkersError(KretaError.ParseError("unknown"))
+                }
+            },
+            Response.ErrorListener { error ->
+                listener.onWorkersError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
+                "User-Agent" to getUserAgent())
+        }
+        queue.add(teachersQuery)
     }
 }

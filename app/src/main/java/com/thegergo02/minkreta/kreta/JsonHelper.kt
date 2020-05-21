@@ -8,10 +8,8 @@ import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
-import com.thegergo02.minkreta.kreta.data.sub.Absence
-import com.thegergo02.minkreta.kreta.data.sub.Evaluation
-import com.thegergo02.minkreta.kreta.data.sub.Note
-import com.thegergo02.minkreta.kreta.data.sub.Notice
+import com.thegergo02.minkreta.kreta.data.message.Worker
+import com.thegergo02.minkreta.kreta.data.sub.*
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDayOrder
@@ -203,6 +201,22 @@ class JsonHelper {
             val adapter: JsonAdapter<StudentDetails> = moshi.adapter(
                 StudentDetails::class.java)
             return adapter.fromJson(studentDetailsString)
+        }
+
+        fun makeWorkers(workersString: String, type: Type): List<Worker>? {
+            val workers = mutableListOf<Worker>()
+            val workersJson = JSONArray(workersString)
+            val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
+            val adapter: JsonAdapter<Worker> = moshi.adapter(
+                Worker::class.java)
+            for (i in 0 until workersJson.length()) {
+                val worker = adapter.fromJson(workersJson[i].toString())
+                if (worker != null) {
+                    worker.type = type
+                    workers.add(worker)
+                }
+            }
+            return if (workers.isEmpty()) null else workers
         }
     }
 }

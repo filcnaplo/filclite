@@ -13,6 +13,7 @@ import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.LoginController
 import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.data.Institute
+import com.thegergo02.minkreta.ui.UIHelper
 import com.thegergo02.minkreta.view.LoginView
 import kotlinx.android.synthetic.main.activity_login.*
 
@@ -82,9 +83,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
     }
 
     override fun displayError(error: String) {
-        val errorSnack = Snackbar.make(login_cl, error, Snackbar.LENGTH_LONG)
-        errorSnack.view.setBackgroundColor(ContextCompat.getColor(this, R.color.colorError))
-        errorSnack.show()
+        UIHelper.displayError(this, login_cl, error)
     }
 
     override fun hideProgress() {

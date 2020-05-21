@@ -4,7 +4,7 @@ import com.squareup.moshi.Json
 import com.thegergo02.minkreta.kreta.data.sub.Type
 
 class Receiver(
-    @Json(name = "azonosito") val id: Int,
+    @Json(name = "azonosito") val id: Int?,
     @Json(name = "kretaAzonosito") val kretaId: Int,
     @Json(name = "kod") val code: String?,
     @Json(name = "rovidNev") val shortName: String?,

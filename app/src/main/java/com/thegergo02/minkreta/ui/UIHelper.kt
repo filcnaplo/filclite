@@ -6,6 +6,7 @@ import android.webkit.WebView
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.R
 
 class UIHelper {
@@ -54,6 +55,20 @@ class UIHelper {
                 "style=\"color: rgb(0, 0, 0);\"",
                 "style=\"color: white;\""
             )
+        }
+        fun displayError(ctx: Context, layout: View, error: String) {
+            val errorSnack = Snackbar.make(layout, error, Snackbar.LENGTH_LONG)
+            errorSnack.view.setBackgroundColor(ContextCompat.getColor(ctx,
+                R.color.colorError
+            ))
+            errorSnack.show()
+        }
+        fun displaySuccess(ctx: Context, layout: View, success: String) {
+            val successSnack = Snackbar.make(layout, success, Snackbar.LENGTH_LONG)
+            successSnack.view.setBackgroundColor(ContextCompat.getColor(ctx,
+                R.color.colorSuccess
+            ))
+            successSnack.show()
         }
     }
 }

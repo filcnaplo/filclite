@@ -325,11 +325,7 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun displayError(error: String) {
-        val errorSnack = Snackbar.make(main_cl, error, Snackbar.LENGTH_LONG)
-        errorSnack.view.setBackgroundColor(ContextCompat.getColor(this,
-            R.color.colorError
-        ))
-        errorSnack.show()
+        UIHelper.displayError(this, main_cl, error)
     }
 
     private fun showDetails() {
