@@ -34,6 +34,7 @@
     <!--MESSAGE ACTIVITY-->
     <string name="send_mea">Send</string>
     <string name="subject_mea">Subject</string>
+    <string name="receivers_mea">Receivers...</string>
     <string name="attachments_mea">Attachments...</string>
     <string name="add_attachment_mea">Add attachment</string>
     <string name="message_mea">Message</string>

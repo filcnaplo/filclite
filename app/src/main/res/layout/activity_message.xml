@@ -12,7 +12,6 @@
         android:id="@+id/receivertype_s"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:layout_weight="1"
         android:background="@color/colorPrimary"
         android:dropDownWidth="match_parent"
@@ -23,15 +22,13 @@
         android:scrollbarTrackHorizontal="@color/colorText"
         android:scrollbarTrackVertical="@color/colorText"
         android:spinnerMode="dropdown"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/receiver_s"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Spinner
         android:id="@+id/receiver_s"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
         android:layout_weight="1"
         android:background="@color/colorPrimary"
         android:dropDownWidth="match_parent"
@@ -42,9 +39,30 @@
         android:scrollbarTrackHorizontal="@color/colorText"
         android:scrollbarTrackVertical="@color/colorText"
         android:spinnerMode="dropdown"
-        app:layout_constraintBottom_toTopOf="@+id/subject_mea"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/receivertype_s" />
+
+    <EditText
+        android:id="@+id/receivers_tv"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_marginBottom="10dp"
+        android:autofillHints="subject"
+        android:background="@color/colorPrimary"
+        android:duplicateParentState="false"
+        android:ems="10"
+        android:focusable="false"
+        android:hint="@string/receivers_mea"
+        android:inputType="textShortMessage|none"
+        android:textColor="@color/colorText"
+        android:textColorHint="@color/colorText"
+        app:layout_constraintBottom_toTopOf="@id/subject_mea"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/receiver_s"
+        tools:layout_conversion_absoluteHeight="45dp"
+        tools:layout_conversion_absoluteWidth="213dp" />
 
     <EditText
         android:id="@+id/subject_mea"
@@ -58,10 +76,11 @@
         android:inputType="textPersonName"
         android:textColor="@color/colorText"
         android:textColorHint="@color/colorText"
+        app:layout_constraintBottom_toTopOf="@+id/message_mea"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/receiver_s"
+        app:layout_constraintTop_toBottomOf="@id/receivers_tv"
         tools:layout_conversion_absoluteHeight="45dp"
         tools:layout_conversion_absoluteWidth="213dp" />
 
@@ -69,7 +88,6 @@
         android:id="@+id/message_mea"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:autofillHints="message"
         android:background="@color/colorPrimary"
@@ -84,9 +102,10 @@
         android:textColorHint="@color/colorText"
         app:layout_constraintBottom_toTopOf="@+id/attachment_mea"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/subject_mea"
+        app:layout_constraintVertical_bias="1.0"
         tools:layout_conversion_absoluteHeight="45dp"
         tools:layout_conversion_absoluteWidth="213dp" />
 
@@ -94,7 +113,6 @@
         android:id="@+id/attachment_mea"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:layout_marginBottom="10dp"
         android:autofillHints="subject"
         android:background="@color/colorPrimary"
         android:duplicateParentState="false"
@@ -126,7 +144,7 @@
         android:id="@+id/message_btt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="75dp"
+        android:layout_marginBottom="50dp"
         android:background="@color/colorAccent"
         android:text="@string/send_mea"
         android:textColor="@color/colorText"
