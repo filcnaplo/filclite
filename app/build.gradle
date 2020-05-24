@@ -25,6 +25,10 @@ android {
     }
 }
 
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -41,4 +45,6 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'androidx.core:core:1.2.0'
-    implementation 'com.github.quickpermissions:quickpermissions-kotlin:0.4.0'}
+    implementation 'com.github.quickpermissions:quickpermissions-kotlin:0.4.0'
+    implementation 'com.github.hardillb:MultiPartVolley:0.0.3'
+}

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -101,7 +102,7 @@ class MessageActivity : AppCompatActivity(), MessageView {
                 position: Int,
                 id: Long
             ) {
-                if (!lockReceiverSpinner) {
+                if (!lockReceiverSpinner && position != 0) {
                     if (!selectableReceivers.isEmpty()) {
                         val receiver = selectableReceivers[position - 1]
                         if (!receivers.contains(receiver)) {
@@ -160,19 +161,28 @@ class MessageActivity : AppCompatActivity(), MessageView {
         receivertype_s.adapter = adapterReceiverType
     }
 
+    private fun uriToAttachment(uri: Uri, id: Int = 0): Attachment {
+        val inputStream = contentResolver.openInputStream(uri)
+        val fileName = contentResolver.query(uri, null, null, null, null)?.use {
+            val index = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            it.moveToFirst()
+            it.getString(index)
+        }
+        return Attachment(id, fileName ?: "", null, inputStream)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == OPEN_REQUEST_CODE && resultCode == Activity.RESULT_OK) data?.let {
             if (data.clipData == null) {
-                val file = (data.data ?: Uri.EMPTY).toFile()
-                attachments.add(Attachment(0, file.name, null, file))
+                val uri = data.data ?: Uri.EMPTY
+                attachments.add(uriToAttachment(uri))
             } else {
                 val itemCount = data.clipData?.itemCount ?: 0
                 for (i in 0 until itemCount) {
                     val uri = data.clipData?.getItemAt(i)?.uri
                     if (uri != null) {
-                        val file = uri.toFile()
-                        attachments.add(Attachment(i, file.name, null, file))
+                        attachments.add(uriToAttachment(uri))
                     }
                 }
             }
