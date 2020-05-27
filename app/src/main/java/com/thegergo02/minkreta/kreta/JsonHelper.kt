@@ -1,5 +1,6 @@
 package com.thegergo02.minkreta.kreta
 
+import android.util.Log
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -8,6 +9,7 @@ import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.kreta.data.message.TemporaryAttachment
 import com.thegergo02.minkreta.kreta.data.message.Worker
 import com.thegergo02.minkreta.kreta.data.sub.*
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
@@ -232,6 +234,12 @@ class JsonHelper {
                 }
             }
             return if (types.isEmpty()) null else types
+        }
+
+        fun temporaryIdFromString(response: String): String {
+            val moshi: Moshi = Moshi.Builder().build()
+            val adapter: JsonAdapter<TemporaryAttachment> = moshi.adapter(TemporaryAttachment::class.java)
+            return adapter.fromJson(response)?.id ?: ""
         }
     }
 }

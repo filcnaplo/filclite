@@ -129,7 +129,7 @@ class MessageActivity : AppCompatActivity(), MessageView {
         }
         message_btt.setOnClickListener {
             for (attachment in attachments) {
-                Log.w("attach", attachment.toString())
+                controller.uploadTemporaryAttachment(attachment)
             }
         }
         controller.getSendableReceiverTypes()
@@ -182,12 +182,37 @@ class MessageActivity : AppCompatActivity(), MessageView {
                 for (i in 0 until itemCount) {
                     val uri = data.clipData?.getItemAt(i)?.uri
                     if (uri != null) {
-                        attachments.add(uriToAttachment(uri))
+                        attachments.add(uriToAttachment(uri, i))
                     }
                 }
             }
+            var attachmentsText = ""
+            for (attachment in attachments) {
+                attachmentsText += "${attachment.fileName}, "
+            }
+            attachment_mea.setText(attachmentsText)
+            attachment_mea.setSelection(attachment_mea.length())
         }
     }
+
+    override fun assignAttachmentTemporaryId(attachment: Attachment) {
+        for (currentAttachment in attachments) {
+            if (currentAttachment.id == attachment.id) {
+                currentAttachment.temporaryId = attachment.temporaryId
+            }
+        }
+        var isSendable = true
+        for (attachment in attachments) {
+            if (attachment.temporaryId == null) {
+                isSendable = false
+                break
+            }
+        }
+        if (isSendable) {
+            controller.sendMessage(receivers, attachments, subject_mea.text.toString(), message_mea.text.toString())
+        }
+    }
+
     override fun displayError(error: String) {
         UIHelper.displayError(this, message_cl, error)
     }

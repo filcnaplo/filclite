@@ -10,8 +10,8 @@ import java.io.InputStream
 class Attachment(
     @Json(name = "azonosito") val id: Int,
     @Json(name = "fajlNev") val fileName: String,
-    val temporaryId: String?,
-    @Transient val inputStream: InputStream? = null
+    var temporaryId: String?,
+    @Transient var inputStream: InputStream? = null
 ) {
     override fun toString(): String {
         return "{\"fajlNev\": \"${fileName}\", \"azonosito\":\"${id}\", \"fajl\": {\"ideiglenesFajlAzonosito\":\"${temporaryId}\"}}"

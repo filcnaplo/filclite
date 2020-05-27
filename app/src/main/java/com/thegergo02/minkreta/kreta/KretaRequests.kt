@@ -2,17 +2,16 @@ package com.thegergo02.minkreta.kreta
 
 import android.app.DownloadManager
 import android.content.Context
+import android.net.Network
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import android.webkit.MimeTypeMap
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
-import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
@@ -26,8 +25,12 @@ import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
+import uk.me.hardill.volley.multipart.MultipartRequest
 import java.net.URLConnection
 import java.util.*
+
 
 class KretaRequests(ctx: Context) {
     private var accessToken = ""
@@ -116,14 +119,19 @@ class KretaRequests(ctx: Context) {
         fun onSendableReceiverTypesSuccess(types: List<Type>)
         fun onSendableReceiverTypesError(error: KretaError)
     }
-
-    private val queue = Volley.newRequestQueue(ctx)
+    interface OnUploadTemporaryAttachmentResult {
+        fun onUploadTemporaryAttachmentSuccess(attachment: Attachment)
+        fun onUploadTemporaryAttachmentError(error: KretaError)
+    }
 
     private var userAgent = "hu.ekreta.student/<version>/<codename>"
     private var apiKey = "7856d350-1fda-45f5-822d-e1a2f3f1acf0"
     private var clientId = "KRETA-ELLENORZO-MOBILE"
     private var loginUrl = "https://idp.e-kreta.hu"
     private var apiUrl = "https://kretaglobalmobileapi2.ekreta.hu"
+
+    private val networkHelper = NetworkHelper(ctx)
+    private val queue = networkHelper.queue //TODO: REMOVE!!!!!!
 
     init {
         GlobalScope.launch {
@@ -133,18 +141,17 @@ class KretaRequests(ctx: Context) {
 
     private val KRETA_DETAILS_URL = "https://thegergo02.github.io/settings.json"
     private fun getKretaDetails() {
-        val userAgentQuery = JsonObjectRequest(Request.Method.GET, KRETA_DETAILS_URL, null,
-            Response.Listener { response ->
-                userAgent = response["kretaUserAgent"].toString().replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
-                apiKey = response["apiKey"].toString()
-                clientId = response["clientId"].toString()
-                loginUrl = response["loginUrl"].toString()
-            },
-            Response.ErrorListener {
-                userAgent = userAgent.replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
-            }
-        )
-        queue.add(userAgentQuery)
+        val successListener = Response.Listener<JSONObject> { response ->
+            userAgent = response["kretaUserAgent"].toString().replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
+            apiKey = response["apiKey"].toString()
+            clientId = response["clientId"].toString()
+            loginUrl = response["loginUrl"].toString()
+        }
+        val errorListener = Response.ErrorListener {
+            userAgent = userAgent.replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
+        }
+        val request = NetworkJsonObjectRequest(Request.Method.GET, KRETA_DETAILS_URL, successListener, errorListener)
+        networkHelper.requestJsonObject(request)
     }
     fun getUserAgent() : String {
         while (userAgent == "") {
@@ -161,94 +168,104 @@ class KretaRequests(ctx: Context) {
     }
 
     fun getInstitutes(listener: OnInstitutesResult) {
-        val institutesQuery = object : JsonArrayRequest(
-            Method.GET, "${apiUrl}/api/v3/Institute", null,
-            Response.Listener { response ->
-                val instituteList = JsonHelper.makeInstitutes(response)
-                if (instituteList != null) {
-                    listener.onInstitutesSuccess(instituteList)
-                } else {
-                    listener.onInstitutesError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onInstitutesError(KretaError.VolleyError(error.toString(), error))
+        val successListener = Response.Listener<JSONArray> { response ->
+            val institutes = JsonHelper.makeInstitutes(response)
+            if (institutes != null) {
+                listener.onInstitutesSuccess(institutes)
+            } else {
+                listener.onInstitutesError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to apiKey)
         }
-        queue.add(institutesQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onInstitutesError(KretaError.VolleyError(error.toString(), error))
+        }
+        val request = NetworkJsonArrayRequest(Request.Method.GET,
+            "${apiUrl}/api/v3/Institute",
+            successListener,
+            errorListener,
+            mapOf(NetworkHelper.Header.ApiKey to apiKey))
+        networkHelper.requestJsonArray(request)
     }
 
     fun getTokens(listener: OnTokensResult, userName: String, password: String, instituteCode: String) {
-        val tokensQuery = object : StringRequest(
-            Method.POST, "$loginUrl/connect/token",
-            Response.Listener { response ->
-                val tokens = JsonHelper.makeTokens(response)
-                if (tokens != null) {
-                    listener.onTokensSuccess(tokens)
-                } else {
-                    listener.onTokensError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onTokensError(KretaError.VolleyError(error.toString(), error))
+        val successListener = Response.Listener<String> { response ->
+            val tokens = JsonHelper.makeTokens(response)
+            if (tokens != null) {
+                listener.onTokensSuccess(tokens)
+            } else {
+                listener.onTokensError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to apiKey,
-                "Accept" to "application/json",
-                "User-Agent" to getUserAgent())
-            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
-            override fun getBody(): ByteArray = "password=$password&institute_code=$instituteCode&grant_type=password&client_id=$clientId&userName=$userName".toByteArray()
         }
-        queue.add(tokensQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onTokensError(KretaError.VolleyError(error.toString(), error))
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.ApiKey to apiKey,
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.POST,
+            "$loginUrl/connect/token",
+            successListener,
+            errorListener,
+            headers,
+            "application/x-www-form-urlencoded",
+            "password=$password&institute_code=$instituteCode&grant_type=password&client_id=$clientId&userName=$userName"
+        )
+        networkHelper.requestString(request)
     }
     fun refreshToken(listener: OnRefreshTokensResult) {
-        val tokensQuery = object : StringRequest(
-            Method.POST, "$loginUrl/connect/token",
-            Response.Listener { response ->
-                val tokens = JsonHelper.makeTokens(response)
-                if (tokens != null) {
-                    accessToken = tokens["access_token"].toString()
-                    refreshToken = tokens["refresh_token"].toString()
-                    listener.onRefreshTokensSuccess(tokens)
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onRefreshTokensError(KretaError.VolleyError(error.toString(), error))
+        val successListener =  Response.Listener<String> { response ->
+            val tokens = JsonHelper.makeTokens(response)
+            if (tokens != null) {
+                accessToken = tokens["access_token"].toString()
+                refreshToken = tokens["refresh_token"].toString()
+                listener.onRefreshTokensSuccess(tokens)
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("apiKey" to apiKey,
-                "Accept" to "application/json",
-                "User-Agent" to getUserAgent())
-            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
-            override fun getBody(): ByteArray = "refresh_token=$refreshToken&institute_code=$instituteCode&grant_type=refresh_token&client_id=$clientId".toByteArray()
         }
-        queue.add(tokensQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onRefreshTokensError(KretaError.VolleyError(error.toString(), error))
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.ApiKey to apiKey,
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.POST,
+            "$loginUrl/connect/token",
+        successListener,
+        errorListener,
+        headers,
+        "application/x-www-form-urlencoded",
+        "refresh_token=$refreshToken&institute_code=$instituteCode&grant_type=refresh_token&client_id=$clientId")
+        networkHelper.requestString(request)
     }
     fun getEvaluationList(listener: OnEvaluationListResult) {
-        val evalQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Ertekelesek",
-            Response.Listener { response ->
-                val evals = JsonHelper.makeEvaluationList(response)
-                if (evals != null) {
-                    listener.onEvaluationListSuccess(evals)
-                } else {
-                    listener.onEvaluationListError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onEvaluationListError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> {  response ->
+            val evals = JsonHelper.makeEvaluationList(response)
+            if (evals != null) {
+                listener.onEvaluationListSuccess(evals)
+            } else {
+                listener.onEvaluationListError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json",
-                "User-Agent" to getUserAgent())
         }
-        queue.add(evalQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onEvaluationListError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET,
+            "$instituteUrl/ellenorzo/V3/Sajat/Ertekelesek",
+        successListener,
+        errorListener,
+        headers)
+        networkHelper.requestString(request)
     }
     fun getNoteList(listener: OnNoteListResult) {
         val noteQuery = object : StringRequest(
@@ -379,13 +396,17 @@ class KretaRequests(ctx: Context) {
     fun sendMessage(listener: OnSendMessageResult, receivers: List<Receiver>, attachments: List<Attachment>, subject: String, content: String, replyId: Int? = null) {
         var receiversText = ""
         var attachmentText = ""
-        var replyText = if (replyId != null) { ",\"elozoUzenetAzonosito\":$replyId" } else { "" }
+        val replyText = if (replyId != null) { ",\"elozoUzenetAzonosito\":$replyId" } else { "" }
         for (receiver in receivers) {
             receiversText += "$receiver,"
         }
+        receiversText = receiversText.dropLast(1)
         for (attachment in attachments) {
             attachmentText += "$attachment,"
         }
+        attachmentText = attachmentText.dropLast(1)
+        val body = "{\"cimzettLista\":[$receiversText],\"csatolmanyok\":[$attachmentText], \"targy\":\"$subject\", \"szoveg\":\"$content\" $replyText}"
+        Log.w("body", body)
         val sendMessageQuery = object : StringRequest(
             Method.POST, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/uzenetek",
             Response.Listener { listener.onSendMessageSuccess() },
@@ -400,7 +421,7 @@ class KretaRequests(ctx: Context) {
                 "X-Uzenet-Lokalizacio" to "hu-HU",
                 "User-Agent" to getUserAgent())
             override fun getBodyContentType(): String = "application/json; charset=utf-8"
-            override fun getBody(): ByteArray = "{\"cimzettLista\":[$receiversText],\"csatolmanyok\":[$attachmentText], \"targy\":\"$subject\", \"szoveg\":\"$content\" $replyText}".toByteArray()
+            override fun getBody(): ByteArray = body.toByteArray()
         }
         queue.add(sendMessageQuery)
     }
@@ -441,6 +462,29 @@ class KretaRequests(ctx: Context) {
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/minkreta/${attachment.fileName}")
         downloadManager.enqueue(request)
+    }
+    fun uploadTemporaryAttachment(listener: OnUploadTemporaryAttachmentResult, attachment: Attachment) {
+        val request = MultipartRequest("https://eugyintezes.e-kreta.hu/api/v1/ideiglenesfajlok", mutableMapOf("Authorization" to "Bearer $accessToken",
+            "Accept" to "application/json",
+            "User-Agent" to getUserAgent()),
+            Response.Listener { response ->
+                attachment.temporaryId = JsonHelper.temporaryIdFromString(response.data.toString(Charsets.UTF_8))
+                listener.onUploadTemporaryAttachmentSuccess(attachment)
+            },
+            Response.ErrorListener { error ->
+                listener.onUploadTemporaryAttachmentError(KretaError.VolleyError(error.toString(), error))
+                if (isRefreshTokenNeeded(error)) {
+                    refreshToken(tokenListener)
+                }
+            })
+        val mimeMap = MimeTypeMap.getSingleton()
+        val mimeType = mimeMap.getMimeTypeFromExtension(mimeMap.getExtensionFromMimeType(attachment.fileName)) ?: URLConnection.guessContentTypeFromName(attachment.fileName)
+        attachment.inputStream?.use {
+            val data: ByteArray = it.readBytes()
+            request.addPart(MultipartRequest.FilePart("fajl", mimeType, attachment.fileName, data))
+            queue.add(request)
+        }
+        attachment.inputStream = null
     }
     fun setMessageRead(messageId: Int, isRead: Boolean) {
         val messageReadQuery = object : StringRequest(

@@ -118,7 +118,7 @@
         android:ems="10"
         android:focusable="false"
         android:hint="@string/attachments_mea"
-        android:inputType="none"
+        android:inputType="textShortMessage|none"
         android:textColor="@color/colorText"
         android:textColorHint="@color/colorText"
         app:layout_constraintBottom_toTopOf="@+id/attachment_btt"

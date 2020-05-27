@@ -15,7 +15,8 @@ class MessageController(ctx: Context, private val messageView: MessageView?, acc
     : KretaRequests.OnSendMessageResult,
     KretaRequests.OnRefreshTokensResult,
     KretaRequests.OnWorkersResult,
-    KretaRequests.OnSendableReceiverTypesResult {
+    KretaRequests.OnSendableReceiverTypesResult,
+    KretaRequests.OnUploadTemporaryAttachmentResult {
 
     private val apiHandler = KretaRequests(ctx, this, accessToken, refreshToken, instituteCode)
 
@@ -37,6 +38,13 @@ class MessageController(ctx: Context, private val messageView: MessageView?, acc
         val parentListener = this
         GlobalScope.launch {
             apiHandler.getSendableReceiverTypes(parentListener)
+        }
+    }
+
+    fun uploadTemporaryAttachment(attachment: Attachment) {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.uploadTemporaryAttachment(parentListener, attachment)
         }
     }
 
@@ -69,6 +77,13 @@ class MessageController(ctx: Context, private val messageView: MessageView?, acc
         messageView?.generateSendableReceiverTypes(types)
     }
     override fun onSendableReceiverTypesError(error: KretaError) {
+        messageView?.displayError(error.errorString)
+    }
+
+    override fun onUploadTemporaryAttachmentSuccess(attachment: Attachment) {
+        messageView?.assignAttachmentTemporaryId(attachment)
+    }
+    override fun onUploadTemporaryAttachmentError(error: KretaError) {
         messageView?.displayError(error.errorString)
     }
 }
