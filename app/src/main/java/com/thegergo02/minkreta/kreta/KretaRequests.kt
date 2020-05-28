@@ -2,7 +2,6 @@ package com.thegergo02.minkreta.kreta
 
 import android.app.DownloadManager
 import android.content.Context
-import android.net.Network
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
@@ -268,130 +267,121 @@ class KretaRequests(ctx: Context) {
         networkHelper.requestString(request)
     }
     fun getNoteList(listener: OnNoteListResult) {
-        val noteQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Feljegyzesek",
-            Response.Listener { response ->
-                val notes = JsonHelper.makeNoteList(response)
-                if (notes != null) {
-                    listener.onNoteListSuccess(notes)
-                } else {
-                    listener.onNoteListError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onNoteListError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val notes = JsonHelper.makeNoteList(response)
+            if (notes != null) {
+                listener.onNoteListSuccess(notes)
+            } else {
+                listener.onNoteListError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json",
-                "User-Agent" to getUserAgent())
-            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
-        queue.add(noteQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onNoteListError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Feljegyzesek", successListener, errorListener, headers)
+        networkHelper.requestString(request)
     }
     fun getNoticeList(listener: OnNoticeListResult) {
-        val noticeQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/FaliujsagElemek",
-            Response.Listener { response ->
-                val notice = JsonHelper.makeNoticeList(response)
-                if (notice != null) {
-                    listener.onNoticeListSuccess(notice)
-                } else {
-                    listener.onNoticeListError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onNoticeListError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val notice = JsonHelper.makeNoticeList(response)
+            if (notice != null) {
+                listener.onNoticeListSuccess(notice)
+            } else {
+                listener.onNoticeListError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json",
-                "User-Agent" to getUserAgent())
-            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
-        queue.add(noticeQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onNoticeListError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/FaliujsagElemek", successListener, errorListener, headers)
+        networkHelper.requestString(request)
     }
     fun getAbsenceList(listener: OnAbsenceListResult) {
-        val absenceQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Mulasztasok",
-            Response.Listener { response ->
-                val absences = JsonHelper.makeAbsenceList(response)
-                if (absences != null) {
-                    listener.onAbsenceListSuccess(absences)
-                } else {
-                    listener.onAbsenceListError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onAbsenceListError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val absences = JsonHelper.makeAbsenceList(response)
+            if (absences != null) {
+                listener.onAbsenceListSuccess(absences)
+            } else {
+                listener.onAbsenceListError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json",
-                "User-Agent" to getUserAgent())
-            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
-        queue.add(absenceQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onAbsenceListError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/Mulasztasok", successListener, errorListener, headers)
+        networkHelper.requestString(request)
     }
 
     fun getTimetable(listener: OnTimetableResult, fromDate: KretaDate, toDate: KretaDate) {
-        val timetableQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/OrarendElemek?datumTol=${fromDate.toFormattedString(KretaDate.KretaDateFormat.API_DATE)}&datumIg=${toDate.toFormattedString(KretaDate.KretaDateFormat.API_DATE)}",
-            Response.Listener { response ->
-                val timetable = JsonHelper.makeTimetable(response)
-                if (timetable != null) {
-                    listener.onTimetableSuccess(timetable)
-                } else {
-                    listener.onTimetableError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onTimetableError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val timetable = JsonHelper.makeTimetable(response)
+            if (timetable != null) {
+                listener.onTimetableSuccess(timetable)
+            } else {
+                listener.onTimetableError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "User-Agent" to getUserAgent())
-            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
-        queue.add(timetableQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onTimetableError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/OrarendElemek?datumTol=${fromDate.toFormattedString(KretaDate.KretaDateFormat.API_DATE)}&datumIg=${toDate.toFormattedString(KretaDate.KretaDateFormat.API_DATE)}", successListener, errorListener, headers)
+        networkHelper.requestString(request)
     }
 
     fun getMessageList(listener: OnMessageListResult, sortType: MessageDescriptor.SortType) {
-        val messageListQuery = object : StringRequest(
-            Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/sajat",
-            Response.Listener { response ->
-                val messageList = JsonHelper.makeMessageList(response)
-                if (messageList != null) {
-                    listener.onMessageListSuccess(messageList, sortType)
-                } else {
-                    listener.onMessageListError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onMessageListError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val messageList = JsonHelper.makeMessageList(response)
+            if (messageList != null) {
+                listener.onMessageListSuccess(messageList, sortType)
+            } else {
+                listener.onMessageListError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json",
-                "User-Agent" to getUserAgent())
-            override fun getBodyContentType(): String = "application/x-www-form-urlencoded"
         }
-        queue.add(messageListQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onMessageListError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/sajat", successListener, errorListener, headers)
+        networkHelper.requestString(request)
     }
     fun sendMessage(listener: OnSendMessageResult, receivers: List<Receiver>, attachments: List<Attachment>, subject: String, content: String, replyId: Int? = null) {
         var receiversText = ""
@@ -426,28 +416,27 @@ class KretaRequests(ctx: Context) {
         queue.add(sendMessageQuery)
     }
     fun getMessage(listener: OnMessageResult, messageId: Int) {
-        val messageQuery = object : StringRequest(
-            Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/$messageId",
-            Response.Listener { response ->
-                val message = JsonHelper.makeMessage(response)
-                if (message != null) {
-                    listener.onMessageSuccess(message)
-                } else {
-                    listener.onMessageError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onMessageError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val message = JsonHelper.makeMessage(response)
+            if (message != null) {
+                listener.onMessageSuccess(message)
+            } else {
+                listener.onMessageError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json",
-                "User-Agent" to getUserAgent())
         }
-        queue.add(messageQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onMessageError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/$messageId", successListener, errorListener, headers)
+        networkHelper.requestString(request)
     }
     fun downloadAttachment(downloadManager: DownloadManager, attachment: Attachment) {
         val uri = Uri.parse("https://eugyintezes.e-kreta.hu/api/v1/dokumentumok/uzenetek/${attachment.id}")
@@ -487,138 +476,140 @@ class KretaRequests(ctx: Context) {
         attachment.inputStream = null
     }
     fun setMessageRead(messageId: Int, isRead: Boolean) {
-        val messageReadQuery = object : StringRequest(
-            Method.POST,
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.POST,
             "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/olvasott",
             Response.Listener {},
-            Response.ErrorListener {}
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf(
-                "Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json",
-                "User-Agent" to getUserAgent()
-            )
-            override fun getBodyContentType(): String = "application/json; charset=utf-8"
-            override fun getBody(): ByteArray = "{\"isOlvasott\": ${isRead},\"postaladaElemAzonositoLista\": [${messageId}] }".toByteArray()
-        }
-        queue.add(messageReadQuery)
+            Response.ErrorListener {},
+            headers,
+            "application/json; charset=utf-8",
+            "{\"isOlvasott\": ${isRead},\"postaladaElemAzonositoLista\": [${messageId}] }")
+        networkHelper.requestString(request)
     }
 
     fun getTestList(listener: OnTestListResult) {
-        val testsQuery = object : StringRequest(
-            Method.GET, "${instituteUrl}/ellenorzo/V3/Sajat/BejelentettSzamonkeresek",
-            Response.Listener { response ->
-                val testList = JsonHelper.makeTestList(response)
-                if (testList != null) {
-                    listener.onTestListSuccess(testList)
-                } else {
-                    listener.onTestListError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onTestListError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val tests = JsonHelper.makeTestList(response)
+            if (tests != null) {
+                listener.onTestListSuccess(tests)
+            } else {
+                listener.onTestListError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "Accept" to "application/json",
-                "User-Agent" to getUserAgent())
         }
-        queue.add(testsQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onTestListError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/BejelentettSzamonkeresek", successListener, errorListener, headers)
+        networkHelper.requestString(request)
     }
 
     fun getHomeworkList(listener: OnHomeworkListResult, fromDate: KretaDate) {
-        val homeworkQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/HaziFeladatok?datumTol=$fromDate",
-            Response.Listener { response ->
-                val homeworks = JsonHelper.makeHomeworkList(response)
-                if (homeworks != null) {
-                    listener.onHomeworkListSuccess(homeworks)
-                } else {
-                    listener.onHomeworkListError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onHomeworkListError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val homeworks = JsonHelper.makeHomeworkList(response)
+            if (homeworks != null) {
+                listener.onHomeworkListSuccess(homeworks)
+            } else {
+                listener.onHomeworkListError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "User-Agent" to getUserAgent())
         }
-        queue.add(homeworkQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onHomeworkListError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/HaziFeladatok?datumTol=$fromDate", successListener, errorListener, headers)
+        networkHelper.requestString(request)
     }
     fun getHomeworkCommentList(listener: OnHomeworkCommentListResult, homeworkUid: String) {
-        val homeworkCommentQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/HaziFeladatok/$homeworkUid/Kommentek",
-            Response.Listener { response ->
-                val comments = JsonHelper.makeHomeworkCommentList(response)
-                if (comments != null) {
-                    listener.onHomeworkCommentListSuccess(comments)
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onHomeworkCommentListError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val comments = JsonHelper.makeHomeworkCommentList(response)
+            if (comments != null) {
+                listener.onHomeworkCommentListSuccess(comments)
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "User-Agent" to getUserAgent())
         }
-        queue.add(homeworkCommentQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onHomeworkCommentListError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/HaziFeladatok/$homeworkUid/Kommentek", successListener, errorListener, headers)
+        networkHelper.requestString(request)
     }
     fun sendHomeworkComment(listener: OnSendHomeworkCommentResult, homeworkUid: String, text: String) {
-        val sendHomeworkCommentQuery = object : StringRequest(
-            Method.POST,
-            "$instituteUrl/ellenorzo/V3/Sajat/Orak/TanitasiOrak/HaziFeladatok/Kommentek",
-            Response.Listener {
-                listener.onSendHomeworkSuccess(homeworkUid)
-            },
-            Response.ErrorListener { error ->
-                listener.onSendHomeworkError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
-            }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf(
-                "Authorization" to "Bearer $accessToken",
-                "User-Agent" to getUserAgent()
-            )
-            override fun getBodyContentType(): String = "application/json; charset=utf-8"
-            override fun getBody(): ByteArray = "{\"HaziFeladatUid\":$homeworkUid,\"FeladatSzovege\":\"$text\"}".toByteArray()
+        val successListener = Response.Listener<String> { response ->
+            listener.onSendHomeworkSuccess(homeworkUid)
         }
-        queue.add(sendHomeworkCommentQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onSendHomeworkError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.POST,
+            "$instituteUrl/ellenorzo/V3/Sajat/Orak/TanitasiOrak/HaziFeladatok/Kommentek",
+            successListener,
+            errorListener,
+            headers,
+        "application/json; charset=utf-8",
+        "{\"HaziFeladatUid\":$homeworkUid,\"FeladatSzovege\":\"$text\"}")
+        networkHelper.requestString(request)
     }
 
     fun getStudentDetails(listener: OnStudentDetailsResult) {
-        val studentDetailsQuery = object : StringRequest(
-            Method.GET, "$instituteUrl/ellenorzo/V3/Sajat/TanuloAdatlap",
-            Response.Listener { response ->
-                val studentDetails = JsonHelper.makeStudentDetails(response)
-                if (studentDetails != null) {
-                    listener.onStudentDetailsSuccess(studentDetails)
-                } else {
-                    listener.onStudentDetailsError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onStudentDetailsError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val studentDetails = JsonHelper.makeStudentDetails(response)
+            if (studentDetails != null) {
+                listener.onStudentDetailsSuccess(studentDetails)
+            } else {
+                listener.onStudentDetailsError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "User-Agent" to getUserAgent())
         }
-        queue.add(studentDetailsQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onStudentDetailsError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET,
+            "$instituteUrl/ellenorzo/V3/Sajat/TanuloAdatlap",
+            successListener,
+            errorListener,
+            headers)
+        networkHelper.requestString(request)
     }
     enum class ReceiverType(val endpoint: String?, val type: Type) {
         Guardian(null,
@@ -645,49 +636,57 @@ class KretaRequests(ctx: Context) {
             Type(11, "SZMK_KEPVISELO", "SZMK képviselő", "SZMK képviselő", "SZMK képviselő"))
     }
     fun getReceivers(listener: OnWorkersResult, type: ReceiverType) {
-        val teachersQuery = object : StringRequest(
-            Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/${type.endpoint}",
-            Response.Listener { response ->
-                val workers = JsonHelper.makeWorkers(response, type.type)
-                if (workers != null) {
-                    listener.onWorkersSuccess(workers)
-                } else {
-                    listener.onWorkersError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onWorkersError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val workers = JsonHelper.makeWorkers(response, type.type)
+            if (workers != null) {
+                listener.onWorkersSuccess(workers)
+            } else {
+                listener.onWorkersError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "User-Agent" to getUserAgent())
         }
-        queue.add(teachersQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onWorkersError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET,
+            "https://eugyintezes.e-kreta.hu/api/v1/${type.endpoint}",
+            successListener,
+            errorListener,
+            headers)
+        networkHelper.requestString(request)
     }
     fun getSendableReceiverTypes(listener: OnSendableReceiverTypesResult) {
-        val sendableReceiverTypesQuery = object : StringRequest(
-            Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/cimezhetotipusok",
-            Response.Listener { response ->
-                val workers = JsonHelper.makeTypes(response)
-                if (workers != null) {
-                    listener.onSendableReceiverTypesSuccess(workers)
-                } else {
-                    listener.onSendableReceiverTypesError(KretaError.ParseError("unknown"))
-                }
-            },
-            Response.ErrorListener { error ->
-                listener.onSendableReceiverTypesError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { response ->
+            val workers = JsonHelper.makeTypes(response)
+            if (workers != null) {
+                listener.onSendableReceiverTypesSuccess(workers)
+            } else {
+                listener.onSendableReceiverTypesError(KretaError.ParseError("unknown"))
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "User-Agent" to getUserAgent())
         }
-        queue.add(sendableReceiverTypesQuery)
+        val errorListener = Response.ErrorListener { error ->
+            listener.onSendableReceiverTypesError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.GET,
+            "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/cimezhetotipusok",
+            successListener,
+            errorListener,
+            headers)
+        networkHelper.requestString(request)
     }
 }
