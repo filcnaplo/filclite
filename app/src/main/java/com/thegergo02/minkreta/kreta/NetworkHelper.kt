@@ -2,6 +2,7 @@ package com.thegergo02.minkreta.kreta
 
 import android.content.Context
 import android.util.Log
+import com.android.volley.NetworkResponse
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
@@ -9,6 +10,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONObject
+import uk.me.hardill.volley.multipart.MultipartRequest
 
 open class NetworkRequest(
     val method: Int,
@@ -16,6 +18,11 @@ open class NetworkRequest(
     val headers: Map<NetworkHelper.Header, String>? = null,
     val contentType: String? = null,
     val body: String? = null
+)
+
+data class MultiPart ( //TODO: SOMEHOW MAKE THE PARENT CLASS FROM MULTIPARTREQUEST PUBLIC
+    val formPart: MultipartRequest.FormPart? = null,
+    val filePart: MultipartRequest.FilePart? = null
 )
 
 class NetworkJsonObjectRequest(method: Int,
@@ -39,9 +46,17 @@ class NetworkStringRequest(method: Int,
                               headers: Map<NetworkHelper.Header, String>? = null,
                               contentType: String? = null,
                               body: String? = null): NetworkRequest(method, url, headers, contentType, body)
+class NetworkMultiPartRequest(method: Int,
+                              url: String,
+                              val successListener: Response.Listener<NetworkResponse>,
+                              val errorListener: Response.ErrorListener,
+                              val parts: List<MultiPart>,
+                              headers: Map<NetworkHelper.Header, String>? = null,
+                              contentType: String? = null,
+                              body: String? = null): NetworkRequest(method, url, headers, contentType, body)
 
 class NetworkHelper(ctx: Context) {
-    val queue = Volley.newRequestQueue(ctx) //TODO: MAKE PRIVATE!!!!!!!
+    private val queue = Volley.newRequestQueue(ctx)
 
     enum class Header(val key: String) {
         ApiKey("apiKey"),
@@ -84,6 +99,18 @@ class NetworkHelper(ctx: Context) {
             override fun getHeaders(): MutableMap<String, String> = generateHeaders(request.headers)
             override fun getBodyContentType(): String = request.contentType ?: ""
             override fun getBody(): ByteArray = request.body?.toByteArray() ?: "".toByteArray()
+        }
+        queue.add(query)
+    }
+
+    fun requestMultiPart(request: NetworkMultiPartRequest) {
+        val query = MultipartRequest(request.url, generateHeaders(request.headers), request.successListener, request.errorListener)
+        for (part in request.parts) {
+            if (part.filePart != null) {
+                query.addPart(part.filePart)
+            } else if (part.formPart != null) {
+                query.addPart(part.formPart)
+            }
         }
         queue.add(query)
     }

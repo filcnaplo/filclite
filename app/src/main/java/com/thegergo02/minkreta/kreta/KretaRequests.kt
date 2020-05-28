@@ -6,10 +6,7 @@ import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import android.webkit.MimeTypeMap
-import com.android.volley.AuthFailureError
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.VolleyError
+import com.android.volley.*
 import com.android.volley.toolbox.StringRequest
 import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.homework.Homework
@@ -130,7 +127,6 @@ class KretaRequests(ctx: Context) {
     private var apiUrl = "https://kretaglobalmobileapi2.ekreta.hu"
 
     private val networkHelper = NetworkHelper(ctx)
-    private val queue = networkHelper.queue //TODO: REMOVE!!!!!!
 
     init {
         GlobalScope.launch {
@@ -396,24 +392,26 @@ class KretaRequests(ctx: Context) {
         }
         attachmentText = attachmentText.dropLast(1)
         val body = "{\"cimzettLista\":[$receiversText],\"csatolmanyok\":[$attachmentText], \"targy\":\"$subject\", \"szoveg\":\"$content\" $replyText}"
-        Log.w("body", body)
-        val sendMessageQuery = object : StringRequest(
-            Method.POST, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/uzenetek",
-            Response.Listener { listener.onSendMessageSuccess() },
-            Response.ErrorListener { error ->
-                listener.onSendMessageError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
+        val successListener = Response.Listener<String> { listener.onSendMessageSuccess() }
+        val errorListener = Response.ErrorListener {  error ->
+            listener.onSendMessageError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = mutableMapOf("Authorization" to "Bearer $accessToken",
-                "X-Uzenet-Lokalizacio" to "hu-HU",
-                "User-Agent" to getUserAgent())
-            override fun getBodyContentType(): String = "application/json; charset=utf-8"
-            override fun getBody(): ByteArray = body.toByteArray()
         }
-        queue.add(sendMessageQuery)
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.ManagementLocalization to "hu-HU",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.POST,
+            "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/uzenetek",
+            successListener,
+            errorListener,
+            headers,
+            "application/json; charset=utf-8",
+            body)
+        networkHelper.requestString(request)
     }
     fun getMessage(listener: OnMessageResult, messageId: Int) {
         val successListener = Response.Listener<String> { response ->
@@ -453,27 +451,37 @@ class KretaRequests(ctx: Context) {
         downloadManager.enqueue(request)
     }
     fun uploadTemporaryAttachment(listener: OnUploadTemporaryAttachmentResult, attachment: Attachment) {
-        val request = MultipartRequest("https://eugyintezes.e-kreta.hu/api/v1/ideiglenesfajlok", mutableMapOf("Authorization" to "Bearer $accessToken",
-            "Accept" to "application/json",
-            "User-Agent" to getUserAgent()),
-            Response.Listener { response ->
-                attachment.temporaryId = JsonHelper.temporaryIdFromString(response.data.toString(Charsets.UTF_8))
-                listener.onUploadTemporaryAttachmentSuccess(attachment)
-            },
-            Response.ErrorListener { error ->
-                listener.onUploadTemporaryAttachmentError(KretaError.VolleyError(error.toString(), error))
-                if (isRefreshTokenNeeded(error)) {
-                    refreshToken(tokenListener)
-                }
-            })
+        val successListener = Response.Listener<NetworkResponse> {
+            attachment.temporaryId = JsonHelper.temporaryIdFromString(it.data.toString(Charsets.UTF_8))
+            listener.onUploadTemporaryAttachmentSuccess(attachment)
+        }
+        val errorListener = Response.ErrorListener { error ->
+            listener.onUploadTemporaryAttachmentError(KretaError.VolleyError(error.toString(), error))
+            if (isRefreshTokenNeeded(error)) {
+                refreshToken(tokenListener)
+            }
+        }
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
         val mimeMap = MimeTypeMap.getSingleton()
         val mimeType = mimeMap.getMimeTypeFromExtension(mimeMap.getExtensionFromMimeType(attachment.fileName)) ?: URLConnection.guessContentTypeFromName(attachment.fileName)
+        var part = MultiPart()
         attachment.inputStream?.use {
             val data: ByteArray = it.readBytes()
-            request.addPart(MultipartRequest.FilePart("fajl", mimeType, attachment.fileName, data))
-            queue.add(request)
+            part = MultiPart(null, MultipartRequest.FilePart("fajl", mimeType, attachment.fileName, data))
+
         }
         attachment.inputStream = null
+        val request = NetworkMultiPartRequest(Request.Method.GET,
+            "https://eugyintezes.e-kreta.hu/api/v1/ideiglenesfajlok",
+            successListener,
+            errorListener,
+            listOf(part),
+            headers)
+        networkHelper.requestMultiPart(request)
     }
     fun setMessageRead(messageId: Int, isRead: Boolean) {
         val headers = mapOf(
