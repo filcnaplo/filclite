@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">MinKreta</string>
     <string name="auth_path">com.thegergo02.minkreta.auth</string>
+    <string name="theme_path">com.thegergo02.minkreta.theme</string>
     <!--ERRORS-->
     <string name="timeout_error_general">The KRETA servers took too long to respond!</string>
     <string name="network_error_general">The request abruptly closed!</string>

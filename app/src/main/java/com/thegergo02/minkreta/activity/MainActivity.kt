@@ -59,12 +59,17 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val sharedPrefTheme = getSharedPreferences(getString(R.string.theme_path), Context.MODE_PRIVATE) ?: return
+        val isDark = sharedPrefTheme.getBoolean("dark", true)
+        if (!isDark) {
+            setTheme(R.style.LightTheme)
+        }
         setContentView(R.layout.activity_main)
 
-        val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
-        val accessToken = sharedPref.getString("accessToken", null)
-        val refreshToken = sharedPref.getString("refreshToken", null)
-        val instituteCode = sharedPref.getString("instituteCode", null)
+        val sharedPrefAuth = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
+        val accessToken = sharedPrefAuth.getString("accessToken", null)
+        val refreshToken = sharedPrefAuth.getString("refreshToken", null)
+        val instituteCode = sharedPrefAuth.getString("instituteCode", null)
         if (accessToken != null && refreshToken != null && instituteCode != null) {
             controller = MainController(this, this, accessToken, refreshToken, instituteCode)
         } else {
@@ -459,6 +464,9 @@ class MainActivity : AppCompatActivity(), MainView {
         } else {
             val nameDetailsTextView = TextView(this)
             nameDetailsTextView.text = studentDetails.toDetailedString()
+            val themeToggleButton = UIHelper.generateButton(this, "TOGGLE THEME", ::toggleTheme, ::showDetails, ::hideDetails, details_ll)
+            themeToggleButton.setBackgroundColor(getColorFromAttr(R.attr.colorAccent))
+            details_ll.addView(themeToggleButton)
             details_ll.addView(nameDetailsTextView)
             showDetails()
         }
@@ -514,7 +522,7 @@ class MainActivity : AppCompatActivity(), MainView {
         controller.sendHomeworkComment(homeworkUid, text)
     }
     override fun refreshToken(tokens: Map<String, String>) {
-        val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
+        val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
         with (sharedPref.edit()) {
             putString("accessToken", tokens["access_token"])
             putString("refreshToken", tokens["refresh_token"])
@@ -533,6 +541,16 @@ class MainActivity : AppCompatActivity(), MainView {
         val loginIntent = Intent(this, LoginActivity::class.java)
         startActivity(loginIntent)
         finish()
+    }
+
+    private fun toggleTheme(view: View): List<View> {
+        val sharedPref = getSharedPreferences(getString(R.string.theme_path), Context.MODE_PRIVATE) ?: return listOf()
+        with (sharedPref.edit()) {
+            putBoolean("dark", !sharedPref.getBoolean("dark", true))
+            commit()
+        }
+        recreate()
+        return listOf()
     }
 
     override fun refreshCommentList(homeworkUid: String) {
