@@ -5,8 +5,8 @@
     android:id="@+id/customSpinnerItemTextView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="left"
-    android:textColor="@color/darkColorText"
-    android:background="@color/darkColorPrimary"
+    android:gravity="center_vertical|center_horizontal"
+    android:textColor="@color/lightColorText"
+    android:background="@color/lightColorBackground"
     android:padding="10sp"
     />

@@ -37,7 +37,7 @@ class MessageUI {
                 senderTextView.text = "${message.senderName} (${message.senderRole}) \n" +
                         message.sendDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)
                 val htmlString = if (message.text != null) {
-                    UIHelper.formatHtml(UIHelper.decodeHtml(message.text), getColorFromAttr(R.attr.colorPrimaryDark, TypedValue(), true), getColorFromAttr(R.attr.colorText, TypedValue(), true))
+                    UIHelper.formatHtml(UIHelper.decodeHtml(message.text), getColorFromAttr(R.attr.colorBackground, TypedValue(), true), getColorFromAttr(R.attr.colorText, TypedValue(), true))
                 } else { "" }
                 val messageWebView = UIHelper.generateWebView(ctx, htmlString)
                 val attachmentLinearLayout = LinearLayout(ctx)
@@ -48,6 +48,7 @@ class MessageUI {
                         listOf<View>()
                     }
                     val attachmentButton = UIHelper.generateButton(ctx, attachment.fileName, onAttachmentClickListener)
+                    attachmentButton.setBackgroundColor(getColorFromAttr(R.attr.colorAccent, TypedValue(), true))
                     val params = ActionBar.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT

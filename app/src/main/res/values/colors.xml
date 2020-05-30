@@ -13,9 +13,9 @@
 
     <!-- LIGHT THEME -->
     <color name="lightColorPrimary">#FFFFFF</color>
-    <color name="lightColorPrimaryDark">#FFFFFF</color>
+    <color name="lightColorPrimaryDark">#ACACAC</color>
     <color name="lightColorAccent">#27A500</color>
-    <color name="lightColorAccent2">#27A500</color>
+    <color name="lightColorAccent2">#BE0000</color>
     <color name="lightColorUnavailable">#5C5C5C</color>
     <color name="lightColorText">#000000</color>
     <color name="lightColorBackground">#FFFFFF</color>

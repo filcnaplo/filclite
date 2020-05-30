@@ -7,11 +7,8 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.LoginController
-import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.ui.UIHelper
 import com.thegergo02.minkreta.view.LoginView
@@ -61,9 +58,11 @@ class LoginActivity : AppCompatActivity(), LoginView {
 
         }
         stringInstitutes.sortBy{it}
-        val adapter = ArrayAdapter(this, R.layout.login_spinner_item, stringInstitutes)
-        adapter.setDropDownViewResource(R.layout.login_spinner_dropdown_item)
+        val ta = this.obtainStyledAttributes(intArrayOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
+        val adapter = ArrayAdapter(this, ta.getResourceId(0, 0), stringInstitutes)
+        adapter.setDropDownViewResource(ta.getResourceId(1, 0))
         inst_code_s.adapter = adapter
+        ta.recycle()
     }
     override fun setTokens(tokens: Map<String, String>) {
         val mainIntent = Intent(this, MainActivity::class.java)

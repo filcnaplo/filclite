@@ -43,7 +43,7 @@ class HomeworkUI {
                     _: View ->
                     val posterTextView = TextView(ctx)
                     posterTextView.text = homework.teacher
-                    val htmlString = UIHelper.formatHtml(UIHelper.decodeHtml(homework.text), getColorFromAttr(R.attr.colorPrimaryDark, TypedValue(), true), getColorFromAttr(R.attr.colorText, TypedValue(), true))
+                    val htmlString = UIHelper.formatHtml(UIHelper.decodeHtml(homework.text), getColorFromAttr(R.attr.colorBackground, TypedValue(), true), getColorFromAttr(R.attr.colorText, TypedValue(), true))
                     val postDateTextView = TextView(ctx)
                     postDateTextView.text =
                         "${homework.postDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}-${homework.deadlineDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
@@ -52,6 +52,7 @@ class HomeworkUI {
                     val homeworkEditText = EditText(ctx)
                     homeworkEditText.height = 100
                     homeworkEditText.hint = "Comment on homework"
+                    homeworkEditText.setBackgroundColor(getColorFromAttr(R.attr.colorBackground, TypedValue(), true))
                     val homeworkCommentOnListener = {
                         _: View ->
                         sendHomeworkComment(homework.uid, homeworkEditText.text.toString())

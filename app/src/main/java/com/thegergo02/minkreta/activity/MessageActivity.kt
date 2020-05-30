@@ -134,28 +134,32 @@ class MessageActivity : AppCompatActivity(), MessageView {
     }
 
     override fun generateReceiverList(receivers: List<Receiver>) {
+        val ta = this.obtainStyledAttributes(intArrayOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
         selectableReceivers = receivers
         val receiverStrings = mutableListOf<String>()
-        receiverStrings.add("")
+        receiverStrings.add("Choose a receiver...")
         for (receiver in receivers) {
             receiverStrings.add(receiver.name)
         }
         lockReceiverSpinner = true
         val adapterReceiver =
-            ArrayAdapter(this, R.layout.dark_sorter_spinner_item, receiverStrings)
-        adapterReceiver.setDropDownViewResource(R.layout.dark_sorter_spinner_dropdown_item)
+            ArrayAdapter(this, ta.getResourceId(0, 0), receiverStrings)
+        adapterReceiver.setDropDownViewResource(ta.getResourceId(1, 0))
+        ta.recycle()
         receiver_s.adapter = adapterReceiver
     }
 
     override fun generateSendableReceiverTypes(types: List<Type>) {
+        val ta = this.obtainStyledAttributes(intArrayOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
         this.receiverTypes = types
         val typeStrings = mutableListOf<String>()
         for (type in types) {
             typeStrings.add(type.name)
         }
         val adapterReceiverType =
-            ArrayAdapter(this, R.layout.dark_sorter_spinner_item, typeStrings)
-        adapterReceiverType.setDropDownViewResource(R.layout.dark_sorter_spinner_dropdown_item)
+            ArrayAdapter(this, ta.getResourceId(0, 0), typeStrings)
+        adapterReceiverType.setDropDownViewResource(ta.getResourceId(1, 0))
+        ta.recycle()
         receivertype_s.adapter = adapterReceiverType
     }
 

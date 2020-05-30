@@ -5,7 +5,7 @@
     android:id="@+id/main_cl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorPrimaryDark"
+    android:background="?attr/colorBackground"
     tools:context=".activity.MainActivity">
 
     <ScrollView
@@ -56,7 +56,7 @@
                     android:id="@+id/notes_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorButtonUnselected"
+                    android:background="?attr/colorBackground"
                     android:text="@string/notes_ma"
                     android:textColor="?android:attr/textColor" />
 
@@ -96,7 +96,7 @@
                     android:id="@+id/noticeboard_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorButtonUnselected"
+                    android:background="?attr/colorBackground"
                     android:text="@string/noticeboard_ma"
                     android:textColor="?android:attr/textColor" />
 
@@ -136,7 +136,7 @@
                     android:id="@+id/messages_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorButtonUnselected"
+                    android:background="?attr/colorBackground"
                     android:text="@string/messages_ma"
                     android:textColor="?android:attr/textColor" />
 
@@ -176,7 +176,7 @@
                     android:id="@+id/tests_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorButtonUnselected"
+                    android:background="?attr/colorBackground"
                     android:text="@string/tests_ma"
                     android:textColor="?android:attr/textColor" />
 
@@ -197,7 +197,7 @@
                     android:id="@+id/timetable_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorButtonUnselected"
+                    android:background="?attr/colorBackground"
                     android:text="@string/timetable_ma"
                     android:textColor="?android:attr/textColor" />
 
@@ -218,7 +218,7 @@
                     android:id="@+id/abs_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorButtonUnselected"
+                    android:background="?attr/colorBackground"
                     android:text="@string/abs_ma"
                     android:textColor="?android:attr/textColor" />
 
@@ -258,7 +258,7 @@
                     android:id="@+id/evals_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorButtonUnselected"
+                    android:background="?attr/colorBackground"
                     android:text="@string/evals_ma"
                     android:textColor="?android:attr/textColor" />
 
@@ -298,7 +298,7 @@
                     android:id="@+id/homework_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorButtonUnselected"
+                    android:background="?attr/colorBackground"
                     android:text="@string/homework_ma"
                     android:textColor="?android:attr/textColor" />
 

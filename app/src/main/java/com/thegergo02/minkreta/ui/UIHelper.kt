@@ -49,14 +49,10 @@ class UIHelper {
             return newHtml.replace("&gt;", ">")
         }
         fun formatHtml(oldHtml: String, background: Int, text: Int): String {
-            //val backgroundColorText = "black"
-            //val textColorText = "white"
             val backgroundColor = Color.valueOf(background)
             val backgroundColorText = "rgb(${backgroundColor.red() * 255}, ${backgroundColor.green() * 255}, ${backgroundColor.blue() * 255})"
             val textColor = Color.valueOf(text)
             val textColorText = "rgb(${textColor.red() * 255}, ${textColor.green() * 255}, ${textColor.blue() * 255})"
-            Log.w("color", backgroundColorText)
-            Log.w("color", textColorText)
             val cssString =
                 "<style>body{background-color: $backgroundColorText !important;color: $textColorText;}</style>"
             var newHtml = "${cssString}${oldHtml}"

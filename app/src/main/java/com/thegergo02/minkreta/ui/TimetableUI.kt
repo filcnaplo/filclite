@@ -24,7 +24,6 @@ class TimetableUI {
                     _: View ->
                     val classDetailsTextView = TextView(ctx)
                     classDetailsTextView.text = schoolClass.toDetailedString()
-                    classDetailsTextView.setTextColor(ContextCompat.getColor(ctx, R.color.darkColorText))
                     listOf(classDetailsTextView)
                 }
                 val classButton = UIHelper.generateButton(ctx, text, classOnClickListener, showDetails, hideDetails, detailsLL)

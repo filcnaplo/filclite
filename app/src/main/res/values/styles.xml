@@ -5,7 +5,8 @@
         <item name="colorPrimaryDark">@color/darkColorPrimaryDark</item>
         <item name="colorAccent">@color/darkColorAccent</item>
         <item name="colorAccent2">@color/darkColorAccent2</item>
-        <item name="colorButtonUnselected">@color/darkColorPrimaryDark</item>
+        <item name="colorBackground">@color/darkColorBackground</item>
+        <item name="colorButtonUnselected">@color/darkColorBackground</item>
         <item name="colorButtonSelected">@color/darkColorAccent</item>
         <item name="colorUnavailable">@color/darkColorUnavailable</item>
         <item name="colorText">@color/darkColorText</item>
@@ -14,6 +15,7 @@
         <item name="spinnerDropdownItemLayout">@layout/dark_sorter_spinner_item</item>
         <item name="android:textColor">@color/darkColorText</item>
         <item name="android:buttonStyle">@style/darkButtonStyle</item>
+        <item name="android:background">@color/darkColorBackground</item>
     </style>
 
     <style name="LightTheme" parent="Theme.AppCompat.Light.NoActionBar">
@@ -21,8 +23,9 @@
         <item name="colorPrimaryDark">@color/lightColorPrimaryDark</item>
         <item name="colorAccent">@color/lightColorAccent</item>
         <item name="colorAccent2">@color/lightColorAccent2</item>
-        <item name="colorButtonUnselected">@color/lightColorPrimaryDark</item>
-        <item name="colorButtonSelected">@color/lightColorAccent2</item>
+        <item name="colorBackground">@color/lightColorBackground</item>
+        <item name="colorButtonUnselected">@color/lightColorBackground</item>
+        <item name="colorButtonSelected">@color/lightColorAccent</item>
         <item name="colorUnavailable">@color/lightColorUnavailable</item>
         <item name="colorText">@color/lightColorText</item>
         <item name="selectedButtonStyle">@style/lightSelectedButtonStyle</item>
@@ -30,6 +33,7 @@
         <item name="spinnerDropdownItemLayout">@layout/light_sorter_spinner_item</item>
         <item name="android:textColor">@color/lightColorText</item>
         <item name="android:buttonStyle">@style/lightButtonStyle</item>
+        <item name="android:background">@color/lightColorBackground</item>
     </style>
 
     <style name="buttonStyle" parent="@style/Widget.AppCompat.Button">
@@ -37,11 +41,11 @@
     </style>
     <style name="lightButtonStyle" parent="@style/buttonStyle">
         <item name="android:textColor">@color/lightColorText</item>
-        <item name="android:background">@color/lightColorPrimaryDark</item>
+        <item name="android:background">@color/lightColorBackground</item>
     </style>
     <style name="darkButtonStyle" parent="@style/buttonStyle">
         <item name="android:textColor">@color/darkColorText</item>
-        <item name="android:background">@color/darkColorPrimaryDark</item>
+        <item name="android:background">@color/darkColorBackground</item>
     </style>
 
     <style name="lightSelectedButtonStyle" parent="@style/buttonStyle">

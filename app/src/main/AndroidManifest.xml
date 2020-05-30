@@ -17,7 +17,7 @@
         tools:ignore="AllowBackup">
         <activity
             android:name=".activity.LoginActivity"
-            android:theme="@style/LightTheme">
+            android:theme="@style/DarkTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

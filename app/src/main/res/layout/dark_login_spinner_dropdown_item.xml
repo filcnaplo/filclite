@@ -2,10 +2,10 @@
 
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/customSpinnerItemTextView"
+    android:id="@+id/customSpinnerDropdownItemTextView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_horizontal|center_vertical"
+    android:gravity="center_vertical|center_horizontal"
     android:textColor="@color/darkColorText"
     android:background="@color/darkColorBackground"
     android:padding="10sp"

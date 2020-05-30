@@ -314,6 +314,7 @@ class MainActivity : AppCompatActivity(), MainView {
             adapter.setDropDownViewResource(ta.getResourceId(1, 0))
             spinnerPair.value.adapter = adapter
         }
+        ta.recycle()
     }
     private fun setupSpinners() {
         for (spinnerPair in tabSortSpinners) {
