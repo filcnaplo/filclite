@@ -47,4 +47,5 @@ dependencies {
     implementation 'androidx.core:core:1.2.0'
     implementation 'com.github.quickpermissions:quickpermissions-kotlin:0.4.0'
     implementation 'com.github.hardillb:MultiPartVolley:0.0.3'
+    implementation 'com.github.Daio-io:dresscode:1.0.0'
 }

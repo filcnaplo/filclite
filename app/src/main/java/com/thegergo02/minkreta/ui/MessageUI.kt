@@ -3,13 +3,13 @@ package com.thegergo02.minkreta.ui
 import android.app.ActionBar
 import android.content.Context
 import android.content.Intent
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.thegergo02.minkreta.R
-import com.thegergo02.minkreta.activity.MainActivity
 import com.thegergo02.minkreta.activity.MessageActivity
 import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.kreta.KretaDate
@@ -26,18 +26,18 @@ class MessageUI {
             detailsLL: LinearLayout,
             downloadAttachment: (attachment: Attachment) -> Unit,
             showDetails: () -> Unit,
-            hideDetails: () -> Unit
+            hideDetails: () -> Unit,
+            getColorFromAttr: (Int, TypedValue, Boolean) -> Int
         ) {
             UIHelper.wrapIntoDetails({
                 val subjectTextView = TextView(ctx)
                 subjectTextView.text = "${message.subject}"
-                subjectTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
+                subjectTextView.setTextColor(getColorFromAttr(R.attr.colorText, TypedValue(), true))
                 val senderTextView = TextView(ctx)
                 senderTextView.text = "${message.senderName} (${message.senderRole}) \n" +
                         message.sendDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)
-                senderTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                 val htmlString = if (message.text != null) {
-                    UIHelper.formatHtml(UIHelper.decodeHtml(message.text))
+                    UIHelper.formatHtml(UIHelper.decodeHtml(message.text), getColorFromAttr(R.attr.colorPrimaryDark, TypedValue(), true), getColorFromAttr(R.attr.colorText, TypedValue(), true))
                 } else { "" }
                 val messageWebView = UIHelper.generateWebView(ctx, htmlString)
                 val attachmentLinearLayout = LinearLayout(ctx)
@@ -54,7 +54,6 @@ class MessageUI {
                     )
                     params.setMargins(10, 0, 10, 0)
                     attachmentButton.layoutParams = params
-                    attachmentButton.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorButtonSelected))
                     attachmentLinearLayout.addView(attachmentButton)
                 }
                 listOf(subjectTextView, messageWebView, attachmentLinearLayout, senderTextView)
@@ -65,7 +64,8 @@ class MessageUI {
             ctx: Context,
             messageDescriptors: List<MessageDescriptor>,
             messageDescriptorsHolder: LinearLayout?,
-            controller: MainController
+            controller: MainController,
+            getColorFromAttr: (Int, TypedValue, Boolean) -> Int
         ) {
             messageDescriptorsHolder?.removeAllViews()
             val sendMessageOnClickListener = {
@@ -81,9 +81,9 @@ class MessageUI {
                 val text =
                     "${message.subject} | ${message.senderName} (${message.senderRole})"
                 val textColor = if (messageDescriptor.isRead) {
-                    R.color.colorUnavailable
+                    getColorFromAttr(R.attr.colorUnavailable, TypedValue(), true)
                 } else {
-                    R.color.colorText
+                    getColorFromAttr(R.attr.colorText, TypedValue(), true)
                 }
                 val messageOnClickListener = {
                     _: View ->
@@ -93,7 +93,8 @@ class MessageUI {
                     }
                     null
                 }
-                val messageButton = UIHelper.generateButton(ctx, text, messageOnClickListener, {}, {}, LinearLayout(ctx), textColor)
+                val messageButton = UIHelper.generateButton(ctx, text, messageOnClickListener, {}, {}, LinearLayout(ctx))
+                messageButton.setTextColor(textColor)
                 messageDescriptorsHolder?.addView(messageButton)
             }
         }

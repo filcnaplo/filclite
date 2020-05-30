@@ -1,22 +1,57 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:spinnerDropDownItemStyle">@style/mySpinnerItemStyle</item>
+    <style name="DarkTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/darkColorPrimary</item>
+        <item name="colorPrimaryDark">@color/darkColorPrimaryDark</item>
+        <item name="colorAccent">@color/darkColorAccent</item>
+        <item name="colorAccent2">@color/darkColorAccent2</item>
+        <item name="colorButtonUnselected">@color/darkColorPrimaryDark</item>
+        <item name="colorButtonSelected">@color/darkColorAccent</item>
+        <item name="colorUnavailable">@color/darkColorUnavailable</item>
+        <item name="colorText">@color/darkColorText</item>
+        <item name="selectedButtonStyle">@style/darkSelectedButtonStyle</item>
+        <item name="spinnerItemLayout">@layout/dark_sorter_spinner_item</item>
+        <item name="spinnerDropdownItemLayout">@layout/dark_sorter_spinner_item</item>
+        <item name="android:textColor">@color/darkColorText</item>
+        <item name="android:buttonStyle">@style/darkButtonStyle</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+    <style name="LightTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/lightColorPrimary</item>
+        <item name="colorPrimaryDark">@color/lightColorPrimaryDark</item>
+        <item name="colorAccent">@color/lightColorAccent</item>
+        <item name="colorAccent2">@color/lightColorAccent2</item>
+        <item name="colorButtonUnselected">@color/lightColorPrimaryDark</item>
+        <item name="colorButtonSelected">@color/lightColorAccent2</item>
+        <item name="colorUnavailable">@color/lightColorUnavailable</item>
+        <item name="colorText">@color/lightColorText</item>
+        <item name="selectedButtonStyle">@style/lightSelectedButtonStyle</item>
+        <item name="spinnerItemLayout">@layout/light_sorter_spinner_item</item>
+        <item name="spinnerDropdownItemLayout">@layout/light_sorter_spinner_item</item>
+        <item name="android:textColor">@color/lightColorText</item>
+        <item name="android:buttonStyle">@style/lightButtonStyle</item>
     </style>
 
-    <style name="mySpinnerItemStyle" parent="@android:style/Widget.Holo.DropDownItem.Spinner">
-        <item name="android:textColor">@color/colorText</item>
-        <item name="android:background">@color/colorPrimaryDark</item>
+    <style name="buttonStyle" parent="@style/Widget.AppCompat.Button">
+        <item name="android:gravity">center_vertical|center_horizontal</item>
     </style>
+    <style name="lightButtonStyle" parent="@style/buttonStyle">
+        <item name="android:textColor">@color/lightColorText</item>
+        <item name="android:background">@color/lightColorPrimaryDark</item>
+    </style>
+    <style name="darkButtonStyle" parent="@style/buttonStyle">
+        <item name="android:textColor">@color/darkColorText</item>
+        <item name="android:background">@color/darkColorPrimaryDark</item>
+    </style>
+
+    <style name="lightSelectedButtonStyle" parent="@style/buttonStyle">
+        <item name="android:textColor">@color/lightColorText</item>
+        <item name="android:background">@color/lightColorAccent</item>
+    </style>
+    <style name="darkSelectedButtonStyle" parent="@style/buttonStyle">
+        <item name="android:textColor">@color/darkColorText</item>
+        <item name="android:background">@color/darkColorAccent</item>
+    </style>
+
 </resources>
 

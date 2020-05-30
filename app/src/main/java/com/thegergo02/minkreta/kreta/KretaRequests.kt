@@ -134,7 +134,6 @@ class KretaRequests(ctx: Context) {
         }
     }
 
-    private val KRETA_DETAILS_URL = "https://thegergo02.github.io/settings.json"
     private fun getKretaDetails() {
         val successListener = Response.Listener<JSONObject> { response ->
             userAgent = response["kretaUserAgent"].toString().replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
@@ -145,7 +144,7 @@ class KretaRequests(ctx: Context) {
         val errorListener = Response.ErrorListener {
             userAgent = userAgent.replace("/<version>/<codename>", "/${(5..9)}.${2..9}/${UUID.randomUUID()}")
         }
-        val request = NetworkJsonObjectRequest(Request.Method.GET, KRETA_DETAILS_URL, successListener, errorListener)
+        val request = NetworkJsonObjectRequest(Request.Method.GET, "https://thegergo02.github.io/settings.json", successListener, errorListener)
         networkHelper.requestJsonObject(request)
     }
     fun getUserAgent() : String {

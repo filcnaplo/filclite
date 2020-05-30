@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="colorAccent2" format="reference"/>
+    <attr name="colorButtonUnselected" format="reference"/>
+    <attr name="colorButtonSelected" format="reference"/>
+    <attr name="colorUnavailable" format="reference"/>
+    <attr name="colorText" format="reference"/>
+    <attr name="selectedButtonStyle" format="reference"/>
+    <attr name="spinnerItemLayout" format="reference"/>
+    <attr name="spinnerDropdownItemLayout" format="reference"/>
+</resources>

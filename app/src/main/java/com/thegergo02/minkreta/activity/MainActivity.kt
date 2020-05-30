@@ -4,14 +4,13 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.widget.*
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.Snackbar
 import com.livinglifetechway.quickpermissions_kotlin.runWithPermissions
-import com.thegergo02.minkreta.kreta.KretaRequests
 import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
@@ -35,6 +34,15 @@ import java.time.LocalDateTime
 
 
 class MainActivity : AppCompatActivity(), MainView {
+    @ColorInt
+    fun getColorFromAttr(
+        @AttrRes attrColor: Int,
+        typedValue: TypedValue = TypedValue(),
+        resolveRefs: Boolean = true
+    ): Int {
+        theme.resolveAttribute(attrColor, typedValue, resolveRefs)
+        return typedValue.data
+    }
     private lateinit var controller: MainController
     private var tabHolders = mutableMapOf<Tab, LinearLayout>()
     private var tabButtons = mutableMapOf<Tab, Button>()
@@ -290,6 +298,7 @@ class MainActivity : AppCompatActivity(), MainView {
         }
     }
     private fun setupSpinnerAdapter(spinnerPair: MutableMap.MutableEntry<Tab, Spinner>) {
+        val ta = this.obtainStyledAttributes(intArrayOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
         val spinnerDisplayArrayMap = mapOf(
             Tab.Notes to listOf("Date", "Type", "Teacher"),
             Tab.Absences to listOf("Subject", "Teacher", "Lesson start time", "Creating time", "Justification state"),
@@ -301,8 +310,8 @@ class MainActivity : AppCompatActivity(), MainView {
         val spinnerDisplayList = spinnerDisplayArrayMap[spinnerPair.key]
         if (spinnerDisplayList != null) {
             val adapter =
-                ArrayAdapter(this, R.layout.sorter_spinner_item, spinnerDisplayList)
-            adapter.setDropDownViewResource(R.layout.sorter_spinner_dropdown_item)
+                ArrayAdapter(this, ta.getResourceId(0, 0), spinnerDisplayList)
+            adapter.setDropDownViewResource(ta.getResourceId(1, 0))
             spinnerPair.value.adapter = adapter
         }
     }
@@ -352,9 +361,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (tabHolder.key != exception) {
                 tabHolder.value.visibility = View.GONE
                 tabSortSpinners[tabHolder.key]?.visibility = View.GONE
-                tabButtons[tabHolder.key]?.setBackgroundColor(ContextCompat.getColor(this,
-                    R.color.colorButtonUnselected
-                ))
+                tabButtons[tabHolder.key]?.setBackgroundColor(getColorFromAttr(R.attr.colorButtonUnselected))
             }
         }
         hideDetails()
@@ -368,18 +375,11 @@ class MainActivity : AppCompatActivity(), MainView {
         if (tabHolder != null && tabButton != null) {
             if (tabHolder.visibility == View.GONE) {
                 newVisibility = View.VISIBLE
-                tabButton.setBackgroundColor(ContextCompat.getColor(this,
-                    R.color.colorButtonSelected
-                ))
+                tabButton.setBackgroundColor(getColorFromAttr(R.attr.colorButtonSelected))
             } else {
                 if (canClose) {
                     newVisibility = View.GONE
-                    tabButton.setBackgroundColor(
-                        ContextCompat.getColor(
-                            this,
-                            R.color.colorButtonUnselected
-                        )
-                    )
+                    tabButton.setBackgroundColor(getColorFromAttr(R.attr.colorButtonUnselected))
                 } else {
                     newVisibility = View.VISIBLE
                 }
@@ -393,17 +393,17 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>) {
         TimetableUI.generateTimetable(this, timetable,
-            tabHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller)
+            tabHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller, ::getColorFromAttr)
         switchTab(Tab.Timetable)
         hideProgress()
     }
     override fun generateMessageDescriptors(messages: List<MessageDescriptor>) {
-        MessageUI.generateMessageDescriptors(this, messages, tabHolders[Tab.Messages], controller)
+        MessageUI.generateMessageDescriptors(this, messages, tabHolders[Tab.Messages], controller, ::getColorFromAttr)
         switchTab(Tab.Messages, false)
         hideProgress()
     }
     override fun generateMessage(message: MessageDescriptor) {
-        MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::showDetails, ::hideDetails)
+        MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::showDetails, ::hideDetails, ::getColorFromAttr)
     }
 
     override fun generateTestList(tests: List<Test>) {
@@ -458,12 +458,6 @@ class MainActivity : AppCompatActivity(), MainView {
         } else {
             val nameDetailsTextView = TextView(this)
             nameDetailsTextView.text = studentDetails.toDetailedString()
-            nameDetailsTextView.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.colorText
-                )
-            )
             details_ll.addView(nameDetailsTextView)
             showDetails()
         }
@@ -473,7 +467,7 @@ class MainActivity : AppCompatActivity(), MainView {
         val holder = tabHolders[Tab.Homework]
         holder?.removeAllViews()
         HomeworkUI.generateHomeworkList(this, homeworks.sortedWith(compareBy(sortType.lambda)), tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails,
-            ::triggerGetHomeworkCommentList, ::sendHomeworkComment)
+            ::triggerGetHomeworkCommentList, ::sendHomeworkComment, R.attr.selectedButtonStyle, ::getColorFromAttr)
     }
     private fun refreshEvaluations(sortType: Evaluation.SortType = Evaluation.SortType.CreatingDate) {
         val holder = tabHolders[Tab.Evaluations]

@@ -1,7 +1,6 @@
 package com.thegergo02.minkreta.ui
 
 import android.content.Context
-import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -11,7 +10,7 @@ import com.thegergo02.minkreta.kreta.data.sub.Absence
 
 class AbsencesUI {
     companion object {
-        private fun getColorFromJustification(ctx: Context, justificationState: String?): Int {
+        private fun getColorFromJustification(justificationState: String?): Int {
             return when (justificationState) {
                 "Igazolt" -> R.color.colorAbsJustified
                 else -> R.color.colorAbsUnjustified
@@ -25,11 +24,11 @@ class AbsencesUI {
                         _: View ->
                     val absDetailsTextView = TextView(ctx)
                     absDetailsTextView.text = abs.toDetailedString()
-                    absDetailsTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                     listOf(absDetailsTextView)
                 }
                 val absenceButton =
-                    UIHelper.generateButton(ctx, text, absOnClickListener, showDetails, hideDetails, detailsLL, getColorFromJustification(ctx, abs.justificationState))
+                    UIHelper.generateButton(ctx, text, absOnClickListener, showDetails, hideDetails, detailsLL)
+                absenceButton.setTextColor(ctx.getColor(getColorFromJustification(abs.justificationState)))
                 absenceHolder?.addView(absenceButton)
             }
         }

@@ -6,12 +6,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toFile
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MessageController
 import com.thegergo02.minkreta.kreta.KretaRequests
@@ -61,11 +59,11 @@ class MessageActivity : AppCompatActivity(), MessageView {
             )
         }
         val adapterReceiverType =
-            ArrayAdapter(this, R.layout.sorter_spinner_item, listOf("Loading receiver types..."))
-        adapterReceiverType.setDropDownViewResource(R.layout.sorter_spinner_dropdown_item)
+            ArrayAdapter(this, R.layout.dark_sorter_spinner_item, listOf("Loading receiver types..."))
+        adapterReceiverType.setDropDownViewResource(R.layout.dark_sorter_spinner_dropdown_item)
         val adapterReceivers =
-            ArrayAdapter(this, R.layout.sorter_spinner_item, listOf("Choose a receiver type first..."))
-        adapterReceivers.setDropDownViewResource(R.layout.sorter_spinner_dropdown_item)
+            ArrayAdapter(this, R.layout.dark_sorter_spinner_item, listOf("Choose a receiver type first..."))
+        adapterReceivers.setDropDownViewResource(R.layout.dark_sorter_spinner_dropdown_item)
         receivertype_s.adapter = adapterReceiverType
         receivertype_s.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -144,8 +142,8 @@ class MessageActivity : AppCompatActivity(), MessageView {
         }
         lockReceiverSpinner = true
         val adapterReceiver =
-            ArrayAdapter(this, R.layout.sorter_spinner_item, receiverStrings)
-        adapterReceiver.setDropDownViewResource(R.layout.sorter_spinner_dropdown_item)
+            ArrayAdapter(this, R.layout.dark_sorter_spinner_item, receiverStrings)
+        adapterReceiver.setDropDownViewResource(R.layout.dark_sorter_spinner_dropdown_item)
         receiver_s.adapter = adapterReceiver
     }
 
@@ -156,8 +154,8 @@ class MessageActivity : AppCompatActivity(), MessageView {
             typeStrings.add(type.name)
         }
         val adapterReceiverType =
-            ArrayAdapter(this, R.layout.sorter_spinner_item, typeStrings)
-        adapterReceiverType.setDropDownViewResource(R.layout.sorter_spinner_dropdown_item)
+            ArrayAdapter(this, R.layout.dark_sorter_spinner_item, typeStrings)
+        adapterReceiverType.setDropDownViewResource(R.layout.dark_sorter_spinner_dropdown_item)
         receivertype_s.adapter = adapterReceiverType
     }
 

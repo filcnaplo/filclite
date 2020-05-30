@@ -24,12 +24,6 @@ class TestUI {
                     _: View ->
                     val testDetailsTextView = TextView(ctx)
                     testDetailsTextView.text = test.toDetailedString()
-                    testDetailsTextView.setTextColor(
-                        ContextCompat.getColor(
-                            ctx,
-                            R.color.colorText
-                        )
-                    )
                     listOf(testDetailsTextView)
                 }
                 testsHolder?.removeAllViews()

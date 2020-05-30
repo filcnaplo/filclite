@@ -1,6 +1,8 @@
 package com.thegergo02.minkreta.ui
 
 import android.content.Context
+import android.graphics.Color
+import android.util.Log
 import android.view.View
 import android.webkit.WebView
 import android.widget.Button
@@ -18,12 +20,12 @@ class UIHelper {
         }
         fun generateButton(ctx: Context, text: String,
                            clickListener: (v: View) -> List<View>? = {null}, showDetails: () -> Unit = {}, hideDetails: () -> Unit = {}, detailsLL: LinearLayout = LinearLayout(ctx),
-                           textColor: Int = R.color.colorText,
-                           backgroundColor: Int = R.color.colorPrimaryDark): Button {
-            val button = Button(ctx)
+                           style: Int? = null): Button {
+            var button = Button(ctx)
+            if (style != null) {
+                button = Button(ctx, null, style)
+            }
             button.text = text
-            button.setTextColor(ContextCompat.getColor(ctx, textColor))
-            button.setBackgroundColor(ContextCompat.getColor(ctx, backgroundColor))
             button.setOnClickListener(wrapIntoDetails(clickListener, showDetails, hideDetails, detailsLL))
             return button
         }
@@ -46,14 +48,22 @@ class UIHelper {
             newHtml = newHtml.replace("&quot;", "\"")
             return newHtml.replace("&gt;", ">")
         }
-        fun formatHtml(oldHtml: String): String {
+        fun formatHtml(oldHtml: String, background: Int, text: Int): String {
+            //val backgroundColorText = "black"
+            //val textColorText = "white"
+            val backgroundColor = Color.valueOf(background)
+            val backgroundColorText = "rgb(${backgroundColor.red() * 255}, ${backgroundColor.green() * 255}, ${backgroundColor.blue() * 255})"
+            val textColor = Color.valueOf(text)
+            val textColorText = "rgb(${textColor.red() * 255}, ${textColor.green() * 255}, ${textColor.blue() * 255})"
+            Log.w("color", backgroundColorText)
+            Log.w("color", textColorText)
             val cssString =
-                "<style>body{background-color: black !important;color: white;}</style>"
+                "<style>body{background-color: $backgroundColorText !important;color: $textColorText;}</style>"
             var newHtml = "${cssString}${oldHtml}"
-            newHtml = newHtml.replace("style=\"color: black;\"", "style=\"color: white;\"")
+            newHtml = newHtml.replace("style=\"color: black;\"", "style=\"color: $textColorText;\"")
             return newHtml.replace(
                 "style=\"color: rgb(0, 0, 0);\"",
-                "style=\"color: white;\""
+                "style=\"color: $textColorText;\""
             )
         }
         fun displayError(ctx: Context, layout: View, error: String) {

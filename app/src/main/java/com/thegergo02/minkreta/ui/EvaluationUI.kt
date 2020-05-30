@@ -17,7 +17,7 @@ class EvaluationUI {
                 3 -> R.color.colorThree
                 4 -> R.color.colorFour
                 5 -> R.color.colorFive
-                else -> R.color.colorText
+                else -> R.color.darkColorText
             }
         }
 
@@ -27,10 +27,10 @@ class EvaluationUI {
                     _: View ->
                     val evalDetailsTextView = TextView(ctx)
                     evalDetailsTextView.text = eval.toDetailedString()
-                    evalDetailsTextView.setTextColor(ContextCompat.getColor(ctx, R.color.colorText))
                     listOf(evalDetailsTextView)
                 }
-                val evalButton = UIHelper.generateButton(ctx, eval.toString(), evalOnClickListener, showDetails, hideDetails, detailsLL, getColorFromGrade(ctx, eval.numberValue))
+                val evalButton = UIHelper.generateButton(ctx, eval.toString(), evalOnClickListener, showDetails, hideDetails, detailsLL)
+                evalButton.setTextColor(ctx.getColor(getColorFromGrade(ctx, eval.numberValue)))
                 eval_holder_ll?.addView(evalButton)
             }
         }

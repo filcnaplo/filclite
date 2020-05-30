@@ -5,7 +5,7 @@
     android:id="@+id/main_cl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
+    android:background="?attr/colorPrimaryDark"
     tools:context=".activity.MainActivity">
 
     <ScrollView
@@ -25,7 +25,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@color/colorAccent2"
+                android:textColor="?attr/colorAccent2"
                 android:textSize="24sp"
                 android:visibility="visible" />
 
@@ -33,7 +33,7 @@
                 android:id="@+id/details_ll"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/colorPrimaryDark"
+                android:background="?attr/colorPrimaryDark"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -44,7 +44,7 @@
                 style="?android:attr/progressBarStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:progressDrawable="@color/colorAccent"
+                android:progressDrawable="@color/lightColorAccent"
                 android:visibility="gone" />
 
             <LinearLayout
@@ -56,23 +56,24 @@
                     android:id="@+id/notes_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorButtonUnselected"
+                    android:background="?attr/colorButtonUnselected"
                     android:text="@string/notes_ma"
-                    android:textColor="@color/colorText" />
+                    android:textColor="?android:attr/textColor" />
 
                 <Spinner
                     android:id="@+id/notes_spinner"
+                    style="?attr/spinnerStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="7dp"
-                    android:background="@color/colorPrimaryDark"
+                    android:background="@color/darkColorPrimaryDark"
                     android:dropDownWidth="match_parent"
                     android:minHeight="45dp"
                     android:scrollbarStyle="outsideInset"
-                    android:scrollbarThumbHorizontal="@color/colorText"
-                    android:scrollbarThumbVertical="@color/colorAccent"
-                    android:scrollbarTrackHorizontal="@color/colorText"
-                    android:scrollbarTrackVertical="@color/colorText"
+                    android:scrollbarThumbHorizontal="@color/darkColorText"
+                    android:scrollbarThumbVertical="@color/darkColorAccent"
+                    android:scrollbarTrackHorizontal="@color/darkColorText"
+                    android:scrollbarTrackVertical="@color/darkColorText"
                     android:spinnerMode="dropdown"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"
@@ -95,23 +96,24 @@
                     android:id="@+id/noticeboard_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorButtonUnselected"
+                    android:background="?attr/colorButtonUnselected"
                     android:text="@string/noticeboard_ma"
-                    android:textColor="@color/colorText" />
+                    android:textColor="?android:attr/textColor" />
 
                 <Spinner
                     android:id="@+id/noticeboard_spinner"
+                    style="?attr/spinnerStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="7dp"
-                    android:background="@color/colorPrimaryDark"
+                    android:background="@color/darkColorPrimaryDark"
                     android:dropDownWidth="match_parent"
                     android:minHeight="45dp"
                     android:scrollbarStyle="outsideInset"
-                    android:scrollbarThumbHorizontal="@color/colorText"
-                    android:scrollbarThumbVertical="@color/colorAccent"
-                    android:scrollbarTrackHorizontal="@color/colorText"
-                    android:scrollbarTrackVertical="@color/colorText"
+                    android:scrollbarThumbHorizontal="@color/darkColorText"
+                    android:scrollbarThumbVertical="@color/darkColorAccent"
+                    android:scrollbarTrackHorizontal="@color/darkColorText"
+                    android:scrollbarTrackVertical="@color/darkColorText"
                     android:spinnerMode="dropdown"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"
@@ -134,23 +136,24 @@
                     android:id="@+id/messages_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorButtonUnselected"
+                    android:background="?attr/colorButtonUnselected"
                     android:text="@string/messages_ma"
-                    android:textColor="@color/colorText" />
+                    android:textColor="?android:attr/textColor" />
 
                 <Spinner
                     android:id="@+id/messages_spinner"
+                    style="?attr/spinnerStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="7dp"
-                    android:background="@color/colorPrimaryDark"
+                    android:background="@color/darkColorPrimaryDark"
                     android:dropDownWidth="match_parent"
                     android:minHeight="45dp"
                     android:scrollbarStyle="outsideInset"
-                    android:scrollbarThumbHorizontal="@color/colorText"
-                    android:scrollbarThumbVertical="@color/colorAccent"
-                    android:scrollbarTrackHorizontal="@color/colorText"
-                    android:scrollbarTrackVertical="@color/colorText"
+                    android:scrollbarThumbHorizontal="@color/darkColorText"
+                    android:scrollbarThumbVertical="@color/darkColorAccent"
+                    android:scrollbarTrackHorizontal="@color/darkColorText"
+                    android:scrollbarTrackVertical="@color/darkColorText"
                     android:spinnerMode="dropdown"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"
@@ -173,9 +176,9 @@
                     android:id="@+id/tests_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorButtonUnselected"
+                    android:background="?attr/colorButtonUnselected"
                     android:text="@string/tests_ma"
-                    android:textColor="@color/colorText" />
+                    android:textColor="?android:attr/textColor" />
 
                 <LinearLayout
                     android:id="@+id/tests_holder_ll"
@@ -194,9 +197,9 @@
                     android:id="@+id/timetable_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorButtonUnselected"
+                    android:background="?attr/colorButtonUnselected"
                     android:text="@string/timetable_ma"
-                    android:textColor="@color/colorText" />
+                    android:textColor="?android:attr/textColor" />
 
                 <LinearLayout
                     android:id="@+id/timetable_holder_ll"
@@ -215,23 +218,24 @@
                     android:id="@+id/abs_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorButtonUnselected"
+                    android:background="?attr/colorButtonUnselected"
                     android:text="@string/abs_ma"
-                    android:textColor="@color/colorText" />
+                    android:textColor="?android:attr/textColor" />
 
                 <Spinner
                     android:id="@+id/abs_spinner"
+                    style="?attr/spinnerStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="7dp"
-                    android:background="@color/colorPrimaryDark"
+                    android:background="@color/darkColorPrimaryDark"
                     android:dropDownWidth="match_parent"
                     android:minHeight="45dp"
                     android:scrollbarStyle="outsideInset"
-                    android:scrollbarThumbHorizontal="@color/colorText"
-                    android:scrollbarThumbVertical="@color/colorAccent"
-                    android:scrollbarTrackHorizontal="@color/colorText"
-                    android:scrollbarTrackVertical="@color/colorText"
+                    android:scrollbarThumbHorizontal="@color/darkColorText"
+                    android:scrollbarThumbVertical="@color/darkColorAccent"
+                    android:scrollbarTrackHorizontal="@color/darkColorText"
+                    android:scrollbarTrackVertical="@color/darkColorText"
                     android:spinnerMode="dropdown"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"
@@ -254,23 +258,24 @@
                     android:id="@+id/evals_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorButtonUnselected"
+                    android:background="?attr/colorButtonUnselected"
                     android:text="@string/evals_ma"
-                    android:textColor="@color/colorText" />
+                    android:textColor="?android:attr/textColor" />
 
                 <Spinner
                     android:id="@+id/evals_spinner"
+                    style="?attr/spinnerStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="7dp"
-                    android:background="@color/colorPrimaryDark"
+                    android:background="@color/darkColorPrimaryDark"
                     android:dropDownWidth="match_parent"
                     android:minHeight="45dp"
                     android:scrollbarStyle="outsideInset"
-                    android:scrollbarThumbHorizontal="@color/colorText"
-                    android:scrollbarThumbVertical="@color/colorAccent"
-                    android:scrollbarTrackHorizontal="@color/colorText"
-                    android:scrollbarTrackVertical="@color/colorText"
+                    android:scrollbarThumbHorizontal="@color/darkColorText"
+                    android:scrollbarThumbVertical="@color/darkColorAccent"
+                    android:scrollbarTrackHorizontal="@color/darkColorText"
+                    android:scrollbarTrackVertical="@color/darkColorText"
                     android:spinnerMode="dropdown"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"
@@ -293,23 +298,24 @@
                     android:id="@+id/homework_btt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorButtonUnselected"
+                    android:background="?attr/colorButtonUnselected"
                     android:text="@string/homework_ma"
-                    android:textColor="@color/colorText" />
+                    android:textColor="?android:attr/textColor" />
 
                 <Spinner
                     android:id="@+id/homework_spinner"
+                    style="?attr/spinnerStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="7dp"
-                    android:background="@color/colorPrimaryDark"
+                    android:background="@color/darkColorPrimaryDark"
                     android:dropDownWidth="match_parent"
                     android:minHeight="45dp"
                     android:scrollbarStyle="outsideInset"
-                    android:scrollbarThumbHorizontal="@color/colorText"
-                    android:scrollbarThumbVertical="@color/colorAccent"
-                    android:scrollbarTrackHorizontal="@color/colorText"
-                    android:scrollbarTrackVertical="@color/colorText"
+                    android:scrollbarThumbHorizontal="@color/darkColorText"
+                    android:scrollbarThumbVertical="@color/darkColorAccent"
+                    android:scrollbarTrackHorizontal="@color/darkColorText"
+                    android:scrollbarTrackVertical="@color/darkColorText"
                     android:spinnerMode="dropdown"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"

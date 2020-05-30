@@ -17,12 +17,6 @@ class NotesUI {
                     _: View ->
                     val noteDetailsTextView = TextView(ctx)
                     noteDetailsTextView.text = note.toDetailedString()
-                    noteDetailsTextView.setTextColor(
-                        ContextCompat.getColor(
-                            ctx,
-                            R.color.colorText
-                        )
-                    )
                     listOf(noteDetailsTextView)
                 }
                 val noteButton = UIHelper.generateButton(ctx, text, noteOnClickListener, showDetails, hideDetails, detailsLL)

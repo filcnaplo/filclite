@@ -17,12 +17,6 @@ class NoticeUI {
                     _: View ->
                     val noticeDetailsTextView = TextView(ctx)
                     noticeDetailsTextView.text = notice.toDetailedString()
-                    noticeDetailsTextView.setTextColor(
-                        ContextCompat.getColor(
-                            ctx,
-                            R.color.colorText
-                        )
-                    )
                     listOf(noticeDetailsTextView)
                 }
                 val noticeButton = UIHelper.generateButton(ctx, text, noticeOnClickListener, showDetails, hideDetails, detailsLL)

@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#212121</color>
-    <color name="colorPrimaryDark">#000000</color>
-    <color name="colorAccent">#b71c1c</color>
-    <color name="colorAccent2">#0029B1</color>
-    <color name="colorUnavailable">#5C5C5C</color>
-    <color name="colorText">#ffffff</color>
-    <color name="colorBackground">#000000</color>
+    <!-- DARK THEME -->
+    <color name="darkColorPrimary">#212121</color>
+    <color name="darkColorPrimaryDark">#000000</color>
+    <color name="darkColorAccent">#b71c1c</color>
+    <color name="darkColorAccent2">#0029B1</color>
+    <color name="darkColorUnavailable">#5C5C5C</color>
+    <color name="darkColorText">#ffffff</color>
+    <color name="darkColorBackground">#000000</color>
+    <color name="darkColorButtonUnselected">#000000</color>
+    <color name="darkColorButtonSelected">#b71c1c</color>
+
+    <!-- LIGHT THEME -->
+    <color name="lightColorPrimary">#FFFFFF</color>
+    <color name="lightColorPrimaryDark">#FFFFFF</color>
+    <color name="lightColorAccent">#27A500</color>
+    <color name="lightColorAccent2">#27A500</color>
+    <color name="lightColorUnavailable">#5C5C5C</color>
+    <color name="lightColorText">#000000</color>
+    <color name="lightColorBackground">#FFFFFF</color>
+    <color name="lightColorButtonUnselected">#27A500</color>
+    <color name="lightColorButtonSelected">#b71c1c</color>
 
     <color name="colorOne">#f44336</color>
     <color name="colorTwo">#FF5722</color>
@@ -20,8 +34,6 @@
     <color name="colorAbsUnjustified">#D50000</color>
     <color name="colorAbsJustified">#00C853</color>
 
-    <color name="colorButtonUnselected">#000000</color>
-    <color name="colorButtonSelected">#b71c1c</color>
 
     <color name="colorHomeworkLate">#D50000</color>
     <color name="colorHomeworkAlmostLate">#FFEB3B</color>
