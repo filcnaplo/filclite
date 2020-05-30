@@ -36,6 +36,11 @@ class MessageActivity : AppCompatActivity(), MessageView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val sharedPrefTheme = getSharedPreferences(getString(R.string.theme_path), Context.MODE_PRIVATE) ?: return
+        val isDark = sharedPrefTheme.getBoolean("dark", true)
+        if (!isDark) {
+            setTheme(R.style.LightTheme)
+        }
         setContentView(R.layout.activity_message)
 
         val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
