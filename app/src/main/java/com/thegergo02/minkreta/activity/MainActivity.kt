@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.widget.*
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var controller: MainController
     private var tabHolders = mutableMapOf<Tab, LinearLayout>()
     private var tabButtons = mutableMapOf<Tab, Button>()
+    private var tabOnClickListeners = mutableMapOf<Tab, (View) -> Unit>()
     private var tabSortSpinners = mutableMapOf<Tab, Spinner>()
 
     private var canClick = true
@@ -80,6 +82,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private fun initializeActivity() {
         setupHolders()
+        setupTabHolders()
         setupSpinners()
         setupClickListeners()
         homeworkCommentHolder = LinearLayout(this)
@@ -107,6 +110,89 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Tests to tests_btt,
             Tab.Noticeboard to noticeboard_btt
         )
+        tabOnClickListeners = mutableMapOf( //THEY ARE NOT REDUNDANT, IDE IS AN IDIOT THX
+            Tab.Evaluations to { _ ->
+                if (canClick) {
+                    if (tabHolders[Tab.Evaluations]?.visibility == View.GONE) {
+                        showProgress()
+                        controller.getEvaluationList()
+                    } else {
+                        switchTab(Tab.Evaluations)
+                    }
+                }
+            },
+            Tab.Notes to { _ ->
+                if (canClick) {
+                    if (tabHolders[Tab.Notes]?.visibility == View.GONE) {
+                        showProgress()
+                        controller.getNoteList()
+                    } else {
+                        switchTab(Tab.Notes)
+                    }
+                }
+            },
+            Tab.Absences to { _ ->
+                if (canClick) {
+                    if (tabHolders[Tab.Absences]?.visibility == View.GONE) {
+                        showProgress()
+                        controller.getAbsenceList()
+                    } else {
+                        switchTab(Tab.Absences)
+                    }
+                }
+            },
+            Tab.Homework to { _ ->
+                if (canClick) {
+                    if (tabHolders[Tab.Homework]?.visibility == View.GONE) {
+                        showProgress()
+                        val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
+                        val startDate = KretaDate(firstDay)
+                        controller.getHomeworkList(startDate)
+                    } else {
+                        switchTab(Tab.Homework)
+                    }
+                }
+            },
+            Tab.Timetable to { _ ->
+                if (canClick) {
+                    if (tabHolders[Tab.Timetable]?.visibility == View.GONE) {
+                        showProgress()
+                        startTimetableRequest()
+                    } else {
+                        switchTab(Tab.Timetable)
+                    }
+                }
+            },
+            Tab.Messages to { _ ->
+                if (canClick) {
+                    if (tabHolders[Tab.Messages]?.visibility == View.GONE) {
+                        refreshMessages(MessageDescriptor.SortType.SendDate)
+                    } else {
+                        switchTab(Tab.Messages)
+                    }
+                }
+            },
+            Tab.Tests to { _ ->
+                if (canClick) {
+                    if (tabHolders[Tab.Tests]?.visibility == View.GONE) {
+                        showProgress()
+                        controller.getTestList()
+                    } else {
+                        switchTab(Tab.Tests)
+                    }
+                }
+            },
+            Tab.Noticeboard to { _ ->
+                if (canClick) {
+                    if (tabHolders[Tab.Noticeboard]?.visibility == View.GONE) {
+                        showProgress()
+                        controller.getNoticeList()
+                    } else {
+                        switchTab(Tab.Noticeboard)
+                    }
+                }
+            }
+        )
         tabSortSpinners = mutableMapOf(
             Tab.Notes to notes_spinner,
             Tab.Absences to abs_spinner,
@@ -126,86 +212,8 @@ class MainActivity : AppCompatActivity(), MainView {
                 hideDetails()
             }
         }
-        tabButtons[Tab.Evaluations]?.setOnClickListener {
-            if (canClick) {
-                if (tabHolders[Tab.Evaluations]?.visibility == View.GONE) {
-                    showProgress()
-                    controller.getEvaluationList()
-                } else {
-                    switchTab(Tab.Evaluations)
-                }
-            }
-        }
-        tabButtons[Tab.Notes]?.setOnClickListener {
-            if (canClick) {
-                if (tabHolders[Tab.Notes]?.visibility == View.GONE) {
-                    showProgress()
-                    controller.getNoteList()
-                } else {
-                    switchTab(Tab.Notes)
-                }
-            }
-        }
-        tabButtons[Tab.Noticeboard]?.setOnClickListener {
-            if (canClick) {
-                if (tabHolders[Tab.Noticeboard]?.visibility == View.GONE) {
-                    showProgress()
-                    controller.getNoticeList()
-                } else {
-                    switchTab(Tab.Noticeboard)
-                }
-            }
-        }
-        tabButtons[Tab.Absences]?.setOnClickListener {
-            if (canClick) {
-                if (tabHolders[Tab.Absences]?.visibility == View.GONE) {
-                    showProgress()
-                    controller.getAbsenceList()
-                } else {
-                    switchTab(Tab.Absences)
-                }
-            }
-        }
-        tabButtons[Tab.Homework]?.setOnClickListener {
-            if (canClick) {
-                if (tabHolders[Tab.Homework]?.visibility == View.GONE) {
-                    showProgress()
-                    val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
-                    val startDate = KretaDate(firstDay)
-                    controller.getHomeworkList(startDate)
-                } else {
-                    switchTab(Tab.Homework)
-                }
-            }
-        }
-        tabButtons[Tab.Timetable]?.setOnClickListener {
-            if (canClick) {
-                if (tabHolders[Tab.Timetable]?.visibility == View.GONE) {
-                    showProgress()
-                    startTimetableRequest()
-                } else {
-                    switchTab(Tab.Timetable)
-                }
-            }
-        }
-        tabButtons[Tab.Messages]?.setOnClickListener {
-            if (canClick) {
-                if (tabHolders[Tab.Messages]?.visibility == View.GONE) {
-                    refreshMessages(MessageDescriptor.SortType.SendDate)
-                } else {
-                    switchTab(Tab.Messages)
-                }
-            }
-        }
-        tabButtons[Tab.Tests]?.setOnClickListener {
-            if (canClick) {
-                if (tabHolders[Tab.Tests]?.visibility == View.GONE) {
-                    showProgress()
-                    controller.getTestList()
-                } else {
-                    switchTab(Tab.Tests)
-                }
-            }
+        for (button in tabButtons) {
+            button.value.setOnClickListener(tabOnClickListeners[button.key])
         }
     }
 
@@ -325,6 +333,12 @@ class MainActivity : AppCompatActivity(), MainView {
         for (spinnerPair in tabSortSpinners) {
             setupSpinnerAdapter(spinnerPair)
             setupItemSelectedListener(spinnerPair)
+        }
+    }
+
+    private fun setupTabHolders() {
+        for (holder in tabHolders) {
+            holder.value.visibility = View.GONE
         }
     }
 
