@@ -54,10 +54,10 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         }
     }
 
-    fun getMessageList(sortType: MessageDescriptor.SortType) {
+    fun getMessageList(type: MessageDescriptor.Type, sortType: MessageDescriptor.SortType) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getMessageList(parentListener, sortType)
+            apiHandler.getMessageList(parentListener, type, sortType)
         }
     }
     fun getMessage(messageId: Int) {

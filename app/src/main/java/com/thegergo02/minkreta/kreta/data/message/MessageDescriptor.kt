@@ -21,6 +21,13 @@ class MessageDescriptor (
         }
     }
 
+    enum class Type(val endpoint: String) {
+        All("https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/sajat"),
+        Inbox("https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/beerkezett"),
+        Sent("https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/elkuldott"),
+        Trash("https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/torolt")
+    }
+
     enum class SortType(val lambda: (it: MessageDescriptor) -> Comparable<*>) {
         SendDate({it.message.sendDate}),
         Teacher({it.message.senderName})

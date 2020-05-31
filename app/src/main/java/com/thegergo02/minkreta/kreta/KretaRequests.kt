@@ -355,7 +355,7 @@ class KretaRequests(ctx: Context) {
         networkHelper.requestString(request)
     }
 
-    fun getMessageList(listener: OnMessageListResult, sortType: MessageDescriptor.SortType) {
+    fun getMessageList(listener: OnMessageListResult, type: MessageDescriptor.Type, sortType: MessageDescriptor.SortType) {
         val successListener = Response.Listener<String> { response ->
             val messageList = JsonHelper.makeMessageList(response)
             if (messageList != null) {
@@ -375,7 +375,7 @@ class KretaRequests(ctx: Context) {
             NetworkHelper.Header.Accept to "application/json",
             NetworkHelper.Header.UserAgent to getUserAgent()
         )
-        val request = NetworkStringRequest(Request.Method.GET, "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/sajat", successListener, errorListener, headers)
+        val request = NetworkStringRequest(Request.Method.GET, type.endpoint, successListener, errorListener, headers)
         networkHelper.requestString(request)
     }
     fun sendMessage(listener: OnSendMessageResult, receivers: List<Receiver>, attachments: List<Attachment>, subject: String, content: String, replyId: Int? = null) {

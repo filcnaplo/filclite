@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Messages to { _ ->
                 if (canClick) {
                     if (tabHolders[Tab.Messages]?.visibility == View.GONE) {
-                        refreshMessages(MessageDescriptor.SortType.SendDate)
+                        refreshMessages(MessageDescriptor.Type.All, MessageDescriptor.SortType.SendDate)
                     } else {
                         switchTab(Tab.Messages)
                     }
@@ -257,9 +257,10 @@ class MainActivity : AppCompatActivity(), MainView {
                         position: Int,
                         id: Long
                     ) {
+                        val type = MessageDescriptor.Type.All
                         val sortType =
                             MessageDescriptor.sortTypeFromString(spinnerPair.value.selectedItem.toString())
-                        refreshMessages(sortType)
+                        refreshMessages(type, sortType)
                     }
                 }
             }
@@ -485,9 +486,9 @@ class MainActivity : AppCompatActivity(), MainView {
             holder, details_ll, ::showDetails, ::hideDetails
         )
     }
-    private fun refreshMessages(sortType: MessageDescriptor.SortType) {
+    private fun refreshMessages(type: MessageDescriptor.Type, sortType: MessageDescriptor.SortType) {
         showProgress()
-        controller.getMessageList(sortType)
+        controller.getMessageList(type, sortType)
     }
     private fun refreshAbsences(sortType: Absence.SortType = Absence.SortType.Date) {
         val holder = tabHolders[Tab.Absences]
