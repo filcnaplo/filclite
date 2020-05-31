@@ -4,12 +4,8 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.util.TypedValue
 import android.view.View
 import android.widget.*
-import androidx.annotation.AttrRes
-import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import com.livinglifetechway.quickpermissions_kotlin.runWithPermissions
 import com.thegergo02.minkreta.kreta.KretaDate
@@ -35,16 +31,9 @@ import java.time.LocalDateTime
 
 
 class MainActivity : AppCompatActivity(), MainView {
-    @ColorInt
-    fun getColorFromAttr(
-        @AttrRes attrColor: Int,
-        typedValue: TypedValue = TypedValue(),
-        resolveRefs: Boolean = true
-    ): Int {
-        theme.resolveAttribute(attrColor, typedValue, resolveRefs)
-        return typedValue.data
-    }
     private lateinit var controller: MainController
+    private lateinit var themeHelper: ThemeHelper
+
     private var tabHolders = mutableMapOf<Tab, LinearLayout>()
     private var tabButtons = mutableMapOf<Tab, Button>()
     private var tabOnClickListeners = mutableMapOf<Tab, (View) -> Unit>()
@@ -61,11 +50,8 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val sharedPrefTheme = getSharedPreferences(getString(R.string.theme_path), Context.MODE_PRIVATE) ?: return
-        val isDark = sharedPrefTheme.getBoolean("dark", true)
-        if (!isDark) {
-            setTheme(R.style.LightTheme)
-        }
+        themeHelper = ThemeHelper(this)
+        themeHelper.setCurrentTheme()
         setContentView(R.layout.activity_main)
 
         val sharedPrefAuth = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
@@ -311,7 +297,6 @@ class MainActivity : AppCompatActivity(), MainView {
         }
     }
     private fun setupSpinnerAdapter(spinnerPair: MutableMap.MutableEntry<Tab, Spinner>) {
-        val ta = this.obtainStyledAttributes(intArrayOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
         val spinnerDisplayArrayMap = mapOf(
             Tab.Notes to listOf("Date", "Type", "Teacher"),
             Tab.Absences to listOf("Subject", "Teacher", "Lesson start time", "Creating time", "Justification state"),
@@ -322,12 +307,12 @@ class MainActivity : AppCompatActivity(), MainView {
         )
         val spinnerDisplayList = spinnerDisplayArrayMap[spinnerPair.key]
         if (spinnerDisplayList != null) {
+            val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
             val adapter =
-                ArrayAdapter(this, ta.getResourceId(0, 0), spinnerDisplayList)
-            adapter.setDropDownViewResource(ta.getResourceId(1, 0))
+                ArrayAdapter(this, spinnerLayouts[0], spinnerDisplayList)
+            adapter.setDropDownViewResource(spinnerLayouts[1])
             spinnerPair.value.adapter = adapter
         }
-        ta.recycle()
     }
     private fun setupSpinners() {
         for (spinnerPair in tabSortSpinners) {
@@ -381,7 +366,7 @@ class MainActivity : AppCompatActivity(), MainView {
             if (tabHolder.key != exception) {
                 tabHolder.value.visibility = View.GONE
                 tabSortSpinners[tabHolder.key]?.visibility = View.GONE
-                tabButtons[tabHolder.key]?.setBackgroundColor(getColorFromAttr(R.attr.colorButtonUnselected))
+                tabButtons[tabHolder.key]?.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorButtonUnselected))
             }
         }
         hideDetails()
@@ -395,11 +380,11 @@ class MainActivity : AppCompatActivity(), MainView {
         if (tabHolder != null && tabButton != null) {
             if (tabHolder.visibility == View.GONE) {
                 newVisibility = View.VISIBLE
-                tabButton.setBackgroundColor(getColorFromAttr(R.attr.colorButtonSelected))
+                tabButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorButtonSelected))
             } else {
                 if (canClose) {
                     newVisibility = View.GONE
-                    tabButton.setBackgroundColor(getColorFromAttr(R.attr.colorButtonUnselected))
+                    tabButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorButtonUnselected))
                 } else {
                     newVisibility = View.VISIBLE
                 }
@@ -413,17 +398,17 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>) {
         TimetableUI.generateTimetable(this, timetable,
-            tabHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller, ::getColorFromAttr)
+            tabHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller, themeHelper)
         switchTab(Tab.Timetable)
         hideProgress()
     }
     override fun generateMessageDescriptors(messages: List<MessageDescriptor>) {
-        MessageUI.generateMessageDescriptors(this, messages, tabHolders[Tab.Messages], controller, ::getColorFromAttr)
+        MessageUI.generateMessageDescriptors(this, messages, tabHolders[Tab.Messages], controller, themeHelper)
         switchTab(Tab.Messages, false)
         hideProgress()
     }
     override fun generateMessage(message: MessageDescriptor) {
-        MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::showDetails, ::hideDetails, ::getColorFromAttr)
+        MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::showDetails, ::hideDetails, themeHelper)
     }
 
     override fun generateTestList(tests: List<Test>) {
@@ -479,7 +464,7 @@ class MainActivity : AppCompatActivity(), MainView {
             val nameDetailsTextView = TextView(this)
             nameDetailsTextView.text = studentDetails.toDetailedString()
             val themeToggleButton = UIHelper.generateButton(this, "TOGGLE THEME", ::toggleTheme, ::showDetails, ::hideDetails, details_ll)
-            themeToggleButton.setBackgroundColor(getColorFromAttr(R.attr.colorAccent))
+            themeToggleButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
             details_ll.addView(themeToggleButton)
             details_ll.addView(nameDetailsTextView)
             showDetails()
@@ -490,7 +475,7 @@ class MainActivity : AppCompatActivity(), MainView {
         val holder = tabHolders[Tab.Homework]
         holder?.removeAllViews()
         HomeworkUI.generateHomeworkList(this, homeworks.sortedWith(compareBy(sortType.lambda)), tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails,
-            ::triggerGetHomeworkCommentList, ::sendHomeworkComment, R.attr.selectedButtonStyle, ::getColorFromAttr)
+            ::triggerGetHomeworkCommentList, ::sendHomeworkComment, R.attr.selectedButtonStyle, themeHelper)
     }
     private fun refreshEvaluations(sortType: Evaluation.SortType = Evaluation.SortType.CreatingDate) {
         val holder = tabHolders[Tab.Evaluations]

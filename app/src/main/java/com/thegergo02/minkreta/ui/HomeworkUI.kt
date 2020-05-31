@@ -2,7 +2,6 @@ package com.thegergo02.minkreta.ui
 
 import android.content.Context
 import android.graphics.Paint
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.EditText
@@ -36,14 +35,16 @@ class HomeworkUI {
                                  getHomeworkCommentListResult: (String) -> Unit,
                                  sendHomeworkComment: (String, String) -> Unit,
                                  buttonSelectedStyle: Int,
-                                 getColorFromAttr: (Int, TypedValue, Boolean) -> Int) {
+                                 themeHelper: ThemeHelper) {
             for (homework in homeworks) {
                 val text = homework.toString()
                 val homeworkOnClickListener = {
                     _: View ->
                     val posterTextView = TextView(ctx)
                     posterTextView.text = homework.teacher
-                    val htmlString = UIHelper.formatHtml(UIHelper.decodeHtml(homework.text), getColorFromAttr(R.attr.colorBackground, TypedValue(), true), getColorFromAttr(R.attr.colorText, TypedValue(), true))
+                    val htmlString = UIHelper.formatHtml(UIHelper.decodeHtml(homework.text),
+                        themeHelper.getColorFromAttributes(R.attr.colorBackground),
+                        themeHelper.getColorFromAttributes(R.attr.colorText))
                     val postDateTextView = TextView(ctx)
                     postDateTextView.text =
                         "${homework.postDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}-${homework.deadlineDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
@@ -52,7 +53,7 @@ class HomeworkUI {
                     val homeworkEditText = EditText(ctx)
                     homeworkEditText.height = 100
                     homeworkEditText.hint = "Comment on homework"
-                    homeworkEditText.setBackgroundColor(getColorFromAttr(R.attr.colorBackground, TypedValue(), true))
+                    homeworkEditText.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorBackground))
                     val homeworkCommentOnListener = {
                         _: View ->
                         sendHomeworkComment(homework.uid, homeworkEditText.text.toString())

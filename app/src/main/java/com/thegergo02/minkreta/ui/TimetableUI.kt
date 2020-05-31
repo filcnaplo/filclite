@@ -1,17 +1,14 @@
 package com.thegergo02.minkreta.ui
 
 import android.content.Context
-import android.util.TypedValue
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
-import java.lang.reflect.Type
 
 class TimetableUI {
     companion object {
@@ -39,26 +36,26 @@ class TimetableUI {
                               showDetails: () -> Unit,
                               hideDetails: () -> Unit,
                               controller: MainController,
-                              getColorFromAttr: (Int, TypedValue, Boolean) -> Int) {
+                              themeHelper: ThemeHelper) {
             timetableHolder?.removeAllViews()
             for (day in currentTimetable) {
                 val text = day.key.toString()
                 val textColor = if (KretaDate().fromSchoolDay(day.key).isToday()) {
-                    getColorFromAttr(R.attr.colorText, TypedValue(), true)
+                    themeHelper.getColorFromAttributes(R.attr.colorText)
                 } else {
-                    getColorFromAttr(R.attr.colorUnavailable, TypedValue(), true)
+                    themeHelper.getColorFromAttributes(R.attr.colorUnavailable)
                 }
                 val dayOnClickListener = {
                     _: View ->
                     val text = ctx.getString(R.string.back_ma)
                     val timetableBackOnClickListener = {
                         _: View ->
-                        generateTimetable(ctx, currentTimetable, timetableHolder, detailsLL, showDetails, hideDetails, controller, getColorFromAttr)
+                        generateTimetable(ctx, currentTimetable, timetableHolder, detailsLL, showDetails, hideDetails, controller, themeHelper)
                         listOf<View>()
                     }
                     timetableHolder?.removeAllViews()
                     val timetableBackButton = UIHelper.generateButton(ctx, text, timetableBackOnClickListener, showDetails, hideDetails, detailsLL)
-                    timetableBackButton.setTextColor(getColorFromAttr(R.attr.colorUnavailable, TypedValue(), true))
+                    timetableBackButton.setTextColor(themeHelper.getColorFromAttributes(R.attr.colorUnavailable))
                     timetableHolder?.addView(timetableBackButton)
                     val timetableClassLL = generateSchoolClasses(ctx, day.value, detailsLL, showDetails, hideDetails)
                     timetableHolder?.addView(timetableClassLL)

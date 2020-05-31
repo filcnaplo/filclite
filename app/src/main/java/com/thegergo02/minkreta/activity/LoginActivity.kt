@@ -10,25 +10,25 @@ import androidx.appcompat.app.AppCompatActivity
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.LoginController
 import com.thegergo02.minkreta.kreta.data.Institute
+import com.thegergo02.minkreta.ui.ThemeHelper
 import com.thegergo02.minkreta.ui.UIHelper
 import com.thegergo02.minkreta.view.LoginView
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity(), LoginView {
     private lateinit var controller: LoginController
+    private lateinit var themeHelper: ThemeHelper
+
     private var instituteNames = mutableMapOf<String, Institute>()
     private var stringInstitutes = ArrayList<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val sharedPrefTheme = getSharedPreferences(getString(R.string.theme_path), Context.MODE_PRIVATE) ?: return
-        val isDark = sharedPrefTheme.getBoolean("dark", true)
-        if (!isDark) {
-            setTheme(R.style.LightTheme)
-        }
+        themeHelper = ThemeHelper(this)
+        themeHelper.setCurrentTheme()
         setContentView(R.layout.activity_login)
 
-        val sharedPref = getSharedPreferences("com.thegergo02.minkreta.auth", Context.MODE_PRIVATE) ?: return
+        val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
         if (sharedPref.getString("accessToken", null) != null) {
             val mainIntent = Intent(this, MainActivity::class.java)
             startActivity(mainIntent)
@@ -63,11 +63,10 @@ class LoginActivity : AppCompatActivity(), LoginView {
 
         }
         stringInstitutes.sortBy{it}
-        val ta = this.obtainStyledAttributes(intArrayOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
-        val adapter = ArrayAdapter(this, ta.getResourceId(0, 0), stringInstitutes)
-        adapter.setDropDownViewResource(ta.getResourceId(1, 0))
+        val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
+        val adapter = ArrayAdapter(this, spinnerLayouts[0], stringInstitutes)
+        adapter.setDropDownViewResource(spinnerLayouts[1])
         inst_code_s.adapter = adapter
-        ta.recycle()
     }
     override fun setTokens(tokens: Map<String, String>) {
         val mainIntent = Intent(this, MainActivity::class.java)
