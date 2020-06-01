@@ -24,6 +24,8 @@ import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
 import com.thegergo02.minkreta.kreta.data.timetable.Test
 import com.thegergo02.minkreta.ui.*
+import com.thegergo02.minkreta.ui.manager.RefreshableData
+import com.thegergo02.minkreta.ui.manager.UIManager
 import com.thegergo02.minkreta.view.MainView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.DayOfWeek
@@ -34,18 +36,10 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var controller: MainController
     private lateinit var themeHelper: ThemeHelper
 
-    private var tabHolders = mutableMapOf<Tab, LinearLayout>()
-    private var tabButtons = mutableMapOf<Tab, Button>()
-    private var tabOnClickListeners = mutableMapOf<Tab, (View) -> Unit>()
-    private var tabSortSpinners = mutableMapOf<Tab, Spinner>()
+    private var managers = mutableMapOf<Tab, UIManager>()
 
     private var canClick = true
 
-    private var abs = listOf<Absence>()
-    private var notes = listOf<Note>()
-    private var evals = listOf<Evaluation>()
-    private var homeworks = listOf<Homework>()
-    private var notices = listOf<Notice>()
     private lateinit var homeworkCommentHolder: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,16 +61,22 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     private fun initializeActivity() {
-        setupHolders()
-        setupTabHolders()
-        setupSpinners()
-        setupClickListeners()
+        setupManagers()
+        name_tt.setOnClickListener {
+            if (canClick) {
+                if (details_ll.visibility == View.GONE) {
+                    controller.getStudentDetails()
+                }
+                hideDetails()
+            }
+        }
+
         homeworkCommentHolder = LinearLayout(this)
         controller.getStudentDetails()
     }
 
-    private fun setupHolders() {
-        tabHolders = mutableMapOf(
+    private fun setupManagers() {
+        val tabHolders = mutableMapOf(
             Tab.Evaluations to eval_holder_ll,
             Tab.Notes to note_holder_ll,
             Tab.Absences to abs_holder_ll,
@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Tests to tests_holder_ll,
             Tab.Noticeboard to noticeboard_holder_ll
         )
-        tabButtons = mutableMapOf(
+        val tabButtons = mutableMapOf(
             Tab.Evaluations to evals_btt,
             Tab.Notes to notes_btt,
             Tab.Absences to abs_btt,
@@ -96,90 +96,179 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Tests to tests_btt,
             Tab.Noticeboard to noticeboard_btt
         )
-        tabOnClickListeners = mutableMapOf( //THEY ARE NOT REDUNDANT, IDE IS AN IDIOT THX
-            Tab.Evaluations to { _ ->
-                if (canClick) {
-                    if (tabHolders[Tab.Evaluations]?.visibility == View.GONE) {
-                        showProgress()
-                        controller.getEvaluationList()
-                    } else {
-                        switchTab(Tab.Evaluations)
-                    }
+        val tabOnEnterListeners = mutableMapOf(
+            Tab.Absences to {
+                showProgress()
+                controller.getAbsenceList()
+            },
+            Tab.Evaluations to {
+                showProgress()
+                controller.getEvaluationList()
+            },
+            Tab.Notes to {
+                showProgress()
+                controller.getNoteList()
+            },
+            Tab.Homework to {
+                showProgress()
+                val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
+                val startDate = KretaDate(firstDay)
+                controller.getHomeworkList(startDate)
+            },
+            Tab.Timetable to {
+                showProgress()
+                startTimetableRequest()
+            },
+            Tab.Messages to {
+                showProgress()
+                controller.getMessageList(MessageDescriptor.Type.All)
+            },
+            Tab.Tests to {
+                showProgress()
+                controller.getTestList()
+            },
+            Tab.Noticeboard to {
+                showProgress()
+                controller.getNoticeList()
+            }
+        )
+        val tabOnExitListeners = mutableMapOf(
+            Tab.Absences to {
+                switchTab(Tab.Absences)
+            },
+            Tab.Evaluations to {
+                switchTab(Tab.Evaluations)
+            },
+            Tab.Notes to {
+                switchTab(Tab.Notes)
+            },
+            Tab.Homework to {
+                switchTab(Tab.Homework)
+            },
+            Tab.Timetable to {
+                switchTab(Tab.Timetable)
+            },
+            Tab.Messages to {
+                switchTab(Tab.Messages)
+            },
+            Tab.Tests to {
+                switchTab(Tab.Tests)
+            },
+            Tab.Noticeboard to {
+                switchTab(Tab.Noticeboard)
+            }
+        )
+        val tabOnElemClickListener = mutableMapOf<Tab, (View, RefreshableData) -> List<View>>(
+            Tab.Absences to { _: View, elem: RefreshableData ->
+                val absDetailsTextView = TextView(this)
+                absDetailsTextView.text = elem.absence?.toDetailedString()
+                listOf(absDetailsTextView)
+            },
+            Tab.Evaluations to { _: View, elem: RefreshableData ->
+                val evalDetailsTextView = TextView(this)
+                evalDetailsTextView.text = elem.eval?.toDetailedString()
+                listOf(evalDetailsTextView)
+            },
+            Tab.Homework to { _: View, elem: RefreshableData ->
+                if (elem.homework != null) {
+                    HomeworkUI.generateHomework(this, elem.homework, themeHelper, ::sendHomeworkComment, details_ll, ::triggerGetHomeworkCommentList)
+                } else {
+                    listOf()
                 }
             },
-            Tab.Notes to { _ ->
-                if (canClick) {
-                    if (tabHolders[Tab.Notes]?.visibility == View.GONE) {
-                        showProgress()
-                        controller.getNoteList()
-                    } else {
-                        switchTab(Tab.Notes)
-                    }
+            Tab.Messages to { _: View, elem: RefreshableData ->
+                controller.getMessage(elem.messageDescriptor?.id ?: 0)
+                controller.setMessageRead(elem.messageDescriptor?.message?.id ?: 0)
+                listOf<View>()
+            },
+            Tab.Notes to { _: View, elem: RefreshableData ->
+                val noteDetailsTextView = TextView(this)
+                noteDetailsTextView.text = elem.note?.toDetailedString()
+                listOf(noteDetailsTextView)
+            },
+            Tab.Noticeboard to { _: View, elem: RefreshableData ->
+                val noticeDetailsTextView = TextView(this)
+                noticeDetailsTextView.text = elem.notice?.toDetailedString()
+                listOf(noticeDetailsTextView)
+            },
+            Tab.Tests to { _: View, elem: RefreshableData ->
+                val testDetailsTextView = TextView(this)
+                testDetailsTextView.text = elem.test?.toDetailedString()
+                listOf(testDetailsTextView)
+            }
+        )
+        val tabOnItemSelectedListener = mutableMapOf(
+            Tab.Absences to {
+                parent: AdapterView<*>?,
+                view: View?,
+                _: Int,
+                _: Long ->
+                val manager = managers[Tab.Absences]
+                if (manager != null) {
+                    manager.sortType = SortType(Absence.sortTypeFromString(parent?.selectedItem.toString()))
+                    controller.getAbsenceList()
                 }
             },
-            Tab.Absences to { _ ->
-                if (canClick) {
-                    if (tabHolders[Tab.Absences]?.visibility == View.GONE) {
-                        showProgress()
-                        controller.getAbsenceList()
-                    } else {
-                        switchTab(Tab.Absences)
-                    }
+            Tab.Notes to {
+                parent: AdapterView<*>?,
+                _: View?,
+                _: Int,
+                _: Long ->
+                val manager = managers[Tab.Notes]
+                if (manager != null) {
+                    manager.sortType = SortType(null, Note.sortTypeFromString(parent?.selectedItem.toString()))
+                    controller.getNoteList()
                 }
             },
-            Tab.Homework to { _ ->
-                if (canClick) {
-                    if (tabHolders[Tab.Homework]?.visibility == View.GONE) {
-                        showProgress()
-                        val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
-                        val startDate = KretaDate(firstDay)
-                        controller.getHomeworkList(startDate)
-                    } else {
-                        switchTab(Tab.Homework)
-                    }
+            Tab.Noticeboard to {
+                    parent: AdapterView<*>?,
+                    _: View?,
+                    _: Int,
+                    _: Long ->
+                val manager = managers[Tab.Noticeboard]
+                if (manager != null) {
+                    manager.sortType = SortType(null, null, null, null, Notice.sortTypeFromString(parent?.selectedItem.toString()))
+                    controller.getNoticeList()
                 }
             },
-            Tab.Timetable to { _ ->
-                if (canClick) {
-                    if (tabHolders[Tab.Timetable]?.visibility == View.GONE) {
-                        showProgress()
-                        startTimetableRequest()
-                    } else {
-                        switchTab(Tab.Timetable)
-                    }
+            Tab.Messages to {
+                    parent: AdapterView<*>?,
+                    _: View?,
+                    _: Int,
+                    _: Long ->
+                val type = MessageDescriptor.Type.All
+                val manager = managers[Tab.Messages]
+                if (manager != null) {
+                    manager.sortType = SortType(null, null, null, MessageDescriptor.sortTypeFromString(parent?.selectedItem.toString()))
+                    controller.getMessageList(type)
                 }
             },
-            Tab.Messages to { _ ->
-                if (canClick) {
-                    if (tabHolders[Tab.Messages]?.visibility == View.GONE) {
-                        refreshMessages(MessageDescriptor.Type.All, MessageDescriptor.SortType.SendDate)
-                    } else {
-                        switchTab(Tab.Messages)
-                    }
+            Tab.Evaluations to {
+                    parent: AdapterView<*>?,
+                    _: View?,
+                    _: Int,
+                    _: Long ->
+                val manager = managers[Tab.Evaluations]
+                if (manager != null) {
+                    manager.sortType = SortType(null, null, Evaluation.sortTypeFromString(parent?.selectedItem.toString()))
+                    controller.getEvaluationList()
                 }
             },
-            Tab.Tests to { _ ->
-                if (canClick) {
-                    if (tabHolders[Tab.Tests]?.visibility == View.GONE) {
-                        showProgress()
-                        controller.getTestList()
-                    } else {
-                        switchTab(Tab.Tests)
-                    }
-                }
-            },
-            Tab.Noticeboard to { _ ->
-                if (canClick) {
-                    if (tabHolders[Tab.Noticeboard]?.visibility == View.GONE) {
-                        showProgress()
-                        controller.getNoticeList()
-                    } else {
-                        switchTab(Tab.Noticeboard)
-                    }
+            Tab.Homework to {
+                    parent: AdapterView<*>?,
+                    _: View?,
+                    _: Int,
+                    _: Long ->
+                val manager = managers[Tab.Homework]
+                if (manager != null) {
+                    manager.sortType = SortType(null, null, null, null, null, Homework.sortTypeFromString(parent?.selectedItem.toString()))
+                    val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
+                    val startDate = KretaDate(firstDay)
+                    controller.getHomeworkList(startDate)
                 }
             }
         )
-        tabSortSpinners = mutableMapOf(
+        val tabSortSpinners = mutableMapOf(
             Tab.Notes to notes_spinner,
             Tab.Absences to abs_spinner,
             Tab.Messages to messages_spinner,
@@ -187,118 +276,16 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Homework to homework_spinner,
             Tab.Noticeboard to noticeboard_spinner
         )
-    }
-    private fun setupClickListeners() {
-        canClick = true
-        name_tt.setOnClickListener {
-            if (canClick) {
-                if (details_ll.visibility == View.GONE) {
-                    controller.getStudentDetails()
-                }
-                hideDetails()
-            }
-        }
-        for (button in tabButtons) {
-            button.value.setOnClickListener(tabOnClickListeners[button.key])
-        }
-    }
-
-    private fun setupItemSelectedListener(spinnerPair: MutableMap.MutableEntry<Tab, Spinner>) {
-        var onItemSelectedListener: AdapterView.OnItemSelectedListener? = null
-        when (spinnerPair.key) {
-            Tab.Absences -> {
-                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        val sortType = Absence.sortTypeFromString(spinnerPair.value.selectedItem.toString())
-                        refreshAbsences(sortType)
-                    }
-                }
-            }
-            Tab.Notes -> {
-                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        val sortType = Note.sortTypeFromString(spinnerPair.value.selectedItem.toString())
-                        refreshNotes(sortType)
-                    }
-                }
-            }
-            Tab.Noticeboard -> {
-                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        val sortType = Notice.sortTypeFromString(spinnerPair.value.selectedItem.toString())
-                        refreshNotices(sortType)
-                    }
-                }
-            }
-            Tab.Messages -> {
-                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        val type = MessageDescriptor.Type.All
-                        val sortType =
-                            MessageDescriptor.sortTypeFromString(spinnerPair.value.selectedItem.toString())
-                        refreshMessages(type, sortType)
-                    }
-                }
-            }
-            Tab.Evaluations -> {
-                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        val sortType = Evaluation.sortTypeFromString(spinnerPair.value.selectedItem.toString())
-                        refreshEvaluations(sortType)
-                    }
-                }
-            }
-            Tab.Homework -> {
-                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        val sortType = Homework.sortTypeFromString(spinnerPair.value.selectedItem.toString())
-                        refreshHomeworks(sortType)
-                    }
-                }
-            }
-        }
-        if (onItemSelectedListener != null) {
-            spinnerPair.value.onItemSelectedListener = onItemSelectedListener
-        }
-    }
-    private fun setupSpinnerAdapter(spinnerPair: MutableMap.MutableEntry<Tab, Spinner>) {
-        val spinnerDisplayArrayMap = mapOf(
+        val tabSortType = mutableMapOf(
+            Tab.Notes to SortType(null, Note.SortType.Date),
+            Tab.Absences to SortType(Absence.SortType.Subject),
+            Tab.Messages to SortType(null, null, null, MessageDescriptor.SortType.SendDate),
+            Tab.Evaluations to SortType(null, null, Evaluation.SortType.CreatingDate),
+            Tab.Homework to SortType(null, null, null, null, null, Homework.SortType.PostDate),
+            Tab.Noticeboard to SortType(null, null, null, null, Notice.SortType.ValidFrom)
+        )
+        val canClick = {canClick}
+        val tabSpinnerElements = mapOf(
             Tab.Notes to listOf("Date", "Type", "Teacher"),
             Tab.Absences to listOf("Subject", "Teacher", "Lesson start time", "Creating time", "Justification state"),
             Tab.Messages to listOf("Send date", "Teacher"),
@@ -306,25 +293,64 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Homework to listOf("Post date", "Deadline", "Teacher", "Subject"),
             Tab.Noticeboard to listOf("Valid from", "Valid until", "Title")
         )
-        val spinnerDisplayList = spinnerDisplayArrayMap[spinnerPair.key]
-        if (spinnerDisplayList != null) {
-            val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
-            val adapter =
-                ArrayAdapter(this, spinnerLayouts[0], spinnerDisplayList)
-            adapter.setDropDownViewResource(spinnerLayouts[1])
-            spinnerPair.value.adapter = adapter
-        }
-    }
-    private fun setupSpinners() {
-        for (spinnerPair in tabSortSpinners) {
-            setupSpinnerAdapter(spinnerPair)
-            setupItemSelectedListener(spinnerPair)
-        }
-    }
-
-    private fun setupTabHolders() {
-        for (holder in tabHolders) {
-            holder.value.visibility = View.GONE
+        val tabGetElemColor = mapOf(
+            Tab.Messages to { elem: RefreshableData ->
+                if (elem.messageDescriptor?.isRead == true) {
+                    themeHelper.getColorFromAttributes(R.attr.colorUnavailable)
+                } else {
+                    themeHelper.getColorFromAttributes(R.attr.colorText)
+                }
+            }
+        )
+        val tabGetElemTextColor = mapOf(
+            Tab.Absences to { elem: RefreshableData ->
+                if (elem.absence?.justificationState == "Igazolt") {
+                    R.color.colorAbsJustified
+                } else {
+                    R.color.colorAbsUnjustified
+                }
+            },
+            Tab.Evaluations to { elem: RefreshableData ->
+                when (elem.eval?.numberValue) {
+                    1 -> R.color.colorOne
+                    2 -> R.color.colorTwo
+                    3 -> R.color.colorThree
+                    4 -> R.color.colorFour
+                    5 -> R.color.colorFive
+                    else -> themeHelper.getColorFromAttributes(R.attr.colorText)
+                }
+            },
+            Tab.Homework to { elem: RefreshableData ->
+                val homework = elem.homework
+                if (homework != null) {
+                    HomeworkUI.getColorFromDeadline(homework)
+                } else {
+                    themeHelper.getColorFromAttributes(R.attr.colorText)
+                }
+            }
+        )
+        for (tab in Tab.values()) {
+            val uiManager = UIManager(this,
+                themeHelper,
+                tabHolders[tab] ?: LinearLayout(this),
+                tabButtons[tab] ?: Button(this),
+                tabGetElemColor[tab] ?: {themeHelper.getColorFromAttributes(R.attr.colorButtonUnselected)},
+                tabGetElemTextColor[tab] ?: {themeHelper.getColorFromAttributes(R.attr.colorText)},
+                canClick,
+                tabOnEnterListeners[tab] ?: {},
+                tabOnExitListeners[tab] ?: {},
+                tabOnElemClickListener[tab] ?: {_: View, _: RefreshableData -> listOf()},
+                tabSortSpinners[tab],
+                tabSortType[tab],
+                tabSpinnerElements[tab],
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                        tabOnItemSelectedListener[tab]?.invoke(parent, view, position, id)
+                    }
+                }
+                )
+            managers[tab] = uiManager
         }
     }
 
@@ -363,49 +389,39 @@ class MainActivity : AppCompatActivity(), MainView {
         Noticeboard
     }
     private fun closeTabs(exception: Tab? = null) {
-        for (tabHolder in tabHolders) {
-            if (tabHolder.key != exception) {
-                tabHolder.value.visibility = View.GONE
-                tabSortSpinners[tabHolder.key]?.visibility = View.GONE
-                tabButtons[tabHolder.key]?.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorButtonUnselected))
+        for (managerPair in managers) {
+            if (managerPair.key != exception) {
+                managerPair.value.setVisibility(View.GONE)
             }
         }
         hideDetails()
     }
     private fun switchTab(newTab: Tab, canClose: Boolean = true) {
         closeTabs(newTab)
-        val tabHolder = tabHolders[newTab]
-        val tabButton = tabButtons[newTab]
-        val tabSpinner = tabSortSpinners[newTab]
-        val newVisibility: Int
-        if (tabHolder != null && tabButton != null) {
-            if (tabHolder.visibility == View.GONE) {
-                newVisibility = View.VISIBLE
-                tabButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorButtonSelected))
-            } else {
-                if (canClose) {
-                    newVisibility = View.GONE
-                    tabButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorButtonUnselected))
-                } else {
-                    newVisibility = View.VISIBLE
-                }
-            }
-            tabHolder.visibility = newVisibility
-            if (tabSpinner != null) {
-                tabSpinner.visibility = newVisibility
-            }
+        val manager = managers[newTab]
+        if (manager != null) {
+            val newVisibility = if(manager.holder.visibility == View.GONE) {View.VISIBLE} else {if (canClose) {View.GONE} else {View.VISIBLE}}
+            manager.setVisibility(newVisibility)
         }
     }
 
     override fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>) {
         TimetableUI.generateTimetable(this, timetable,
-            tabHolders[Tab.Timetable], details_ll, ::showDetails, ::hideDetails, controller, themeHelper)
+            managers[Tab.Timetable]?.holder, details_ll, ::showDetails, ::hideDetails, controller, themeHelper)
         switchTab(Tab.Timetable)
         hideProgress()
     }
     override fun generateMessageDescriptors(messages: List<MessageDescriptor>) {
-        MessageUI.generateMessageDescriptors(this, messages, tabHolders[Tab.Messages], controller, themeHelper)
-        switchTab(Tab.Messages, false)
+        val tab = Tab.Messages
+        val manager = managers[tab]
+        if (manager != null) {
+            val elems = mutableListOf<RefreshableData>()
+            for (message in messages.sortedWith(compareBy())) {
+                elems.add(RefreshableData(message.toString(), null, null, null, message))
+            }
+            managers[tab]?.refresh(elems)
+        }
+        switchTab(tab)
         hideProgress()
     }
     override fun generateMessage(message: MessageDescriptor) {
@@ -413,30 +429,58 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun generateTestList(tests: List<Test>) {
-        tabHolders[Tab.Tests]?.removeAllViews()
-        TestUI.generateTests(this, tests, tabHolders[Tab.Tests], details_ll, ::showDetails, ::hideDetails)
-        switchTab(Tab.Tests)
+        val tab = Tab.Tests
+        val manager = managers[tab]
+        if (manager != null) {
+            val elems = mutableListOf<RefreshableData>()
+            for (test in tests) {
+                elems.add(RefreshableData(test.toString(), null, null, null, null, null, null, test))
+            }
+            managers[tab]?.refresh(elems)
+        }
+        switchTab(tab)
         hideProgress()
     }
 
     override fun generateNoteList(notes: List<Note>) {
-        this.notes = notes
-        refreshNotes()
-        switchTab(Tab.Notes)
+        val tab = Tab.Notes
+        val manager = managers[tab]
+        if (manager != null) {
+            val elems = mutableListOf<RefreshableData>()
+            for (note in notes.sortedWith(compareBy(manager.sortType?.note?.lambda ?: Note.SortType.Date.lambda))) {
+                elems.add(RefreshableData(note.toString(), null, null, null, null, note))
+            }
+            managers[tab]?.refresh(elems)
+        }
+        switchTab(tab)
         hideProgress()
     }
 
     override fun generateNoticeList(notices: List<Notice>) {
-        this.notices = notices
-        refreshNotices()
-        switchTab(Tab.Noticeboard)
+        val tab = Tab.Noticeboard
+        val manager = managers[tab]
+        if (manager != null) {
+            val elems = mutableListOf<RefreshableData>()
+            for (notice in notices.sortedWith(compareBy(manager.sortType?.notice?.lambda ?: Notice.SortType.ValidFrom.lambda))) {
+                elems.add(RefreshableData(notice.toString(), null, null, null, null, null, notice))
+            }
+            managers[tab]?.refresh(elems)
+        }
+        switchTab(tab)
         hideProgress()
     }
 
     override fun generateHomeworkList(homeworks: List<Homework>) {
-        this.homeworks = homeworks
-        refreshHomeworks()
-        switchTab(Tab.Homework)
+        val tab = Tab.Homework
+        val manager = managers[tab]
+        if (manager != null) {
+            val elems = mutableListOf<RefreshableData>()
+            for (homework in homeworks.sortedWith(compareBy(manager.sortType?.homework?.lambda ?: Homework.SortType.PostDate.lambda))) {
+                elems.add(RefreshableData(homework.toString(), null, null, homework))
+            }
+            managers[tab]?.refresh(elems)
+        }
+        switchTab(tab)
         hideProgress()
     }
 
@@ -445,16 +489,30 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun generateEvaluationList(evaluations: List<Evaluation>) {
-        evals = evaluations
-        refreshEvaluations()
-        switchTab(Tab.Evaluations)
+        val tab = Tab.Evaluations
+        val manager = managers[tab]
+        if (manager != null) {
+            val elems = mutableListOf<RefreshableData>()
+            for (eval in evaluations.sortedWith(compareBy(manager.sortType?.eval?.lambda ?: Evaluation.SortType.CreatingDate.lambda))) {
+                elems.add(RefreshableData(eval.toString(), null, eval))
+            }
+            managers[tab]?.refresh(elems)
+        }
+        switchTab(tab)
         hideProgress()
     }
 
     override fun generateAbsenceList(absences: List<Absence>) {
-        abs = absences
-        refreshAbsences()
-        switchTab(Tab.Absences)
+        val tab = Tab.Absences
+        val manager = managers[tab]
+        if (manager != null) {
+            val elems = mutableListOf<RefreshableData>()
+            for (abs in absences.sortedWith(compareBy(manager.sortType?.abs?.lambda ?: Absence.SortType.Subject.lambda))) {
+                elems.add(RefreshableData(abs.toString(), abs))
+            }
+            managers[tab]?.refresh(elems)
+        }
+        switchTab(tab)
         hideProgress()
     }
 
@@ -464,55 +522,12 @@ class MainActivity : AppCompatActivity(), MainView {
         } else {
             val nameDetailsTextView = TextView(this)
             nameDetailsTextView.text = studentDetails.toDetailedString()
-            val themeToggleButton = UIHelper.generateButton(this, "TOGGLE THEME", ::toggleTheme, ::showDetails, ::hideDetails, details_ll)
+            val themeToggleButton = UIHelper.generateButton(this, "TOGGLE THEME", {_, _ -> toggleTheme()}, null, ::showDetails, ::hideDetails, details_ll)
             themeToggleButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
             details_ll.addView(themeToggleButton)
             details_ll.addView(nameDetailsTextView)
             showDetails()
         }
-    }
-
-    private fun refreshHomeworks(sortType: Homework.SortType = Homework.SortType.PostDate) {
-        val holder = tabHolders[Tab.Homework]
-        holder?.removeAllViews()
-        HomeworkUI.generateHomeworkList(this, homeworks.sortedWith(compareBy(sortType.lambda)), tabHolders[Tab.Homework], details_ll, ::showDetails, ::hideDetails,
-            ::triggerGetHomeworkCommentList, ::sendHomeworkComment, R.attr.selectedButtonStyle, themeHelper)
-    }
-    private fun refreshEvaluations(sortType: Evaluation.SortType = Evaluation.SortType.CreatingDate) {
-        val holder = tabHolders[Tab.Evaluations]
-        holder?.removeAllViews()
-        EvaluationUI.generateEvaluations(
-            this, evals.sortedWith(compareBy(sortType.lambda)),
-            holder, details_ll, ::showDetails, ::hideDetails
-        )
-    }
-    private fun refreshMessages(type: MessageDescriptor.Type, sortType: MessageDescriptor.SortType) {
-        showProgress()
-        controller.getMessageList(type, sortType)
-    }
-    private fun refreshAbsences(sortType: Absence.SortType = Absence.SortType.Date) {
-        val holder = tabHolders[Tab.Absences]
-        holder?.removeAllViews()
-        AbsencesUI.generateAbsences(
-            this, abs.sortedWith(compareBy(sortType.lambda)),
-            holder, details_ll, ::showDetails, ::hideDetails
-        )
-    }
-    private fun refreshNotes(sortType: Note.SortType = Note.SortType.Date) {
-        val holder = tabHolders[Tab.Notes]
-        holder?.removeAllViews()
-        NotesUI.generateNotes(
-            this, notes.sortedWith(compareBy(sortType.lambda)),
-            holder, details_ll, ::showDetails, ::hideDetails
-        )
-    }
-    private fun refreshNotices(sortType: Notice.SortType = Notice.SortType.ValidFrom) {
-        val holder = tabHolders[Tab.Noticeboard]
-        holder?.removeAllViews()
-        NoticeUI.generateNoticeList(
-            this, notices.sortedWith(compareBy(sortType.lambda)),
-            holder, details_ll, ::showDetails, ::hideDetails
-        )
     }
 
     private fun triggerGetHomeworkCommentList(homeworkUid: String) {
@@ -543,7 +558,7 @@ class MainActivity : AppCompatActivity(), MainView {
         finish()
     }
 
-    private fun toggleTheme(view: View): List<View> {
+    private fun toggleTheme(): List<View> {
         val sharedPref = getSharedPreferences(getString(R.string.theme_path), Context.MODE_PRIVATE) ?: return listOf()
         with (sharedPref.edit()) {
             putBoolean("dark", !sharedPref.getBoolean("dark", true))

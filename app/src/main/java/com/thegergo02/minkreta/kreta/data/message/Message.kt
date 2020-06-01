@@ -6,7 +6,7 @@ import com.thegergo02.minkreta.kreta.KretaDate
 
 @JsonClass(generateAdapter = true)
 data class Message(
-    @Json(name = "azonosito") val id: Int?,
+    @Json(name = "azonosito") val id: Int?, //THIS SHOULDN'T BE NULL??
     @Json(name = "kuldesDatum") val sendDate: KretaDate,
     @Json(name = "feladoNev") val senderName: String,
     @Json(name = "feladoTitulus") val senderRole: String?,

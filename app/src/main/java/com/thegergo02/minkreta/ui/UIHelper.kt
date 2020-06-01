@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.thegergo02.minkreta.R
+import com.thegergo02.minkreta.ui.manager.RefreshableData
 
 class UIHelper {
     companion object {
@@ -19,21 +20,22 @@ class UIHelper {
             return webView
         }
         fun generateButton(ctx: Context, text: String,
-                           clickListener: (v: View) -> List<View>? = {null}, showDetails: () -> Unit = {}, hideDetails: () -> Unit = {}, detailsLL: LinearLayout = LinearLayout(ctx),
+                           clickListener: (View, RefreshableData) -> List<View>? = {_, _ -> null}, elem: RefreshableData? = null, showDetails: () -> Unit = {}, hideDetails: () -> Unit = {}, detailsLL: LinearLayout = LinearLayout(ctx),
                            style: Int? = null): Button {
             var button = Button(ctx)
             if (style != null) {
                 button = Button(ctx, null, style)
             }
             button.text = text
-            button.setOnClickListener(wrapIntoDetails(clickListener, showDetails, hideDetails, detailsLL))
+            if (elem != null)
+                button.setOnClickListener(wrapIntoDetails(clickListener, elem, showDetails, hideDetails, detailsLL))
             return button
         }
-        fun wrapIntoDetails(function: (v: View) -> List<View>?, showDetails: () -> Unit, hideDetails: () -> Unit, detailsLL: LinearLayout): (v: View) -> Unit {
+        fun wrapIntoDetails(function: (View, RefreshableData) -> List<View>?, elem: RefreshableData, showDetails: () -> Unit, hideDetails: () -> Unit, detailsLL: LinearLayout): (v: View) -> Unit {
             return {
                 v: View ->
                 hideDetails()
-                val views = function(v)
+                val views = function(v, elem)
                 if (views != null) {
                     for (view in views) {
                         detailsLL.addView(view)

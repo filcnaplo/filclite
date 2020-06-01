@@ -12,11 +12,12 @@ import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
+import com.thegergo02.minkreta.ui.manager.RefreshableData
 import java.time.LocalDateTime
 
 class HomeworkUI {
     companion object {
-        private fun getColorFromDeadline(homework: Homework): Int {
+        fun getColorFromDeadline(homework: Homework): Int {
             val now = KretaDate(LocalDateTime.now())
             return if (homework.deadlineDate.year == now.year && homework.deadlineDate.month == now.month && homework.deadlineDate.day == now.day) {
                 R.color.colorHomeworkAlmostLate
@@ -25,49 +26,38 @@ class HomeworkUI {
             } else {
                 R.color.colorHomeworkNotLate
             }
+
         }
-        fun generateHomeworkList(ctx: Context,
-                                 homeworks: List<Homework>,
-                                 homeworkHolder: LinearLayout?,
-                                 detailsLL: LinearLayout,
-                                 showDetails: () -> Unit,
-                                 hideDetails: () -> Unit,
-                                 getHomeworkCommentListResult: (String) -> Unit,
-                                 sendHomeworkComment: (String, String) -> Unit,
-                                 buttonSelectedStyle: Int,
-                                 themeHelper: ThemeHelper) {
-            for (homework in homeworks) {
-                val text = homework.toString()
-                val homeworkOnClickListener = {
-                    _: View ->
-                    val posterTextView = TextView(ctx)
-                    posterTextView.text = homework.teacher
-                    val htmlString = UIHelper.formatHtml(UIHelper.decodeHtml(homework.text),
-                        themeHelper.getColorFromAttributes(R.attr.colorBackground),
-                        themeHelper.getColorFromAttributes(R.attr.colorText))
-                    val postDateTextView = TextView(ctx)
-                    postDateTextView.text =
-                        "${homework.postDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}-${homework.deadlineDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
-                    postDateTextView.setTextColor(ContextCompat.getColor(ctx, getColorFromDeadline(homework)))
-                    val homeworkWebView = UIHelper.generateWebView(ctx, htmlString)
-                    val homeworkEditText = EditText(ctx)
-                    homeworkEditText.height = 100
-                    homeworkEditText.hint = "Comment on homework"
-                    homeworkEditText.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorBackground))
-                    val homeworkCommentOnListener = {
-                        _: View ->
-                        sendHomeworkComment(homework.uid, homeworkEditText.text.toString())
-                        homeworkEditText.text = null
-                        listOf<View>()
-                    }
-                    val homeworkCommentButton = UIHelper.generateButton(ctx, "SEND", homeworkCommentOnListener, {}, {}, detailsLL, buttonSelectedStyle)
-                    getHomeworkCommentListResult(homework.uid)
-                    listOf(posterTextView, homeworkWebView, postDateTextView, homeworkEditText, homeworkCommentButton)
-                }
-                val homeworkButton = UIHelper.generateButton(ctx, text, homeworkOnClickListener, showDetails, hideDetails, detailsLL)
-                homeworkButton.setTextColor(ctx.getColor(getColorFromDeadline(homework)))
-                homeworkHolder?.addView(homeworkButton)
+        fun generateHomework(ctx: Context,
+                             homework: Homework,
+                             themeHelper: ThemeHelper,
+                             sendHomeworkComment: (String, String) -> Unit,
+                             detailsLL: LinearLayout,
+                             getHomeworkCommentListResult: (String) -> Unit
+        ): List<View> {
+            val posterTextView = TextView(ctx)
+            posterTextView.text = homework.teacher
+            val htmlString = UIHelper.formatHtml(UIHelper.decodeHtml(homework.text),
+                themeHelper.getColorFromAttributes(R.attr.colorBackground),
+                themeHelper.getColorFromAttributes(R.attr.colorText))
+            val postDateTextView = TextView(ctx)
+            postDateTextView.text =
+                "${homework.postDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}-${homework.deadlineDate.toFormattedString(KretaDate.KretaDateFormat.DATE)}"
+            postDateTextView.setTextColor(ContextCompat.getColor(ctx, getColorFromDeadline(homework)))
+            val homeworkWebView = UIHelper.generateWebView(ctx, htmlString)
+            val homeworkEditText = EditText(ctx)
+            homeworkEditText.height = 100
+            homeworkEditText.hint = "Comment on homework"
+            homeworkEditText.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorBackground))
+            val homeworkCommentOnListener = {
+                    _: View, _: RefreshableData ->
+                sendHomeworkComment(homework.uid, homeworkEditText.text.toString())
+                homeworkEditText.text = null
+                listOf<View>()
             }
+            val homeworkCommentButton = UIHelper.generateButton(ctx, "SEND", homeworkCommentOnListener)
+            getHomeworkCommentListResult(homework.uid)
+            return listOf(posterTextView, homeworkWebView, postDateTextView, homeworkEditText, homeworkCommentButton)
         }
         fun generateHomeworkCommentList(ctx: Context, comments: List<HomeworkComment>, detailsLL: LinearLayout, homeworkCommentHolder: LinearLayout): LinearLayout {
             homeworkCommentHolder.removeAllViews()

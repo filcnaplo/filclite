@@ -54,10 +54,10 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         }
     }
 
-    fun getMessageList(type: MessageDescriptor.Type, sortType: MessageDescriptor.SortType) {
+    fun getMessageList(type: MessageDescriptor.Type) {
         val parentListener = this
         GlobalScope.launch {
-            apiHandler.getMessageList(parentListener, type, sortType)
+            apiHandler.getMessageList(parentListener, type)
         }
     }
     fun getMessage(messageId: Int) {
@@ -149,8 +149,8 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.hideProgress()
     }
 
-    override fun onMessageListSuccess(messageList: List<MessageDescriptor>, sortType: MessageDescriptor.SortType) {
-        mainView?.generateMessageDescriptors(messageList.reversed().sortedWith(compareBy(sortType.lambda)))
+    override fun onMessageListSuccess(messageList: List<MessageDescriptor>) {
+        mainView?.generateMessageDescriptors(messageList.reversed())
     }
     override fun onMessageListError(error: KretaError) {
         mainView?.displayError(error.errorString)

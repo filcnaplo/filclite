@@ -64,7 +64,7 @@ class KretaRequests(ctx: Context) {
         fun onTimetableError(error: KretaError)
     }
     interface OnMessageListResult {
-        fun onMessageListSuccess(messageList: List<MessageDescriptor>, sortType: MessageDescriptor.SortType)
+        fun onMessageListSuccess(messageList: List<MessageDescriptor>)
         fun onMessageListError(error: KretaError)
     }
     interface OnMessageResult {
@@ -355,11 +355,11 @@ class KretaRequests(ctx: Context) {
         networkHelper.requestString(request)
     }
 
-    fun getMessageList(listener: OnMessageListResult, type: MessageDescriptor.Type, sortType: MessageDescriptor.SortType) {
+    fun getMessageList(listener: OnMessageListResult, type: MessageDescriptor.Type) {
         val successListener = Response.Listener<String> { response ->
             val messageList = JsonHelper.makeMessageList(response)
             if (messageList != null) {
-                listener.onMessageListSuccess(messageList, sortType)
+                listener.onMessageListSuccess(messageList)
             } else {
                 listener.onMessageListError(KretaError.ParseError("unknown"))
             }

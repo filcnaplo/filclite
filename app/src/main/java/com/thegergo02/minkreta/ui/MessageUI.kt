@@ -14,6 +14,7 @@ import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.kreta.data.message.Attachment
 import com.thegergo02.minkreta.kreta.data.message.Message
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
+import com.thegergo02.minkreta.ui.manager.RefreshableData
 
 
 class MessageUI {
@@ -27,7 +28,7 @@ class MessageUI {
             hideDetails: () -> Unit,
             themeHelper: ThemeHelper
         ) {
-            UIHelper.wrapIntoDetails({
+            UIHelper.wrapIntoDetails({ _, _ ->
                 val subjectTextView = TextView(ctx)
                 subjectTextView.text = "${message.subject}"
                 subjectTextView.setTextColor(themeHelper.getColorFromAttributes(R.attr.colorText))
@@ -35,17 +36,23 @@ class MessageUI {
                 senderTextView.text = "${message.senderName} (${message.senderRole}) \n" +
                         message.sendDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)
                 val htmlString = if (message.text != null) {
-                    UIHelper.formatHtml(UIHelper.decodeHtml(message.text), themeHelper.getColorFromAttributes(R.attr.colorBackground), themeHelper.getColorFromAttributes(R.attr.colorText))
-                } else { "" }
+                    UIHelper.formatHtml(
+                        UIHelper.decodeHtml(message.text),
+                        themeHelper.getColorFromAttributes(R.attr.colorBackground),
+                        themeHelper.getColorFromAttributes(R.attr.colorText)
+                    )
+                } else {
+                    ""
+                }
                 val messageWebView = UIHelper.generateWebView(ctx, htmlString)
                 val attachmentLinearLayout = LinearLayout(ctx)
                 for (attachment in message.attachments) {
-                    val onAttachmentClickListener = {
-                            _: View ->
+                    val onAttachmentClickListener = { _: View, _: RefreshableData ->
                         downloadAttachment(attachment)
                         listOf<View>()
                     }
-                    val attachmentButton = UIHelper.generateButton(ctx, attachment.fileName, onAttachmentClickListener)
+                    val attachmentButton =
+                        UIHelper.generateButton(ctx, attachment.fileName, onAttachmentClickListener)
                     attachmentButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
                     val params = ActionBar.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -56,46 +63,7 @@ class MessageUI {
                     attachmentLinearLayout.addView(attachmentButton)
                 }
                 listOf(subjectTextView, messageWebView, attachmentLinearLayout, senderTextView)
-            }, showDetails, hideDetails, detailsLL)(View(ctx))
-        }
-
-        fun generateMessageDescriptors(
-            ctx: Context,
-            messageDescriptors: List<MessageDescriptor>,
-            messageDescriptorsHolder: LinearLayout?,
-            controller: MainController,
-            themeHelper: ThemeHelper
-        ) {
-            messageDescriptorsHolder?.removeAllViews()
-            val sendMessageOnClickListener = {
-                _: View ->
-                val messageIntent = Intent(ctx, MessageActivity::class.java)
-                ctx.startActivity(messageIntent)
-                null
-            }
-            val sendMessageButton = UIHelper.generateButton(ctx, ctx.getString(R.string.send_ma), sendMessageOnClickListener)
-            messageDescriptorsHolder?.addView(sendMessageButton)
-            for (messageDescriptor in messageDescriptors) {
-                val message = messageDescriptor.message
-                val text =
-                    "${message.subject} | ${message.senderName} (${message.senderRole})"
-                val textColor = if (messageDescriptor.isRead) {
-                    themeHelper.getColorFromAttributes(R.attr.colorUnavailable)
-                } else {
-                    themeHelper.getColorFromAttributes(R.attr.colorText)
-                }
-                val messageOnClickListener = {
-                    _: View ->
-                    if (message.id != null) {
-                        controller.getMessage(messageDescriptor.id)
-                        controller.setMessageRead(message.id)
-                    }
-                    null
-                }
-                val messageButton = UIHelper.generateButton(ctx, text, messageOnClickListener, {}, {}, LinearLayout(ctx))
-                messageButton.setTextColor(textColor)
-                messageDescriptorsHolder?.addView(messageButton)
-            }
+            }, RefreshableData(""), showDetails, hideDetails, detailsLL)(View(ctx))
         }
     }
 }
