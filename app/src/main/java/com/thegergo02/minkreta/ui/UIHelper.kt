@@ -27,8 +27,7 @@ class UIHelper {
                 button = Button(ctx, null, style)
             }
             button.text = text
-            if (elem != null)
-                button.setOnClickListener(wrapIntoDetails(clickListener, elem, showDetails, hideDetails, detailsLL))
+            button.setOnClickListener(wrapIntoDetails(clickListener, elem ?: RefreshableData(""), showDetails, hideDetails, detailsLL))
             return button
         }
         fun wrapIntoDetails(function: (View, RefreshableData) -> List<View>?, elem: RefreshableData, showDetails: () -> Unit, hideDetails: () -> Unit, detailsLL: LinearLayout): (v: View) -> Unit {

@@ -26,6 +26,7 @@ open class UIManager (
     spinnerElements: List<String>? = null,
     onItemSelectedListener: AdapterView.OnItemSelectedListener? = null
 ) {
+    public var firstSpinnerSelection = true
     init {
         holder.visibility = View.GONE
         button.setOnClickListener {

@@ -65,9 +65,11 @@ class MainActivity : AppCompatActivity(), MainView {
         name_tt.setOnClickListener {
             if (canClick) {
                 if (details_ll.visibility == View.GONE) {
-                    controller.getStudentDetails()
+                    //controller.getStudentDetails()
+                    generateStudentDetails(null)
+                } else {
+                    hideDetails()
                 }
-                hideDetails()
             }
         }
 
@@ -206,7 +208,11 @@ class MainActivity : AppCompatActivity(), MainView {
                 val manager = managers[Tab.Absences]
                 if (manager != null) {
                     manager.sortType = SortType(Absence.sortTypeFromString(parent?.selectedItem.toString()))
-                    controller.getAbsenceList()
+                    if (!manager.firstSpinnerSelection) {
+                        controller.getAbsenceList()
+                    } else {
+                        manager.firstSpinnerSelection = false
+                    }
                 }
             },
             Tab.Notes to {
@@ -217,7 +223,11 @@ class MainActivity : AppCompatActivity(), MainView {
                 val manager = managers[Tab.Notes]
                 if (manager != null) {
                     manager.sortType = SortType(null, Note.sortTypeFromString(parent?.selectedItem.toString()))
-                    controller.getNoteList()
+                    if (!manager.firstSpinnerSelection) {
+                        controller.getNoteList()
+                    } else {
+                        manager.firstSpinnerSelection = false
+                    }
                 }
             },
             Tab.Noticeboard to {
@@ -228,7 +238,11 @@ class MainActivity : AppCompatActivity(), MainView {
                 val manager = managers[Tab.Noticeboard]
                 if (manager != null) {
                     manager.sortType = SortType(null, null, null, null, Notice.sortTypeFromString(parent?.selectedItem.toString()))
-                    controller.getNoticeList()
+                    if (!manager.firstSpinnerSelection) {
+                        controller.getNoticeList()
+                    } else {
+                        manager.firstSpinnerSelection = false
+                    }
                 }
             },
             Tab.Messages to {
@@ -240,7 +254,11 @@ class MainActivity : AppCompatActivity(), MainView {
                 val manager = managers[Tab.Messages]
                 if (manager != null) {
                     manager.sortType = SortType(null, null, null, MessageDescriptor.sortTypeFromString(parent?.selectedItem.toString()))
-                    controller.getMessageList(type)
+                    if (!manager.firstSpinnerSelection) {
+                        controller.getMessageList(type)
+                    } else {
+                        manager.firstSpinnerSelection = false
+                    }
                 }
             },
             Tab.Evaluations to {
@@ -251,7 +269,11 @@ class MainActivity : AppCompatActivity(), MainView {
                 val manager = managers[Tab.Evaluations]
                 if (manager != null) {
                     manager.sortType = SortType(null, null, Evaluation.sortTypeFromString(parent?.selectedItem.toString()))
-                    controller.getEvaluationList()
+                    if (!manager.firstSpinnerSelection) {
+                        controller.getEvaluationList()
+                    } else {
+                        manager.firstSpinnerSelection = false
+                    }
                 }
             },
             Tab.Homework to {
@@ -262,9 +284,13 @@ class MainActivity : AppCompatActivity(), MainView {
                 val manager = managers[Tab.Homework]
                 if (manager != null) {
                     manager.sortType = SortType(null, null, null, null, null, Homework.sortTypeFromString(parent?.selectedItem.toString()))
-                    val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
-                    val startDate = KretaDate(firstDay)
-                    controller.getHomeworkList(startDate)
+                    if (!manager.firstSpinnerSelection) {
+                        val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
+                        val startDate = KretaDate(firstDay)
+                        controller.getHomeworkList(startDate)
+                    } else {
+                        manager.firstSpinnerSelection = false
+                    }
                 }
             }
         )
@@ -293,15 +319,7 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Homework to listOf("Post date", "Deadline", "Teacher", "Subject"),
             Tab.Noticeboard to listOf("Valid from", "Valid until", "Title")
         )
-        val tabGetElemColor = mapOf(
-            Tab.Messages to { elem: RefreshableData ->
-                if (elem.messageDescriptor?.isRead == true) {
-                    themeHelper.getColorFromAttributes(R.attr.colorUnavailable)
-                } else {
-                    themeHelper.getColorFromAttributes(R.attr.colorText)
-                }
-            }
-        )
+        val tabGetElemColor = mapOf<Tab, (RefreshableData) -> Int>()
         val tabGetElemTextColor = mapOf(
             Tab.Absences to { elem: RefreshableData ->
                 if (elem.absence?.justificationState == "Igazolt") {
@@ -324,6 +342,13 @@ class MainActivity : AppCompatActivity(), MainView {
                 val homework = elem.homework
                 if (homework != null) {
                     HomeworkUI.getColorFromDeadline(homework)
+                } else {
+                    themeHelper.getColorFromAttributes(R.attr.colorText)
+                }
+            },
+            Tab.Messages to { elem: RefreshableData ->
+                if (elem.messageDescriptor?.isRead == true) {
+                    themeHelper.getColorFromAttributes(R.attr.colorUnavailable)
                 } else {
                     themeHelper.getColorFromAttributes(R.attr.colorText)
                 }
@@ -416,12 +441,12 @@ class MainActivity : AppCompatActivity(), MainView {
         val manager = managers[tab]
         if (manager != null) {
             val elems = mutableListOf<RefreshableData>()
-            for (message in messages.sortedWith(compareBy())) {
+            for (message in messages.sortedWith(compareBy(manager.sortType?.messageDescriptor?.lambda ?: MessageDescriptor.SortType.SendDate.lambda))) {
                 elems.add(RefreshableData(message.toString(), null, null, null, message))
             }
             managers[tab]?.refresh(elems)
         }
-        switchTab(tab)
+        switchTab(tab, false)
         hideProgress()
     }
     override fun generateMessage(message: MessageDescriptor) {
@@ -452,7 +477,7 @@ class MainActivity : AppCompatActivity(), MainView {
             }
             managers[tab]?.refresh(elems)
         }
-        switchTab(tab)
+        switchTab(tab, false)
         hideProgress()
     }
 
@@ -466,7 +491,7 @@ class MainActivity : AppCompatActivity(), MainView {
             }
             managers[tab]?.refresh(elems)
         }
-        switchTab(tab)
+        switchTab(tab, false)
         hideProgress()
     }
 
@@ -480,7 +505,7 @@ class MainActivity : AppCompatActivity(), MainView {
             }
             managers[tab]?.refresh(elems)
         }
-        switchTab(tab)
+        switchTab(tab, false)
         hideProgress()
     }
 
@@ -498,7 +523,7 @@ class MainActivity : AppCompatActivity(), MainView {
             }
             managers[tab]?.refresh(elems)
         }
-        switchTab(tab)
+        switchTab(tab, false)
         hideProgress()
     }
 
@@ -512,20 +537,22 @@ class MainActivity : AppCompatActivity(), MainView {
             }
             managers[tab]?.refresh(elems)
         }
-        switchTab(tab)
+        switchTab(tab, false)
         hideProgress()
     }
 
-    override fun generateStudentDetails(studentDetails: StudentDetails) {
+    override fun generateStudentDetails(studentDetails: StudentDetails?) {
         if (name_tt.text == "") {
             name_tt.text = studentDetails.toString()
         } else {
-            val nameDetailsTextView = TextView(this)
-            nameDetailsTextView.text = studentDetails.toDetailedString()
             val themeToggleButton = UIHelper.generateButton(this, "TOGGLE THEME", {_, _ -> toggleTheme()}, null, ::showDetails, ::hideDetails, details_ll)
             themeToggleButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
             details_ll.addView(themeToggleButton)
-            details_ll.addView(nameDetailsTextView)
+            if (studentDetails != null) {
+                val nameDetailsTextView = TextView(this)
+                nameDetailsTextView.text = studentDetails.toDetailedString()
+                details_ll.addView(nameDetailsTextView)
+            }
             showDetails()
         }
     }

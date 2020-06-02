@@ -2,6 +2,7 @@ package com.thegergo02.minkreta.kreta.data.message
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.kreta.data.sub.Note
 
 @JsonClass(generateAdapter = true)
@@ -34,5 +35,9 @@ class MessageDescriptor (
     }
     override fun compareTo(other: MessageDescriptor): Int {
         return this.message.sendDate.compareTo(other.message.sendDate)
+    }
+
+    override fun toString(): String {
+        return "${message.senderName} \n ${message.subject} \n ${message.sendDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
     }
 }
