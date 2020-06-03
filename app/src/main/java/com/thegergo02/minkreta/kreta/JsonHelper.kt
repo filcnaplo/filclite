@@ -53,6 +53,7 @@ class JsonHelper {
                 timetable[day] = mutableListOf()
             }
             for (i in 0 until timetableJson.length()) {
+                Log.w("class", timetableJson[i].toString())
                 val schoolClass = adapter.fromJson(timetableJson[i].toString())
                 if (schoolClass != null) {
                     val schoolDay = schoolClass.startDate.toSchoolDay()
