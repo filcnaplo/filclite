@@ -11,10 +11,7 @@ import com.android.volley.toolbox.StringRequest
 import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
-import com.thegergo02.minkreta.kreta.data.message.Attachment
-import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
-import com.thegergo02.minkreta.kreta.data.message.Receiver
-import com.thegergo02.minkreta.kreta.data.message.Worker
+import com.thegergo02.minkreta.kreta.data.message.*
 import com.thegergo02.minkreta.kreta.data.sub.*
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolClass
 import com.thegergo02.minkreta.kreta.data.timetable.SchoolDay
@@ -68,7 +65,7 @@ class KretaRequests(ctx: Context) {
         fun onMessageListError(error: KretaError)
     }
     interface OnMessageResult {
-        fun onMessageSuccess(messageString: MessageDescriptor)
+        fun onMessageSuccess(messageString: LongerMessageDescriptor)
         fun onMessageError(error: KretaError)
     }
     interface OnTestListResult {
@@ -361,7 +358,7 @@ class KretaRequests(ctx: Context) {
             if (messageList != null) {
                 listener.onMessageListSuccess(messageList)
             } else {
-                listener.onMessageListError(KretaError.ParseError("unknown"))
+                listener.onMessageListError(KretaError.ParseError("empty"))
             }
         }
         val errorListener = Response.ErrorListener { error ->

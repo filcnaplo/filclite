@@ -3,15 +3,19 @@ package com.thegergo02.minkreta.kreta.data.message
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.thegergo02.minkreta.kreta.KretaDate
+import com.thegergo02.minkreta.kreta.adapter.KretaDateAdapter
 import com.thegergo02.minkreta.kreta.data.sub.Note
 
 @JsonClass(generateAdapter = true)
 class MessageDescriptor (
     @Json(name = "azonosito") val id: Int,
+    @Json(name = "uzenetAzonosito") val messageId: Int,
+    @Json(name = "uzenetKuldesDatum") val date: KretaDate,
+    @Json(name = "uzenetFeladoNev") val sender: String? = "",
+    @Json(name = "uzenetFeladoTitulus") val role: String?,
+    @Json(name = "uzenetTargy") val subject: String,
     @Json(name = "isElolvasva") val isRead: Boolean,
-    @Json(name = "isToroltElem") val isDeleted: Boolean,
-    @Json(name = "tipus") val type: MessageType,
-    @Json(name = "uzenet") val message: Message
+    @Json(name = "hasCsatolmany") val hasAttachment: Boolean
 ): Comparable<MessageDescriptor> {
     companion object {
         fun sortTypeFromString(str: String): SortType {
@@ -23,21 +27,20 @@ class MessageDescriptor (
     }
 
     enum class Type(val endpoint: String) {
-        All("https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/sajat"),
         Inbox("https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/beerkezett"),
         Sent("https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/elkuldott"),
         Trash("https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/torolt")
     }
 
     enum class SortType(val lambda: (it: MessageDescriptor) -> Comparable<*>) {
-        SendDate({it.message.sendDate}),
-        Teacher({it.message.senderName})
+        SendDate({it.date}),
+        Teacher({it.sender ?: "No Sender"})
     }
     override fun compareTo(other: MessageDescriptor): Int {
-        return this.message.sendDate.compareTo(other.message.sendDate)
+        return this.date.compareTo(other.date)
     }
 
     override fun toString(): String {
-        return "${message.senderName} \n ${message.subject} \n ${message.sendDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+        return "$sender \n $subject \n ${date.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
     }
 }

@@ -1,10 +1,13 @@
 package com.thegergo02.minkreta.activity
 
+import android.app.ActionBar
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.livinglifetechway.quickpermissions_kotlin.runWithPermissions
@@ -15,6 +18,7 @@ import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.Attachment
+import com.thegergo02.minkreta.kreta.data.message.LongerMessageDescriptor
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
@@ -41,6 +45,7 @@ class MainActivity : AppCompatActivity(), MainView {
     private var canClick = true
 
     private lateinit var homeworkCommentHolder: LinearLayout
+    private var messageType = MessageDescriptor.Type.Inbox
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +70,6 @@ class MainActivity : AppCompatActivity(), MainView {
         name_tt.setOnClickListener {
             if (canClick) {
                 if (details_ll.visibility == View.GONE) {
-                    //controller.getStudentDetails()
                     generateStudentDetails(null)
                 } else {
                     toggleDetails(true)
@@ -119,11 +123,14 @@ class MainActivity : AppCompatActivity(), MainView {
             },
             Tab.Timetable to {
                 showProgress()
-                startTimetableRequest()
+                val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
+                val startDate = KretaDate(firstDay)
+                val endDate = KretaDate(firstDay.plusDays(6))
+                controller.getTimetable(startDate, endDate)
             },
             Tab.Messages to {
                 showProgress()
-                controller.getMessageList(MessageDescriptor.Type.All)
+                controller.getMessageList(MessageDescriptor.Type.Inbox)
             },
             Tab.Tests to {
                 showProgress()
@@ -180,7 +187,7 @@ class MainActivity : AppCompatActivity(), MainView {
             },
             Tab.Messages to { _: View, elem: RefreshableData ->
                 controller.getMessage(elem.messageDescriptor?.id ?: 0)
-                controller.setMessageRead(elem.messageDescriptor?.message?.id ?: 0)
+                controller.setMessageRead(elem.messageDescriptor?.id ?: 0)
                 listOf<View>()
             },
             Tab.Notes to { _: View, elem: RefreshableData ->
@@ -250,12 +257,11 @@ class MainActivity : AppCompatActivity(), MainView {
                     _: View?,
                     _: Int,
                     _: Long ->
-                val type = MessageDescriptor.Type.All
                 val manager = managers[Tab.Messages]
                 if (manager != null) {
                     manager.sortType = SortType(null, null, null, MessageDescriptor.sortTypeFromString(parent?.selectedItem.toString()))
                     if (!manager.firstSpinnerSelection) {
-                        controller.getMessageList(type)
+                        controller.getMessageList(messageType)
                     } else {
                         manager.firstSpinnerSelection = false
                     }
@@ -355,6 +361,59 @@ class MainActivity : AppCompatActivity(), MainView {
                 }
             }
         )
+        val tabOnRefreshListeners = mapOf(
+            Tab.Messages to {
+                val manager = managers[Tab.Messages]
+                val categoryHolder = LinearLayout(this)
+                categoryHolder.orientation = LinearLayout.HORIZONTAL
+                categoryHolder.gravity = Gravity.CENTER
+                val categoryButtons = mutableListOf<Button>()
+                val params = ActionBar.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                val setSelectedCategory = { category: Int ->
+                    for (button in categoryButtons) {
+                        button.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorButtonUnselected))
+                    }
+                    categoryButtons[category].setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorButtonSelected))
+                }
+                val inbox = UIHelper.generateButton(this, "INBOX", { _: View, _: RefreshableData ->
+                    messageType = MessageDescriptor.Type.Inbox
+                    controller.getMessageList(messageType)
+                    setSelectedCategory(0)
+                    null
+                })
+                inbox.layoutParams = params
+                categoryButtons.add(inbox)
+                val sent = UIHelper.generateButton(this, "SENT", { _: View, _: RefreshableData ->
+                    messageType = MessageDescriptor.Type.Sent
+                    controller.getMessageList(messageType)
+                    setSelectedCategory(1)
+                    null
+                })
+                sent.layoutParams = params
+                categoryButtons.add(sent)
+                val trash = UIHelper.generateButton(this, "TRASH", { _: View, _: RefreshableData ->
+                    messageType = MessageDescriptor.Type.Trash
+                    controller.getMessageList(messageType)
+                    setSelectedCategory(2)
+                    null
+                })
+                trash.layoutParams = params
+                categoryButtons.add(trash)
+                for (button in categoryButtons) {
+                    categoryHolder.addView(button)
+                }
+                val index = when(messageType) {
+                    MessageDescriptor.Type.Inbox -> 0
+                    MessageDescriptor.Type.Sent -> 1
+                    MessageDescriptor.Type.Trash -> 2
+                }
+                setSelectedCategory(index)
+                manager?.holder?.addView(categoryHolder)
+            }
+        )
         for (tab in Tab.values()) {
             val uiManager = UIManager(this,
                 themeHelper,
@@ -365,6 +424,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 canClick,
                 tabOnEnterListeners[tab] ?: {},
                 tabOnExitListeners[tab] ?: {},
+                tabOnRefreshListeners[tab] ?: {} ,
                 tabOnElemClickListener[tab] ?: {_: View, _: RefreshableData -> listOf()},
                 ::toggleDetails,
                 details_ll,
@@ -454,7 +514,7 @@ class MainActivity : AppCompatActivity(), MainView {
         switchTab(tab, false)
         hideProgress()
     }
-    override fun generateMessage(message: MessageDescriptor) {
+    override fun generateMessage(message: LongerMessageDescriptor) {
         MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::toggleDetails, themeHelper)
     }
 
@@ -602,12 +662,5 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun refreshCommentList(homeworkUid: String) {
         controller.getHomeworkCommentList(homeworkUid)
-    }
-
-    private fun startTimetableRequest() {
-        val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
-        val startDate = KretaDate(firstDay)
-        val endDate = KretaDate(firstDay.plusDays(6))
-        controller.getTimetable(startDate, endDate)
     }
 }

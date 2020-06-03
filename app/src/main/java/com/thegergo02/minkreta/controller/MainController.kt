@@ -13,6 +13,7 @@ import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
 import com.thegergo02.minkreta.kreta.data.message.Attachment
+import com.thegergo02.minkreta.kreta.data.message.LongerMessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
 import com.thegergo02.minkreta.kreta.data.sub.Note
@@ -153,11 +154,14 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateMessageDescriptors(messageList.reversed())
     }
     override fun onMessageListError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        when (error.errorString) {
+            "empty" -> mainView?.displayError("There were no messages to return!")
+            else -> mainView?.displayError(error.errorString)
+        }
         mainView?.hideProgress()
     }
 
-    override fun onMessageSuccess(message: MessageDescriptor) {
+    override fun onMessageSuccess(message: LongerMessageDescriptor) {
         mainView?.generateMessage(message)
     }
     override fun onMessageError(error: KretaError) {

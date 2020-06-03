@@ -8,6 +8,7 @@ import com.thegergo02.minkreta.kreta.adapter.KretaDateAdapter
 import com.thegergo02.minkreta.kreta.data.Institute
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
+import com.thegergo02.minkreta.kreta.data.message.LongerMessageDescriptor
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.message.TemporaryAttachment
 import com.thegergo02.minkreta.kreta.data.message.Worker
@@ -53,7 +54,6 @@ class JsonHelper {
                 timetable[day] = mutableListOf()
             }
             for (i in 0 until timetableJson.length()) {
-                Log.w("class", timetableJson[i].toString())
                 val schoolClass = adapter.fromJson(timetableJson[i].toString())
                 if (schoolClass != null) {
                     val schoolDay = schoolClass.startDate.toSchoolDay()
@@ -87,10 +87,10 @@ class JsonHelper {
             }
             return if (messageList.isEmpty()) null else messageList
         }
-        fun makeMessage(messageString: String): MessageDescriptor? {
+        fun makeMessage(messageString: String): LongerMessageDescriptor? {
             val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
-            val adapter: JsonAdapter<MessageDescriptor> = moshi.adapter(
-                MessageDescriptor::class.java)
+            val adapter: JsonAdapter<LongerMessageDescriptor> = moshi.adapter(
+                LongerMessageDescriptor::class.java)
             return adapter.fromJson(messageString)
         }
 

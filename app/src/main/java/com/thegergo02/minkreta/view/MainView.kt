@@ -3,6 +3,7 @@ package com.thegergo02.minkreta.view
 import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
+import com.thegergo02.minkreta.kreta.data.message.LongerMessageDescriptor
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.kreta.data.sub.Absence
 import com.thegergo02.minkreta.kreta.data.sub.Evaluation
@@ -18,7 +19,7 @@ interface MainView {
     fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>)
     fun displayError(error: String)
     fun generateMessageDescriptors(messages: List<MessageDescriptor>)
-    fun generateMessage(message: MessageDescriptor)
+    fun generateMessage(message: LongerMessageDescriptor)
     fun generateTestList(tests: List<Test>)
     fun generateEvaluationList(evaluations: List<Evaluation>)
     fun refreshToken(tokens: Map<String, String>)

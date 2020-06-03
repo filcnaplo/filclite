@@ -20,6 +20,7 @@ open class UIManager (
     canClick: () -> Boolean,
     onEnterListener: () -> Unit,
     onExitListener: () -> Unit,
+    val onRefreshListener: () -> Unit?,
     val onElemClickListener: (View, RefreshableData) -> List<View>,
     val toggleDetails: (Boolean) -> Unit,
     val detailsLL: LinearLayout,
@@ -28,7 +29,7 @@ open class UIManager (
     spinnerElements: List<String>? = null,
     onItemSelectedListener: AdapterView.OnItemSelectedListener? = null
 ) {
-    public var firstSpinnerSelection = true
+    var firstSpinnerSelection = true
     init {
         holder.visibility = View.GONE
         button.setOnClickListener {
@@ -56,6 +57,7 @@ open class UIManager (
     }
     fun refresh(elems: List<RefreshableData>) {
         holder.removeAllViews()
+        onRefreshListener()
         for (elem in elems) {
             val button = UIHelper.generateButton(ctx, elem.text, onElemClickListener, elem, toggleDetails, detailsLL)
             button.setBackgroundColor(getElemButtonColor(elem))
