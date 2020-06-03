@@ -45,6 +45,7 @@ class MessageUI {
                 }
                 val messageWebView = UIHelper.generateWebView(ctx, htmlString)
                 val attachmentLinearLayout = LinearLayout(ctx)
+                attachmentLinearLayout.orientation = LinearLayout.VERTICAL
                 for (attachment in message.attachments) {
                     val onAttachmentClickListener = { _: View, _: RefreshableData ->
                         downloadAttachment(attachment)
@@ -57,7 +58,7 @@ class MessageUI {
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
-                    params.setMargins(10, 0, 10, 0)
+                    params.setMargins(0, 0, 0, 10)
                     attachmentButton.layoutParams = params
                     attachmentLinearLayout.addView(attachmentButton)
                 }
