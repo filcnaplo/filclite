@@ -322,6 +322,7 @@ class MainActivity : AppCompatActivity(), MainView {
         val tabGetElemColor = mapOf<Tab, (RefreshableData) -> Int>()
         val tabGetElemTextColor = mapOf(
             Tab.Absences to { elem: RefreshableData ->
+                R.color.darkColorText
                 if (elem.absence?.justificationState == "Igazolt") {
                     R.color.colorAbsJustified
                 } else {
@@ -359,8 +360,22 @@ class MainActivity : AppCompatActivity(), MainView {
                 themeHelper,
                 tabHolders[tab] ?: LinearLayout(this),
                 tabButtons[tab] ?: Button(this),
-                tabGetElemColor[tab] ?: {themeHelper.getColorFromAttributes(R.attr.colorButtonUnselected)},
-                tabGetElemTextColor[tab] ?: {themeHelper.getColorFromAttributes(R.attr.colorText)},
+                { elem: RefreshableData ->
+                    val colorRef = tabGetElemColor[tab]?.invoke(elem)
+                    if (colorRef != null) {
+                        getColor(colorRef)
+                    } else {
+                        themeHelper.getColorFromAttributes(R.attr.colorButtonUnselected)
+                    }
+                },
+                { elem: RefreshableData ->
+                    val colorRef = tabGetElemTextColor[tab]?.invoke(elem)
+                    if (colorRef != null) {
+                        getColor(colorRef)
+                    } else {
+                        themeHelper.getColorFromAttributes(R.attr.colorText)
+                    }
+                },
                 canClick,
                 tabOnEnterListeners[tab] ?: {},
                 tabOnExitListeners[tab] ?: {},
