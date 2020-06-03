@@ -21,6 +21,8 @@ open class UIManager (
     onEnterListener: () -> Unit,
     onExitListener: () -> Unit,
     val onElemClickListener: (View, RefreshableData) -> List<View>,
+    val toggleDetails: (Boolean) -> Unit,
+    val detailsLL: LinearLayout,
     val sortSpinner: Spinner? = null,
     var sortType: SortType? = null,
     spinnerElements: List<String>? = null,
@@ -55,7 +57,7 @@ open class UIManager (
     fun refresh(elems: List<RefreshableData>) {
         holder.removeAllViews()
         for (elem in elems) {
-            val button = UIHelper.generateButton(ctx, elem.text, onElemClickListener, elem)
+            val button = UIHelper.generateButton(ctx, elem.text, onElemClickListener, elem, toggleDetails, detailsLL)
             button.setBackgroundColor(getElemButtonColor(elem))
             button.setTextColor(getElemButtonTextColor(elem))
             holder.addView(button)

@@ -13,7 +13,7 @@ import com.thegergo02.minkreta.ui.manager.RefreshableData
 
 class TimetableUI {
     companion object {
-        private fun generateSchoolClasses(ctx: Context, classes: List<SchoolClass>, detailsLL: LinearLayout, showDetails: () -> Unit, hideDetails: () -> Unit): LinearLayout {
+        private fun generateSchoolClasses(ctx: Context, classes: List<SchoolClass>, detailsLL: LinearLayout, toggleDetails: (Boolean) -> Unit): LinearLayout {
             val timetableClassLL = LinearLayout(ctx)
             timetableClassLL.orientation = LinearLayout.VERTICAL
             for (schoolClass in classes) {
@@ -24,7 +24,7 @@ class TimetableUI {
                     classDetailsTextView.text = schoolClass.toDetailedString()
                     listOf(classDetailsTextView)
                 }
-                val classButton = UIHelper.generateButton(ctx, text, classOnClickListener, RefreshableData(""), showDetails, hideDetails, detailsLL)
+                val classButton = UIHelper.generateButton(ctx, text, classOnClickListener, RefreshableData(""), toggleDetails, detailsLL)
                 timetableClassLL.addView(classButton)
             }
             return timetableClassLL
@@ -34,8 +34,7 @@ class TimetableUI {
                               currentTimetable: Map<SchoolDay, List<SchoolClass>>,
                               timetableHolder: LinearLayout?,
                               detailsLL: LinearLayout,
-                              showDetails: () -> Unit,
-                              hideDetails: () -> Unit,
+                              toggleDetails: (Boolean) -> Unit,
                               controller: MainController,
                               themeHelper: ThemeHelper) {
             timetableHolder?.removeAllViews()
@@ -51,18 +50,18 @@ class TimetableUI {
                     val text = ctx.getString(R.string.back_ma)
                     val timetableBackOnClickListener = {
                         _: View, _: RefreshableData ->
-                        generateTimetable(ctx, currentTimetable, timetableHolder, detailsLL, showDetails, hideDetails, controller, themeHelper)
+                        generateTimetable(ctx, currentTimetable, timetableHolder, detailsLL, toggleDetails, controller, themeHelper)
                         listOf<View>()
                     }
                     timetableHolder?.removeAllViews()
-                    val timetableBackButton = UIHelper.generateButton(ctx, text, timetableBackOnClickListener, RefreshableData(""), showDetails, hideDetails, detailsLL)
+                    val timetableBackButton = UIHelper.generateButton(ctx, text, timetableBackOnClickListener, RefreshableData(""), toggleDetails, detailsLL)
                     timetableBackButton.setTextColor(themeHelper.getColorFromAttributes(R.attr.colorUnavailable))
                     timetableHolder?.addView(timetableBackButton)
-                    val timetableClassLL = generateSchoolClasses(ctx, day.value, detailsLL, showDetails, hideDetails)
+                    val timetableClassLL = generateSchoolClasses(ctx, day.value, detailsLL, toggleDetails)
                     timetableHolder?.addView(timetableClassLL)
                     listOf<View>()
                 }
-                val dayButton = UIHelper.generateButton(ctx, text, dayOnClickListener, RefreshableData(""), showDetails, hideDetails, detailsLL)
+                val dayButton = UIHelper.generateButton(ctx, text, dayOnClickListener, RefreshableData(""), toggleDetails, detailsLL)
                 dayButton.setTextColor(textColor)
                 timetableHolder?.addView(dayButton)
             }

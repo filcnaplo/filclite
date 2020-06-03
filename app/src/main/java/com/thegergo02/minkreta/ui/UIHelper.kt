@@ -20,27 +20,27 @@ class UIHelper {
             return webView
         }
         fun generateButton(ctx: Context, text: String,
-                           clickListener: (View, RefreshableData) -> List<View>? = {_, _ -> null}, elem: RefreshableData? = null, showDetails: () -> Unit = {}, hideDetails: () -> Unit = {}, detailsLL: LinearLayout = LinearLayout(ctx),
+                           clickListener: (View, RefreshableData) -> List<View>? = {_, _ -> null}, elem: RefreshableData? = null, toggleDetails: (Boolean) -> Unit = {}, detailsLL: LinearLayout = LinearLayout(ctx),
                            style: Int? = null): Button {
             var button = Button(ctx)
             if (style != null) {
                 button = Button(ctx, null, style)
             }
             button.text = text
-            button.setOnClickListener(wrapIntoDetails(clickListener, elem ?: RefreshableData(""), showDetails, hideDetails, detailsLL))
+            button.setOnClickListener(wrapIntoDetails(clickListener, elem ?: RefreshableData(""), toggleDetails, detailsLL))
             return button
         }
-        fun wrapIntoDetails(function: (View, RefreshableData) -> List<View>?, elem: RefreshableData, showDetails: () -> Unit, hideDetails: () -> Unit, detailsLL: LinearLayout): (v: View) -> Unit {
+        fun wrapIntoDetails(function: (View, RefreshableData) -> List<View>?, elem: RefreshableData, toggleDetails: (Boolean) -> Unit, detailsLL: LinearLayout): (v: View) -> Unit {
             return {
                 v: View ->
-                hideDetails()
+                toggleDetails(true)
                 val views = function(v, elem)
                 if (views != null) {
                     for (view in views) {
                         detailsLL.addView(view)
                     }
                 }
-                showDetails()
+                toggleDetails(false)
             }
         }
 

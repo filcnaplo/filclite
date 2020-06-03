@@ -24,8 +24,7 @@ class MessageUI {
             message: Message,
             detailsLL: LinearLayout,
             downloadAttachment: (attachment: Attachment) -> Unit,
-            showDetails: () -> Unit,
-            hideDetails: () -> Unit,
+            toggleDetails: (Boolean) -> Unit,
             themeHelper: ThemeHelper
         ) {
             UIHelper.wrapIntoDetails({ _, _ ->
@@ -63,7 +62,7 @@ class MessageUI {
                     attachmentLinearLayout.addView(attachmentButton)
                 }
                 listOf(subjectTextView, messageWebView, attachmentLinearLayout, senderTextView)
-            }, RefreshableData(""), showDetails, hideDetails, detailsLL)(View(ctx))
+            }, RefreshableData(""), toggleDetails, detailsLL)(View(ctx))
         }
     }
 }

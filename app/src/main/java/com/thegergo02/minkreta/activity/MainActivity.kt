@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity(), MainView {
                     //controller.getStudentDetails()
                     generateStudentDetails(null)
                 } else {
-                    hideDetails()
+                    toggleDetails(true)
                 }
             }
         }
@@ -322,27 +322,27 @@ class MainActivity : AppCompatActivity(), MainView {
         val tabGetElemColor = mapOf<Tab, (RefreshableData) -> Int>()
         val tabGetElemTextColor = mapOf(
             Tab.Absences to { elem: RefreshableData ->
-                R.color.darkColorText
+                getColor(R.color.darkColorText)
                 if (elem.absence?.justificationState == "Igazolt") {
-                    R.color.colorAbsJustified
+                    getColor(R.color.colorAbsJustified)
                 } else {
-                    R.color.colorAbsUnjustified
+                    getColor(R.color.colorAbsUnjustified)
                 }
             },
             Tab.Evaluations to { elem: RefreshableData ->
                 when (elem.eval?.numberValue) {
-                    1 -> R.color.colorOne
-                    2 -> R.color.colorTwo
-                    3 -> R.color.colorThree
-                    4 -> R.color.colorFour
-                    5 -> R.color.colorFive
+                    1 -> getColor(R.color.colorOne)
+                    2 -> getColor(R.color.colorTwo)
+                    3 -> getColor(R.color.colorThree)
+                    4 -> getColor(R.color.colorFour)
+                    5 -> getColor(R.color.colorFive)
                     else -> themeHelper.getColorFromAttributes(R.attr.colorText)
                 }
             },
             Tab.Homework to { elem: RefreshableData ->
                 val homework = elem.homework
                 if (homework != null) {
-                    HomeworkUI.getColorFromDeadline(homework)
+                    getColor(HomeworkUI.getColorFromDeadline(homework))
                 } else {
                     themeHelper.getColorFromAttributes(R.attr.colorText)
                 }
@@ -360,26 +360,14 @@ class MainActivity : AppCompatActivity(), MainView {
                 themeHelper,
                 tabHolders[tab] ?: LinearLayout(this),
                 tabButtons[tab] ?: Button(this),
-                { elem: RefreshableData ->
-                    val colorRef = tabGetElemColor[tab]?.invoke(elem)
-                    if (colorRef != null) {
-                        getColor(colorRef)
-                    } else {
-                        themeHelper.getColorFromAttributes(R.attr.colorButtonUnselected)
-                    }
-                },
-                { elem: RefreshableData ->
-                    val colorRef = tabGetElemTextColor[tab]?.invoke(elem)
-                    if (colorRef != null) {
-                        getColor(colorRef)
-                    } else {
-                        themeHelper.getColorFromAttributes(R.attr.colorText)
-                    }
-                },
+                tabGetElemColor[tab] ?: {themeHelper.getColorFromAttributes(R.attr.colorButtonUnselected)},
+                tabGetElemTextColor[tab] ?: {themeHelper.getColorFromAttributes(R.attr.colorText)},
                 canClick,
                 tabOnEnterListeners[tab] ?: {},
                 tabOnExitListeners[tab] ?: {},
                 tabOnElemClickListener[tab] ?: {_: View, _: RefreshableData -> listOf()},
+                ::toggleDetails,
+                details_ll,
                 tabSortSpinners[tab],
                 tabSortType[tab],
                 tabSpinnerElements[tab],
@@ -409,13 +397,15 @@ class MainActivity : AppCompatActivity(), MainView {
         UIHelper.displayError(this, main_cl, error)
     }
 
-    private fun showDetails() {
-        details_ll.visibility = View.VISIBLE
-        scroll_view.smoothScrollTo(0, 0)
-    }
-    private fun hideDetails() {
-        details_ll.visibility = View.GONE
-        details_ll.removeAllViews()
+    private fun toggleDetails(hide: Boolean = false) {
+        details_ll.visibility = if (details_ll.visibility == View.VISIBLE || hide)
+        {
+            details_ll.removeAllViews()
+            View.GONE
+        } else {
+            scroll_view.smoothScrollTo(0, 0)
+            View.VISIBLE
+        }
     }
 
     enum class Tab {
@@ -434,7 +424,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 managerPair.value.setVisibility(View.GONE)
             }
         }
-        hideDetails()
+        toggleDetails(true)
     }
     private fun switchTab(newTab: Tab, canClose: Boolean = true) {
         closeTabs(newTab)
@@ -447,7 +437,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>) {
         TimetableUI.generateTimetable(this, timetable,
-            managers[Tab.Timetable]?.holder, details_ll, ::showDetails, ::hideDetails, controller, themeHelper)
+            managers[Tab.Timetable]?.holder, details_ll, ::toggleDetails, controller, themeHelper)
         switchTab(Tab.Timetable)
         hideProgress()
     }
@@ -465,7 +455,7 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
     override fun generateMessage(message: MessageDescriptor) {
-        MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::showDetails, ::hideDetails, themeHelper)
+        MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::toggleDetails, themeHelper)
     }
 
     override fun generateTestList(tests: List<Test>) {
@@ -560,7 +550,7 @@ class MainActivity : AppCompatActivity(), MainView {
         if (name_tt.text == "") {
             name_tt.text = studentDetails.toString()
         } else {
-            val themeToggleButton = UIHelper.generateButton(this, "TOGGLE THEME", {_, _ -> toggleTheme()}, null, ::showDetails, ::hideDetails, details_ll)
+            val themeToggleButton = UIHelper.generateButton(this, "TOGGLE THEME", {_, _ -> toggleTheme()}, null, ::toggleDetails, details_ll)
             themeToggleButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
             details_ll.addView(themeToggleButton)
             if (studentDetails != null) {
@@ -568,7 +558,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 nameDetailsTextView.text = studentDetails.toDetailedString()
                 details_ll.addView(nameDetailsTextView)
             }
-            showDetails()
+            toggleDetails()
         }
     }
 
