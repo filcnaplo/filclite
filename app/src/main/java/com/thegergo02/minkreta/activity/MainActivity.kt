@@ -173,7 +173,7 @@ class MainActivity : AppCompatActivity(), MainView {
             },
             Tab.Homework to { _: View, elem: RefreshableData ->
                 if (elem.homework != null) {
-                    HomeworkUI.generateHomework(this, elem.homework, themeHelper, ::sendHomeworkComment, details_ll, ::triggerGetHomeworkCommentList)
+                    HomeworkUI.generateHomework(this, elem.homework, themeHelper, ::sendHomeworkComment, ::triggerGetHomeworkCommentList)
                 } else {
                     listOf()
                 }

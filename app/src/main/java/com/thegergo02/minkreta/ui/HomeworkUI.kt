@@ -32,7 +32,6 @@ class HomeworkUI {
                              homework: Homework,
                              themeHelper: ThemeHelper,
                              sendHomeworkComment: (String, String) -> Unit,
-                             detailsLL: LinearLayout,
                              getHomeworkCommentListResult: (String) -> Unit
         ): List<View> {
             val posterTextView = TextView(ctx)
@@ -56,6 +55,7 @@ class HomeworkUI {
                 listOf<View>()
             }
             val homeworkCommentButton = UIHelper.generateButton(ctx, "SEND", homeworkCommentOnListener)
+            homeworkCommentButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorButtonSelected))
             getHomeworkCommentListResult(homework.uid)
             return listOf(posterTextView, homeworkWebView, postDateTextView, homeworkEditText, homeworkCommentButton)
         }

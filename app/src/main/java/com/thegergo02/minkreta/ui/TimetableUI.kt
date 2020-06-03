@@ -47,14 +47,14 @@ class TimetableUI {
                 }
                 val dayOnClickListener = {
                     _: View, _: RefreshableData ->
-                    val text = ctx.getString(R.string.back_ma)
+                    val backText = ctx.getString(R.string.back_ma)
                     val timetableBackOnClickListener = {
                         _: View, _: RefreshableData ->
                         generateTimetable(ctx, currentTimetable, timetableHolder, detailsLL, toggleDetails, controller, themeHelper)
                         listOf<View>()
                     }
                     timetableHolder?.removeAllViews()
-                    val timetableBackButton = UIHelper.generateButton(ctx, text, timetableBackOnClickListener, RefreshableData(""), toggleDetails, detailsLL)
+                    val timetableBackButton = UIHelper.generateButton(ctx, backText, timetableBackOnClickListener, RefreshableData(""), toggleDetails, detailsLL)
                     timetableBackButton.setTextColor(themeHelper.getColorFromAttributes(R.attr.colorUnavailable))
                     timetableHolder?.addView(timetableBackButton)
                     val timetableClassLL = generateSchoolClasses(ctx, day.value, detailsLL, toggleDetails)
