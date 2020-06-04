@@ -48,7 +48,7 @@ class Absence (
     fun toDetailedString(): String {
         return  "${type.description} \n" +
                 "$subject ($teacher) \n" +
-                "$justificationState ($justificationType) \n" +
+                "$justificationState (${justificationType.description}) \n" +
                 "${absenceClass.startDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)} \n" +
                 date.toFormattedString(KretaDate.KretaDateFormat.DATE)
     }

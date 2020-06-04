@@ -35,7 +35,7 @@ class SchoolClass(
                 "$teacher"
     }
     fun toDetailedString(): String {
-        val deputy = if (deputyTeacher != "") {
+        val deputy = if (deputyTeacher != null) {
             "(Deputy: ${deputyTeacher})"
         } else {
             ""

@@ -47,22 +47,34 @@ class Evaluation(
     }
 
     override fun toString(): String {
-        if (nature == "Diligence" || nature == "Deportment") {
-            return  "$nature ($teacher) \n" +
-                    "${creatingDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+        if (nature == "Magatartas" || nature == "Szorgalom") {
+            return  "${subject.name} ($teacher) \n" +
+                    creatingDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)
         }
-        return  "${subject.name} ($teacher) \n" +
-                "$textValue ($weight%) \n" +
-                "${theme ?: ""} \n" +
-                "${creatingDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+        var text = "${subject.name} ($teacher)\n" +
+                "$textValue"
+        if (weight != null) {
+            text += " ($weight%)"
+        }
+        text += "\n"
+        if (theme != null) {
+            text += "$theme \n"
+        }
+        text += creatingDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)
+        return text
     }
     fun toDetailedString(): String {
-        return  "${subject.name} ($teacher)\n" +
-                "$textValue ($weight%) \n" +
-                "${type?.name} \n" +
-                "$nature \n" +
-                "${theme ?: ""} \n" +
-                "${creatingDate?.toFormattedString(KretaDate.KretaDateFormat.DATETIME)}"
+        var text = "${subject.name} ($teacher)\n" +
+                "$textValue"
+        if (weight != null) {
+            text += " ($weight%)"
+        }
+        text += "\n"
+        if (theme != null) {
+            text += "$theme \n"
+        }
+        text += creatingDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)
+        return text
     }
     override fun compareTo(other: Evaluation): Int {
         return this.creatingDate.compareTo(other.creatingDate)

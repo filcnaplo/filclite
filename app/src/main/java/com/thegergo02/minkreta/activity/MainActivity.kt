@@ -5,6 +5,8 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.util.Linkify
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -193,11 +195,13 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Notes to { _: View, elem: RefreshableData ->
                 val noteDetailsTextView = TextView(this)
                 noteDetailsTextView.text = elem.note?.toDetailedString()
+                Linkify.addLinks(noteDetailsTextView, Linkify.EMAIL_ADDRESSES + Linkify.WEB_URLS)
                 listOf(noteDetailsTextView)
             },
             Tab.Noticeboard to { _: View, elem: RefreshableData ->
                 val noticeDetailsTextView = TextView(this)
                 noticeDetailsTextView.text = elem.notice?.toDetailedString()
+                Linkify.addLinks(noticeDetailsTextView, Linkify.EMAIL_ADDRESSES + Linkify.WEB_URLS)
                 listOf(noticeDetailsTextView)
             },
             Tab.Tests to { _: View, elem: RefreshableData ->
@@ -584,7 +588,10 @@ class MainActivity : AppCompatActivity(), MainView {
         if (manager != null) {
             val elems = mutableListOf<RefreshableData>()
             for (eval in evaluations.sortedWith(compareBy(manager.sortType?.eval?.lambda ?: Evaluation.SortType.CreatingDate.lambda))) {
-                elems.add(RefreshableData(eval.toString(), null, eval))
+                Log.w("asd", eval.type?.name.toString())
+                if (eval.type?.name == "evkozi_jegy_ertekeles") {
+                    elems.add(RefreshableData(eval.toString(), null, eval))
+                }
             }
             managers[tab]?.refresh(elems)
         }
