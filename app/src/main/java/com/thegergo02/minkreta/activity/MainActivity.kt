@@ -56,6 +56,8 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var homeworkCommentHolder: LinearLayout
     private var messageType = MessageDescriptor.Type.Inbox
 
+    private var account: Account? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         themeHelper = ThemeHelper(this)
@@ -72,7 +74,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 { future ->
                     val bnd = future.result
                     val accessToken = bnd.getString(AccountManager.KEY_AUTHTOKEN)
-                    val account = Account(bnd.getString(AccountManager.KEY_ACCOUNT_NAME), bnd.getString(AccountManager.KEY_ACCOUNT_TYPE))
+                    account = Account(bnd.getString(AccountManager.KEY_ACCOUNT_NAME), bnd.getString(AccountManager.KEY_ACCOUNT_TYPE))
                     val refreshToken = accountManager.getUserData(account, getString(R.string.key_refresh_token))
                     val instituteCode = accountManager.getUserData(account, getString(R.string.key_institute_code))
                     if (accessToken != null && refreshToken != null && instituteCode != null) {
@@ -654,12 +656,9 @@ class MainActivity : AppCompatActivity(), MainView {
         controller.sendHomeworkComment(homeworkUid, text)
     }
     override fun refreshToken(tokens: Map<String, String>) {
-        val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
-        with (sharedPref.edit()) {
-            putString("accessToken", tokens["access_token"])
-            putString("refreshToken", tokens["refresh_token"])
-            commit()
-        }
+        val accountManager = AccountManager.get(this)
+        accountManager.setAuthToken(account, getString(R.string.kreta_auth_type_full), tokens["access_token"])
+        accountManager.setUserData(account, getString(R.string.key_refresh_token), tokens["refresh_token"])
     }
 
     private fun downloadAttachment(attachment: Attachment) {
