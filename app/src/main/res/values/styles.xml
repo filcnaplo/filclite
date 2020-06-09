@@ -11,8 +11,10 @@
         <item name="colorUnavailable">@color/darkColorUnavailable</item>
         <item name="colorText">@color/darkColorText</item>
         <item name="selectedButtonStyle">@style/darkSelectedButtonStyle</item>
-        <item name="spinnerItemLayout">@layout/dark_sorter_spinner_item</item>
-        <item name="spinnerDropdownItemLayout">@layout/dark_sorter_spinner_item</item>
+        <item name="sortSpinnerItemLayout">@layout/dark_sorter_spinner_item</item>
+        <item name="sortSpinnerDropdownItemLayout">@layout/dark_sorter_spinner_item</item>
+        <item name="loginSpinnerItemLayout">@layout/dark_login_spinner_item</item>
+        <item name="loginSpinnerDropdownItemLayout">@layout/dark_login_spinner_item</item>
         <item name="android:textColor">@color/darkColorText</item>
         <item name="android:buttonStyle">@style/darkButtonStyle</item>
         <item name="android:background">@color/darkColorBackground</item>
@@ -29,8 +31,10 @@
         <item name="colorUnavailable">@color/lightColorUnavailable</item>
         <item name="colorText">@color/lightColorText</item>
         <item name="selectedButtonStyle">@style/lightSelectedButtonStyle</item>
-        <item name="spinnerItemLayout">@layout/light_sorter_spinner_item</item>
-        <item name="spinnerDropdownItemLayout">@layout/light_sorter_spinner_item</item>
+        <item name="sortSpinnerItemLayout">@layout/light_sorter_spinner_item</item>
+        <item name="sortSpinnerDropdownItemLayout">@layout/light_sorter_spinner_item</item>
+        <item name="loginSpinnerItemLayout">@layout/light_login_spinner_item</item>
+        <item name="loginSpinnerDropdownItemLayout">@layout/light_login_spinner_item</item>
         <item name="android:textColor">@color/lightColorText</item>
         <item name="android:buttonStyle">@style/lightButtonStyle</item>
         <item name="android:background">@color/lightColorBackground</item>

@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/customSpinnerItemTextView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical|center_horizontal"
-    android:textColor="@color/darkColorText"
     android:background="@color/darkColorBackground"
     android:padding="10sp"
-    />
+    android:textColor="@color/darkColorText" />

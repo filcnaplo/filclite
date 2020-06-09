@@ -8,15 +8,20 @@
     android:background="?attr/colorBackground"
     tools:context=".activity.LoginActivity">
 
-    <TextView
+    <EditText
         android:id="@+id/inst_code_tt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
-        android:gravity="center_horizontal"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:ems="10"
+        android:hint="@string/institute_hint_la"
+        android:inputType="textPersonName"
+        android:singleLine="false"
+        android:textAlignment="center"
         android:textColor="?attr/colorAccent2"
-        android:textSize="24sp"
+        android:textColorHint="?attr/colorAccent2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
@@ -75,7 +80,7 @@
         android:scrollbarThumbVertical="@color/darkColorAccent"
         android:scrollbarTrackHorizontal="@color/darkColorText"
         android:scrollbarTrackVertical="@color/darkColorText"
-        android:spinnerMode="dropdown"
+        android:spinnerMode="dialog"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/login_ll" />
 
@@ -84,13 +89,11 @@
         style="?android:attr/progressBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="75dp"
         android:layout_marginBottom="75dp"
         android:progressDrawable="?attr/colorAccent"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/login_ll"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/inst_code_tt" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/login_btt"

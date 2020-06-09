@@ -1,11 +1,9 @@
 package com.thegergo02.minkreta.ui.manager
 
 import android.content.Context
-import android.provider.Contacts
 import android.view.View
 import android.widget.*
 import com.thegergo02.minkreta.R
-import com.thegergo02.minkreta.activity.MainActivity
 import com.thegergo02.minkreta.ui.SortType
 import com.thegergo02.minkreta.ui.ThemeHelper
 import com.thegergo02.minkreta.ui.UIHelper
@@ -45,8 +43,8 @@ open class UIManager (
             sortSpinner.onItemSelectedListener = onItemSelectedListener
             val spinnerLayouts = themeHelper.getResourcesFromAttributes(
                 listOf(
-                    R.attr.spinnerItemLayout,
-                    R.attr.spinnerDropdownItemLayout
+                    R.attr.sortSpinnerItemLayout,
+                    R.attr.sortSpinnerDropdownItemLayout
                 )
             )
             val adapter =

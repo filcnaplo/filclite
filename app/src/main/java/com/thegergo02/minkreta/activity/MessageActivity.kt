@@ -62,7 +62,7 @@ class MessageActivity : AppCompatActivity(), MessageView {
                 replyId
             )
         }
-        val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
+        val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.sortSpinnerItemLayout, R.attr.sortSpinnerDropdownItemLayout))
         val adapterReceiverType =
             ArrayAdapter(this, spinnerLayouts[0], listOf("Loading receiver types..."))
         adapterReceiverType.setDropDownViewResource(spinnerLayouts[1])
@@ -146,7 +146,7 @@ class MessageActivity : AppCompatActivity(), MessageView {
             receiverStrings.add(receiver.name)
         }
         lockReceiverSpinner = true
-        val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
+        val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.sortSpinnerItemLayout, R.attr.sortSpinnerDropdownItemLayout))
         val adapterReceiver =
             ArrayAdapter(this, spinnerLayouts[0], receiverStrings)
         adapterReceiver.setDropDownViewResource(spinnerLayouts[1])
@@ -154,7 +154,7 @@ class MessageActivity : AppCompatActivity(), MessageView {
     }
 
     override fun generateSendableReceiverTypes(types: List<Type>) {
-        val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
+        val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.sortSpinnerItemLayout, R.attr.sortSpinnerDropdownItemLayout))
         this.receiverTypes = types
         val typeStrings = mutableListOf<String>()
         for (type in types) {

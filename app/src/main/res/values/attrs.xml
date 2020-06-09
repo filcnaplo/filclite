@@ -7,6 +7,8 @@
     <attr name="colorUnavailable" format="reference"/>
     <attr name="colorText" format="reference"/>
     <attr name="selectedButtonStyle" format="reference"/>
-    <attr name="spinnerItemLayout" format="reference"/>
-    <attr name="spinnerDropdownItemLayout" format="reference"/>
+    <attr name="sortSpinnerItemLayout" format="reference"/>
+    <attr name="sortSpinnerDropdownItemLayout" format="reference"/>
+    <attr name="loginSpinnerItemLayout" format="reference"/>
+    <attr name="loginSpinnerDropdownItemLayout" format="reference"/>
 </resources>

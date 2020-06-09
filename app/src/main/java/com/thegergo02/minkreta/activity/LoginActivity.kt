@@ -4,9 +4,11 @@ import android.accounts.Account
 import android.accounts.AccountAuthenticatorActivity
 import android.accounts.AccountManager
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -23,7 +25,8 @@ class LoginActivity : AccountAuthenticatorActivity(), LoginView {
     private lateinit var themeHelper: ThemeHelper
 
     private var instituteNames = mutableMapOf<String, Institute>()
-    private var stringInstitutes = ArrayList<String>()
+    private var originalStringInstitutes = mutableListOf<String>()
+    private var stringInstitutes = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,15 +37,22 @@ class LoginActivity : AccountAuthenticatorActivity(), LoginView {
         controller = LoginController(this, this)
         controller.getInstitutes()
         showProgress()
-        inst_code_s?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val institute = instituteNames[inst_code_s.selectedItem.toString()]
-                inst_code_tt.text = institute.toString()
+        inst_code_tt.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val newStringInstitutes = mutableListOf<String>()
+                originalStringInstitutes.forEach {
+                    if (it.contains(s.toString(), true) || instituteNames[it]?.code?.contains(s.toString(), true) == true)
+                        newStringInstitutes.add(it)
+                }
+                stringInstitutes = newStringInstitutes
+                refreshInstitutesSpinner()
             }
-        }
+        })
         login_btt.setOnClickListener {
             val institute = instituteNames[inst_code_s.selectedItem.toString()]
+            inst_code_tt.setText(institute.toString())
             val userName = username_et.text.toString()
             val password = password_et.text.toString()
             if (institute != null) {
@@ -55,15 +65,21 @@ class LoginActivity : AccountAuthenticatorActivity(), LoginView {
     override fun setInstitutes(institutes: List<Institute>) {
         for (institute in institutes) {
             instituteNames[institute.name] = institute
-            stringInstitutes.add(institute.name)
+            originalStringInstitutes.add(institute.name)
 
         }
-        stringInstitutes.sortBy{it}
-        val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.spinnerItemLayout, R.attr.spinnerDropdownItemLayout))
+        originalStringInstitutes.sortBy{it}
+        stringInstitutes = originalStringInstitutes
+        refreshInstitutesSpinner()
+    }
+
+    private fun refreshInstitutesSpinner() {
+        val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.loginSpinnerItemLayout, R.attr.loginSpinnerDropdownItemLayout))
         val adapter = ArrayAdapter(this, spinnerLayouts[0], stringInstitutes)
         adapter.setDropDownViewResource(spinnerLayouts[1])
         inst_code_s.adapter = adapter
     }
+
     override fun setTokens(tokens: Map<String, String>) {
         val userName = username_et.text.toString()
         val password = password_et.text.toString()

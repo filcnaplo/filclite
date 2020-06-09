@@ -19,6 +19,7 @@
     <string name="username_la">Username</string>
     <string name="password_la">Password</string>
     <string name="login_la">Login</string>
+    <string name="institute_hint_la">Institute code/name</string>
 
     <!--MAIN ACTIVITY-->
     <string name="evals_ma">Evaluations</string>
