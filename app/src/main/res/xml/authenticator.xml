@@ -1,0 +1,6 @@
+<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accountType="@string/kreta_account_id"
+    android:label="@string/kreta_account_name" />
+    <!--android:icon="@drawable/ic_udinic"
+    android:smallIcon="@drawable/ic_udinic"
+    android:accountPreferences="@xml/prefs" -->

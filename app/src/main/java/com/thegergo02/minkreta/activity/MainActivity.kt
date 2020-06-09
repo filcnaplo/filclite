@@ -1,5 +1,9 @@
 package com.thegergo02.minkreta.activity
 
+import android.accounts.Account
+import android.accounts.AccountManager
+import android.accounts.AccountManagerCallback
+import android.accounts.AccountManagerFuture
 import android.app.ActionBar
 import android.app.DownloadManager
 import android.content.Context
@@ -10,12 +14,15 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.livinglifetechway.quickpermissions_kotlin.runWithPermissions
-import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.MainController
+import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.kreta.StudentDetails
 import com.thegergo02.minkreta.kreta.data.homework.Homework
 import com.thegergo02.minkreta.kreta.data.homework.HomeworkComment
@@ -55,16 +62,27 @@ class MainActivity : AppCompatActivity(), MainView {
         themeHelper.setCurrentTheme()
         setContentView(R.layout.activity_main)
 
-        val sharedPrefAuth = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
-        val accessToken = sharedPrefAuth.getString("accessToken", null)
-        val refreshToken = sharedPrefAuth.getString("refreshToken", null)
-        val instituteCode = sharedPrefAuth.getString("instituteCode", null)
-        if (accessToken != null && refreshToken != null && instituteCode != null) {
-            controller = MainController(this, this, accessToken, refreshToken, instituteCode)
-        } else {
-            sendToLogin()
-        }
-        initializeActivity()
+        val accountManager = AccountManager.get(this)
+        val future: AccountManagerFuture<Bundle> =
+            accountManager.getAuthTokenByFeatures(getString(R.string.kreta_account_id), getString(R.string.kreta_auth_type_full),
+                null,
+                this,
+                null,
+                null,
+                { future ->
+                    val bnd = future.result
+                    val accessToken = bnd.getString(AccountManager.KEY_AUTHTOKEN)
+                    val account = Account(bnd.getString(AccountManager.KEY_ACCOUNT_NAME), bnd.getString(AccountManager.KEY_ACCOUNT_TYPE))
+                    val refreshToken = accountManager.getUserData(account, getString(R.string.key_refresh_token))
+                    val instituteCode = accountManager.getUserData(account, getString(R.string.key_institute_code))
+                    if (accessToken != null && refreshToken != null && instituteCode != null) {
+                        controller = MainController(this, this, accessToken, refreshToken, instituteCode)
+                        initializeActivity()
+                    } else {
+                        sendToLogin()
+                    }
+                },
+                null)
     }
 
     private fun initializeActivity() {

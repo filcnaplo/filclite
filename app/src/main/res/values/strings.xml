@@ -39,4 +39,15 @@
     <string name="attachments_mea">Attachments...</string>
     <string name="add_attachment_mea">Add attachment</string>
     <string name="message_mea">Message</string>
+
+    <!--AUTHENTICATOR-->
+    <string name="kreta_account_id">com.filc.kreta</string>
+    <string name="kreta_account_name">Kreta</string>
+    <string name="kreta_auth_type_full">fullAccess</string>
+    <string name="key_auth_type">keyAuthType</string>
+    <string name="key_is_adding_new_account">keyIsAddingNewAccount</string>
+    <string name="key_is_refresh_token">keyIsRefreshToken</string>
+    <string name="key_refresh_token">keyRefreshToken</string>
+    <string name="key_institute_code">keyInstituteCode</string>
+    <string name="key_password">keyPassword</string>
 </resources>

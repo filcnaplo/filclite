@@ -1,12 +1,15 @@
 package com.thegergo02.minkreta.activity
 
+import android.accounts.Account
+import android.accounts.AccountAuthenticatorActivity
+import android.accounts.AccountManager
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.appcompat.app.AppCompatActivity
 import com.thegergo02.minkreta.R
 import com.thegergo02.minkreta.controller.LoginController
 import com.thegergo02.minkreta.kreta.data.Institute
@@ -15,7 +18,7 @@ import com.thegergo02.minkreta.ui.UIHelper
 import com.thegergo02.minkreta.view.LoginView
 import kotlinx.android.synthetic.main.activity_login.*
 
-class LoginActivity : AppCompatActivity(), LoginView {
+class LoginActivity : AccountAuthenticatorActivity(), LoginView {
     private lateinit var controller: LoginController
     private lateinit var themeHelper: ThemeHelper
 
@@ -27,13 +30,6 @@ class LoginActivity : AppCompatActivity(), LoginView {
         themeHelper = ThemeHelper(this)
         themeHelper.setCurrentTheme()
         setContentView(R.layout.activity_login)
-
-        val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
-        if (sharedPref.getString("accessToken", null) != null) {
-            val mainIntent = Intent(this, MainActivity::class.java)
-            startActivity(mainIntent)
-            finish()
-        }
 
         controller = LoginController(this, this)
         controller.getInstitutes()
@@ -69,19 +65,27 @@ class LoginActivity : AppCompatActivity(), LoginView {
         inst_code_s.adapter = adapter
     }
     override fun setTokens(tokens: Map<String, String>) {
-        val mainIntent = Intent(this, MainActivity::class.java)
-        val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
-        with (sharedPref.edit()) {
+        val userName = username_et.text.toString()
+        val password = password_et.text.toString()
+        val account = Account(userName, getString(R.string.kreta_account_id))
+        val accountManager = AccountManager.get(this)
+        if (intent.getBooleanExtra(getString(R.string.key_is_adding_new_account), false)) {
+            val userData = Bundle()
             val institute = instituteNames[inst_code_s.selectedItem.toString()]
-            if (institute != null) {
-                putString("accessToken", tokens["access_token"])
-                putString("refreshToken", tokens["refresh_token"])
-                putString("instituteUrl", institute.url)
-                putString("instituteCode", institute.toString())
-            }
-            commit()
+            userData.putString(getString(R.string.key_refresh_token), tokens["refresh_token"])
+            userData.putString(getString(R.string.key_institute_code), institute.toString())
+            accountManager.addAccountExplicitly(account, password, userData)
+            accountManager.setAuthToken(account, getString(R.string.kreta_auth_type_full), tokens["access_token"])
+        } else {
+            accountManager.setPassword(account, password)
         }
-        startActivity(mainIntent)
+        val res = Intent()
+        res.putExtra(AccountManager.KEY_ACCOUNT_NAME, userName)
+        res.putExtra(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.kreta_account_id))
+        res.putExtra(AccountManager.KEY_AUTHTOKEN, tokens["access_token"])
+        res.putExtra(getString(R.string.key_password), password)
+        setAccountAuthenticatorResult(res.extras)
+        setResult(Activity.RESULT_OK, res)
         finish()
     }
 

@@ -26,9 +26,9 @@ import java.util.*
 
 
 class KretaRequests(ctx: Context) {
-    private var accessToken = ""
-    private var refreshToken = ""
-    private var instituteCode = ""
+    var accessToken = ""
+    var refreshToken = ""
+    var instituteCode = ""
     private var instituteUrl = ""
     private lateinit var tokenListener: OnRefreshTokensResult
 
