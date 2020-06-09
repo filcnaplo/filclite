@@ -480,6 +480,9 @@ class MainActivity : AppCompatActivity(), MainView {
     override fun displayError(error: String) {
         UIHelper.displayError(this, main_cl, error)
     }
+    override fun displaySuccess(success: String) {
+        UIHelper.displaySuccess(this, main_cl, success)
+    }
 
     private fun toggleDetails(hide: Boolean = false) {
         details_ll.visibility = if (details_ll.visibility == View.VISIBLE || hide)
@@ -539,7 +542,7 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
     override fun generateMessage(message: LongerMessageDescriptor) {
-        MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::toggleDetails, themeHelper)
+        MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::toggleDetails, themeHelper, ::trashMessage)
     }
 
     override fun generateTestList(tests: List<Test>) {
@@ -666,6 +669,9 @@ class MainActivity : AppCompatActivity(), MainView {
         runWithPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) {
             controller.downloadAttachment(downloadManager, attachment)
         }
+    }
+    private fun trashMessage(messageId: Int, isTrashed: Boolean) {
+        controller.trashMessage(messageId, isTrashed)
     }
 
     override fun sendToLogin() {

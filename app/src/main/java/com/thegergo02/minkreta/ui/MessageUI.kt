@@ -25,7 +25,8 @@ class MessageUI {
             detailsLL: LinearLayout,
             downloadAttachment: (attachment: Attachment) -> Unit,
             toggleDetails: (Boolean) -> Unit,
-            themeHelper: ThemeHelper
+            themeHelper: ThemeHelper,
+            trashMessage: (Int, Boolean) -> Unit
         ) {
             UIHelper.wrapIntoDetails({ _, _ ->
                 val subjectTextView = TextView(ctx)
@@ -62,7 +63,13 @@ class MessageUI {
                     attachmentButton.layoutParams = params
                     attachmentLinearLayout.addView(attachmentButton)
                 }
-                listOf(subjectTextView, messageWebView, attachmentLinearLayout, senderTextView)
+                val onMessageTrashClickListener = { _: View, _: RefreshableData ->
+                    trashMessage(message.id ?: 0, true)
+                    listOf<View>()
+                }
+                val trashButton = UIHelper.generateButton(ctx, ctx.getString(R.string.trash_ma), onMessageTrashClickListener)
+                trashButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
+                listOf(subjectTextView, messageWebView, senderTextView, trashButton, attachmentLinearLayout)
             }, RefreshableData(""), toggleDetails, detailsLL)(View(ctx))
         }
     }

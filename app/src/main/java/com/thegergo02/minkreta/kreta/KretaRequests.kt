@@ -116,6 +116,10 @@ class KretaRequests(ctx: Context) {
         fun onUploadTemporaryAttachmentSuccess(attachment: Attachment)
         fun onUploadTemporaryAttachmentError(error: KretaError)
     }
+    interface OnTrashMessageResult {
+        fun onTrashMessageSuccess(messageId: Int, isTrashed: Boolean)
+        fun onTrashMessageError(error: KretaError)
+    }
 
     private var userAgent = "hu.ekreta.student/<version>/<codename>"
     private var apiKey = "7856d350-1fda-45f5-822d-e1a2f3f1acf0"
@@ -492,6 +496,26 @@ class KretaRequests(ctx: Context) {
             headers,
             "application/json; charset=utf-8",
             "{\"isOlvasott\": ${isRead},\"postaladaElemAzonositoLista\": [${messageId}] }")
+        networkHelper.requestString(request)
+    }
+
+    fun trashMessage(listener: OnTrashMessageResult, messageId: Int, isTrashed: Boolean) {
+        val headers = mapOf(
+            NetworkHelper.Header.Auth to "Bearer $accessToken",
+            NetworkHelper.Header.Accept to "application/json",
+            NetworkHelper.Header.UserAgent to getUserAgent()
+        )
+        val request = NetworkStringRequest(Request.Method.POST,
+            "https://eugyintezes.e-kreta.hu/api/v1/kommunikacio/postaladaelemek/kuka",
+            Response.Listener {
+                listener.onTrashMessageSuccess(messageId, isTrashed)
+            },
+            Response.ErrorListener {
+                listener.onTrashMessageError(KretaError.VolleyError(it.toString(), it))
+            },
+            headers,
+            "application/json; charset=utf-8",
+            "{\"isKuka\": ${isTrashed},\"postaladaElemAzonositoLista\": [${messageId}] }")
         networkHelper.requestString(request)
     }
 

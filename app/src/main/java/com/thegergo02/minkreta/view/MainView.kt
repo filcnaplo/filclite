@@ -18,6 +18,7 @@ interface MainView {
     fun showProgress()
     fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>)
     fun displayError(error: String)
+    fun displaySuccess(success: String)
     fun generateMessageDescriptors(messages: List<MessageDescriptor>)
     fun generateMessage(message: LongerMessageDescriptor)
     fun generateTestList(tests: List<Test>)

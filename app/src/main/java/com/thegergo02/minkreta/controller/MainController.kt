@@ -36,7 +36,8 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     KretaRequests.OnAbsenceListResult,
     KretaRequests.OnHomeworkCommentListResult,
     KretaRequests.OnSendHomeworkCommentResult,
-    KretaRequests.OnNoticeListResult
+    KretaRequests.OnNoticeListResult,
+    KretaRequests.OnTrashMessageResult
 {
 
     private val apiHandler = KretaRequests(ctx, this, accessToken, refreshToken, instituteCode)
@@ -131,6 +132,13 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         val parentListener = this
         GlobalScope.launch {
             apiHandler.getStudentDetails(parentListener)
+        }
+    }
+
+    fun trashMessage(messageId: Int, isTrashed: Boolean) {
+        val parentListener = this
+        GlobalScope.launch {
+            apiHandler.trashMessage(parentListener, messageId, isTrashed)
         }
     }
 
@@ -236,6 +244,15 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.refreshCommentList(homeworkUid)
     }
     override fun onSendHomeworkError(error: KretaError) {
+        mainView?.displayError(error.errorString)
+        mainView?.hideProgress()
+    }
+
+    override fun onTrashMessageSuccess(messageId: Int, isTrashed: Boolean) {
+        mainView?.displaySuccess("Message ($messageId) ${if (isTrashed) "has been trashed" else "has been recovered"}!")
+    }
+
+    override fun onTrashMessageError(error: KretaError) {
         mainView?.displayError(error.errorString)
         mainView?.hideProgress()
     }

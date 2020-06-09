@@ -32,6 +32,7 @@
     <string name="tests_ma">Tests</string>
     <string name="back_ma">Back</string>
     <string name="send_ma">Send message</string>
+    <string name="trash_ma">Trash</string>
 
     <!--MESSAGE ACTIVITY-->
     <string name="send_mea">Send</string>
