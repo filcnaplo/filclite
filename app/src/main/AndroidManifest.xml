@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.thegergo02.filclite">
+    package="hu.filcnaplo.ellenorzo.lite">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -15,15 +15,15 @@
         android:supportsRtl="true"
         android:theme="@style/DarkTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <activity android:name="com.thegergo02.filclite.activity.MainActivity">
+        <activity android:name="hu.filcnaplo.ellenorzo.lite.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.thegergo02.filclite.activity.LoginActivity" />
-        <activity android:name="com.thegergo02.filclite.activity.MessageActivity"/>
-        <service android:name="com.thegergo02.filclite.authenticator.KretaAuthenticatorService">
+        <activity android:name="hu.filcnaplo.ellenorzo.lite.activity.LoginActivity" />
+        <activity android:name="hu.filcnaplo.ellenorzo.lite.activity.MessageActivity"/>
+        <service android:name="hu.filcnaplo.ellenorzo.lite.authenticator.KretaAuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>

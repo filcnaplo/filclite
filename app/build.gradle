@@ -10,7 +10,7 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
     defaultConfig {
-        applicationId "com.thegergo02.minkreta"
+        applicationId "hu.filcnaplo.ellenorzo.lite"
         minSdkVersion 26
         targetSdkVersion 29
         versionCode 1

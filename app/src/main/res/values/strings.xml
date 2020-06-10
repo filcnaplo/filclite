@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Filc Lite</string>
-    <string name="auth_path">com.thegergo02.minkreta.auth</string>
-    <string name="theme_path">com.thegergo02.minkreta.theme</string>
+    <string name="auth_path">hu.filcnaplo.ellenorzo.lite.auth</string>
+    <string name="theme_path">hu.filcnaplo.ellenorzo.lite.theme</string>
     <!--ERRORS-->
     <string name="timeout_error_general">The KRETA servers took too long to respond!</string>
     <string name="network_error_general">The request abruptly closed!</string>
