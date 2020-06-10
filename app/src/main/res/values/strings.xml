@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MinKreta</string>
+    <string name="app_name">Filc Lite</string>
     <string name="auth_path">com.thegergo02.minkreta.auth</string>
     <string name="theme_path">com.thegergo02.minkreta.theme</string>
     <!--ERRORS-->
