@@ -33,6 +33,7 @@
     <string name="back_ma">Back</string>
     <string name="send_ma">Send message</string>
     <string name="trash_ma">Trash</string>
+    <string name="recover_ma">Recover</string>
 
     <!--MESSAGE ACTIVITY-->
     <string name="send_mea">Send</string>

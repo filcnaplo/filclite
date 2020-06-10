@@ -250,6 +250,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
 
     override fun onTrashMessageSuccess(messageId: Int, isTrashed: Boolean) {
         mainView?.displaySuccess("Message ($messageId) ${if (isTrashed) "has been trashed" else "has been recovered"}!")
+        getMessageList(if (isTrashed) MessageDescriptor.Type.Trash else MessageDescriptor.Type.Inbox)
     }
 
     override fun onTrashMessageError(error: KretaError) {

@@ -542,7 +542,7 @@ class MainActivity : AppCompatActivity(), MainView {
         hideProgress()
     }
     override fun generateMessage(message: LongerMessageDescriptor) {
-        MessageUI.generateMessage(this, message.message, details_ll, ::downloadAttachment, ::toggleDetails, themeHelper, ::trashMessage)
+        MessageUI.generateMessage(this, message, details_ll, ::downloadAttachment, ::toggleDetails, themeHelper, ::trashMessage)
     }
 
     override fun generateTestList(tests: List<Test>) {

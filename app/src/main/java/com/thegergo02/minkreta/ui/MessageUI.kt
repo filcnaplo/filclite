@@ -12,6 +12,7 @@ import com.thegergo02.minkreta.activity.MessageActivity
 import com.thegergo02.minkreta.controller.MainController
 import com.thegergo02.minkreta.kreta.KretaDate
 import com.thegergo02.minkreta.kreta.data.message.Attachment
+import com.thegergo02.minkreta.kreta.data.message.LongerMessageDescriptor
 import com.thegergo02.minkreta.kreta.data.message.Message
 import com.thegergo02.minkreta.kreta.data.message.MessageDescriptor
 import com.thegergo02.minkreta.ui.manager.RefreshableData
@@ -21,7 +22,7 @@ class MessageUI {
     companion object {
         fun generateMessage(
             ctx: Context,
-            message: Message,
+            messageDescriptor: LongerMessageDescriptor,
             detailsLL: LinearLayout,
             downloadAttachment: (attachment: Attachment) -> Unit,
             toggleDetails: (Boolean) -> Unit,
@@ -29,6 +30,7 @@ class MessageUI {
             trashMessage: (Int, Boolean) -> Unit
         ) {
             UIHelper.wrapIntoDetails({ _, _ ->
+                val message = messageDescriptor.message
                 val subjectTextView = TextView(ctx)
                 subjectTextView.text = "${message.subject}"
                 subjectTextView.setTextColor(themeHelper.getColorFromAttributes(R.attr.colorText))
@@ -64,10 +66,12 @@ class MessageUI {
                     attachmentLinearLayout.addView(attachmentButton)
                 }
                 val onMessageTrashClickListener = { _: View, _: RefreshableData ->
-                    trashMessage(message.id ?: 0, true)
+                    trashMessage(messageDescriptor.id, !messageDescriptor.isTrashed)
                     listOf<View>()
                 }
-                val trashButton = UIHelper.generateButton(ctx, ctx.getString(R.string.trash_ma), onMessageTrashClickListener)
+                val trashButton = UIHelper.generateButton(ctx,
+                    if (messageDescriptor.isTrashed) ctx.getString(R.string.recover_ma) else ctx.getString(R.string.trash_ma),
+                    onMessageTrashClickListener)
                 trashButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
                 listOf(subjectTextView, messageWebView, senderTextView, trashButton, attachmentLinearLayout)
             }, RefreshableData(""), toggleDetails, detailsLL)(View(ctx))
