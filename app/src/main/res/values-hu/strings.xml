@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Filc Lite</string>
+
+    <!--ERRORS-->
+    <string name="timeout_error_general">A KRÉTA szerverek nem válaszoltak időn belül!</string>
+    <string name="network_error_general">A kérés váratlanul lezárult!</string>
+    <string name="auth_failure_error_general">Hibás adatok!</string>
+    <string name="no_connection_error_general">Nincs internetkapcsolat!</string>
+    <string name="server_error_general">Probléma van a KRÉTA szerverekkel!</string>
+
+    <!--LOGIN ERRORS-->
+    <string name="client_error_login">Nem lehet semmi üres!</string>
+
+    <!--INST ERRORS-->
+    <string name="client_error_inst">Probléma volt az iskolák lekérése közben!</string>
+
+    <!--LOGIN ACTIVITY-->
+    <string name="username_la">Felhasználónév</string>
+    <string name="password_la">Jelszó</string>
+    <string name="login_la">Bejelentkezés</string>
+    <string name="institute_hint_la">Iskola kód/név</string>
+
+    <!--MAIN ACTIVITY-->
+    <string name="toggle_theme_ma">Téma választás</string>
+    <string name="date_ma">Dátum</string>
+    <string name="type_ma">Típus</string>
+    <string name="teacher_ma">Tanár</string>
+    <string name="valid_from_ma">Érvényes innen</string>
+    <string name="valid_until_ma">Érvényes eddig</string>
+    <string name="title_ma">Cím</string>
+    <string name="send_date_ma">Küldés dátuma</string>
+    <string name="inbox_ma">Beérkezett</string>
+    <string name="sent_ma">Elküldött</string>
+    <string name="monday_ma">Hétfő</string>
+    <string name="tuesday_ma">Kedd</string>
+    <string name="wednesday_ma">Szerda</string>
+    <string name="thursday_ma">Csütörtök</string>
+    <string name="friday_ma">Péntek</string>
+    <string name="saturday_ma">Szombat</string>
+    <string name="sunday_ma">Vasárnap</string>
+    <string name="subject_ma">Tantárgy</string>
+    <string name="lesson_start_time_ma">Óra kezdete</string>
+    <string name="creating_time_ma">Készítés dátuma</string>
+    <string name="justification_state_ma">Igazolás állapota</string>
+    <string name="form_ma">Alak</string>
+    <string name="value_ma">Érték</string>
+    <string name="mode_ma">Mód</string>
+    <string name="post_date_ma">Kirakás dátuma</string>
+    <string name="deadline_ma">Határidő</string>
+    <string name="evals_ma">Jegyek</string>
+    <string name="notes_ma">Jegyzetek</string>
+    <string name="noticeboard_ma">Faliújság</string>
+    <string name="abs_ma">Hiányzások</string>
+    <string name="homework_ma">Házi feladatok</string>
+    <string name="timetable_ma">Órarend</string>
+    <string name="messages_ma">Üzenetek</string>
+    <string name="tests_ma">Dolgozatok</string>
+    <string name="back_ma">Vissza</string>
+    <string name="send_ma">Üzenet küldése</string>
+    <string name="trash_ma">Kuka</string>
+    <string name="recover_ma">Visszaállítás</string>
+
+    <!--MESSAGE ACTIVITY-->
+    <string name="send_mea">Küldés</string>
+    <string name="subject_mea">Tárgy</string>
+    <string name="receivers_mea">Címzettek...</string>
+    <string name="attachments_mea">Mellékletek...</string>
+    <string name="add_attachment_mea">Csatolmány hozzáadása</string>
+    <string name="message_mea">Üzenet</string>
+
+    <string name="kreta_account_name">Kréta</string>
+</resources>

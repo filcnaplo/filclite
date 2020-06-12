@@ -237,7 +237,13 @@ class MainActivity : AppCompatActivity(), MainView {
                 _: Long ->
                 val manager = managers[Tab.Absences]
                 if (manager != null) {
-                    manager.sortType = SortType(Absence.sortTypeFromString(parent?.selectedItem.toString()))
+                    val stringToSortType = mapOf(
+                        getString(R.string.subject_ma) to Absence.SortType.Subject,
+                        getString(R.string.teacher_ma) to Absence.SortType.Teacher,
+                        getString(R.string.lesson_start_time_ma) to Absence.SortType.ClassStartDate,
+                        getString(R.string.creating_time_ma) to Absence.SortType.Date,
+                        getString(R.string.justification_state_ma) to Absence.SortType.JustificationState)
+                    manager.sortType = SortType(stringToSortType[parent?.selectedItem.toString()] ?: Absence.SortType.Subject)
                     if (!manager.firstSpinnerSelection) {
                         controller.getAbsenceList()
                     } else {
@@ -252,7 +258,11 @@ class MainActivity : AppCompatActivity(), MainView {
                 _: Long ->
                 val manager = managers[Tab.Notes]
                 if (manager != null) {
-                    manager.sortType = SortType(null, Note.sortTypeFromString(parent?.selectedItem.toString()))
+                    val stringToSortType = mapOf(
+                        getString(R.string.date_ma) to Note.SortType.Date,
+                        getString(R.string.type_ma) to Note.SortType.Type,
+                        getString(R.string.teacher_ma) to Note.SortType.Teacher)
+                    manager.sortType = SortType(stringToSortType[parent?.selectedItem.toString()] ?: Note.SortType.Date)
                     if (!manager.firstSpinnerSelection) {
                         controller.getNoteList()
                     } else {
@@ -267,7 +277,11 @@ class MainActivity : AppCompatActivity(), MainView {
                     _: Long ->
                 val manager = managers[Tab.Noticeboard]
                 if (manager != null) {
-                    manager.sortType = SortType(null, null, null, null, Notice.sortTypeFromString(parent?.selectedItem.toString()))
+                    val stringToSortType = mapOf(
+                        getString(R.string.valid_from_ma) to Notice.SortType.ValidFrom,
+                        getString(R.string.valid_until_ma) to Notice.SortType.ValidUntil,
+                        getString(R.string.title_ma) to Notice.SortType.Title)
+                    manager.sortType = SortType(stringToSortType[parent?.selectedItem.toString()] ?: Notice.SortType.ValidFrom)
                     if (!manager.firstSpinnerSelection) {
                         controller.getNoticeList()
                     } else {
@@ -282,7 +296,10 @@ class MainActivity : AppCompatActivity(), MainView {
                     _: Long ->
                 val manager = managers[Tab.Messages]
                 if (manager != null) {
-                    manager.sortType = SortType(null, null, null, MessageDescriptor.sortTypeFromString(parent?.selectedItem.toString()))
+                    val stringToSortType = mapOf(
+                        getString(R.string.send_date_ma) to MessageDescriptor.SortType.SendDate,
+                        getString(R.string.teacher_ma) to MessageDescriptor.SortType.Teacher)
+                    manager.sortType = SortType(stringToSortType[parent?.selectedItem.toString()] ?: MessageDescriptor.SortType.SendDate)
                     if (!manager.firstSpinnerSelection) {
                         controller.getMessageList(messageType)
                     } else {
@@ -297,7 +314,14 @@ class MainActivity : AppCompatActivity(), MainView {
                     _: Long ->
                 val manager = managers[Tab.Evaluations]
                 if (manager != null) {
-                    manager.sortType = SortType(null, null, Evaluation.sortTypeFromString(parent?.selectedItem.toString()))
+                    val stringToSortType = mapOf(
+                        getString(R.string.creating_time_ma) to Evaluation.SortType.CreatingDate,
+                        getString(R.string.form_ma) to Evaluation.SortType.Nature,
+                        getString(R.string.value_ma) to Evaluation.SortType.TextValue,
+                        getString(R.string.mode_ma) to Evaluation.SortType.Mode,
+                        getString(R.string.subject_ma) to Evaluation.SortType.Subject,
+                        getString(R.string.teacher_ma) to Evaluation.SortType.Teacher)
+                    manager.sortType = SortType(stringToSortType[parent?.selectedItem.toString()] ?: Evaluation.SortType.CreatingDate)
                     if (!manager.firstSpinnerSelection) {
                         controller.getEvaluationList()
                     } else {
@@ -312,7 +336,13 @@ class MainActivity : AppCompatActivity(), MainView {
                     _: Long ->
                 val manager = managers[Tab.Homework]
                 if (manager != null) {
-                    manager.sortType = SortType(null, null, null, null, null, Homework.sortTypeFromString(parent?.selectedItem.toString()))
+                    val stringToSortType = mapOf(
+                        getString(R.string.post_date_ma) to Homework.SortType.PostDate,
+                        getString(R.string.deadline_ma) to Homework.SortType.Deadline,
+                        getString(R.string.teacher_ma) to Homework.SortType.Teacher,
+                        getString(R.string.subject_ma) to Homework.SortType.Subject
+                    )
+                    manager.sortType = SortType(stringToSortType[parent?.selectedItem.toString()] ?: Homework.SortType.PostDate)
                     if (!manager.firstSpinnerSelection) {
                         val firstDay = LocalDateTime.now().with(DayOfWeek.MONDAY)
                         val startDate = KretaDate(firstDay)
@@ -332,21 +362,38 @@ class MainActivity : AppCompatActivity(), MainView {
             Tab.Noticeboard to noticeboard_spinner
         )
         val tabSortType = mutableMapOf(
-            Tab.Notes to SortType(null, Note.SortType.Date),
+            Tab.Notes to SortType(Note.SortType.Date),
             Tab.Absences to SortType(Absence.SortType.Subject),
-            Tab.Messages to SortType(null, null, null, MessageDescriptor.SortType.SendDate),
-            Tab.Evaluations to SortType(null, null, Evaluation.SortType.CreatingDate),
-            Tab.Homework to SortType(null, null, null, null, null, Homework.SortType.PostDate),
-            Tab.Noticeboard to SortType(null, null, null, null, Notice.SortType.ValidFrom)
+            Tab.Messages to SortType(MessageDescriptor.SortType.SendDate),
+            Tab.Evaluations to SortType(Evaluation.SortType.CreatingDate),
+            Tab.Homework to SortType(Homework.SortType.PostDate),
+            Tab.Noticeboard to SortType(Notice.SortType.ValidFrom)
         )
         val canClick = {canClick}
         val tabSpinnerElements = mapOf(
-            Tab.Notes to listOf("Date", "Type", "Teacher"),
-            Tab.Absences to listOf("Subject", "Teacher", "Lesson start time", "Creating time", "Justification state"),
-            Tab.Messages to listOf("Send date", "Teacher"),
-            Tab.Evaluations to listOf("Creating time", "Form", "Value", "Mode", "Subject", "Teacher"),
-            Tab.Homework to listOf("Post date", "Deadline", "Teacher", "Subject"),
-            Tab.Noticeboard to listOf("Valid from", "Valid until", "Title")
+            Tab.Notes to listOf(getString(R.string.date_ma),
+                getString(R.string.type_ma),
+                getString(R.string.teacher_ma)),
+            Tab.Absences to listOf(getString(R.string.subject_ma),
+                getString(R.string.teacher_ma),
+                getString(R.string.lesson_start_time_ma),
+                getString(R.string.creating_time_ma),
+                getString(R.string.justification_state_ma)),
+            Tab.Messages to listOf(getString(R.string.send_date_ma),
+                getString(R.string.teacher_ma)),
+            Tab.Evaluations to listOf(getString(R.string.creating_time_ma),
+                getString(R.string.form_ma),
+                getString(R.string.value_ma),
+                getString(R.string.mode_ma),
+                getString(R.string.subject_ma),
+                getString(R.string.teacher_ma)),
+            Tab.Homework to listOf(getString(R.string.post_date_ma),
+                getString(R.string.deadline_ma),
+                getString(R.string.teacher_ma),
+                getString(R.string.subject_ma)),
+            Tab.Noticeboard to listOf(getString(R.string.valid_from_ma),
+                getString(R.string.valid_until_ma),
+                getString(R.string.title_ma))
         )
         val tabGetElemColor = mapOf<Tab, (RefreshableData) -> Int>()
         val tabGetElemTextColor = mapOf(
@@ -401,7 +448,7 @@ class MainActivity : AppCompatActivity(), MainView {
                     }
                     categoryButtons[category].setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorButtonSelected))
                 }
-                val inbox = UIHelper.generateButton(this, "INBOX", { _: View, _: RefreshableData ->
+                val inbox = UIHelper.generateButton(this, getString(R.string.inbox_ma), { _: View, _: RefreshableData ->
                     messageType = MessageDescriptor.Type.Inbox
                     controller.getMessageList(messageType)
                     setSelectedCategory(0)
@@ -409,7 +456,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 })
                 inbox.layoutParams = params
                 categoryButtons.add(inbox)
-                val sent = UIHelper.generateButton(this, "SENT", { _: View, _: RefreshableData ->
+                val sent = UIHelper.generateButton(this, getString(R.string.sent_ma), { _: View, _: RefreshableData ->
                     messageType = MessageDescriptor.Type.Sent
                     controller.getMessageList(messageType)
                     setSelectedCategory(1)
@@ -417,7 +464,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 })
                 sent.layoutParams = params
                 categoryButtons.add(sent)
-                val trash = UIHelper.generateButton(this, "TRASH", { _: View, _: RefreshableData ->
+                val trash = UIHelper.generateButton(this, getString(R.string.trash_ma), { _: View, _: RefreshableData ->
                     messageType = MessageDescriptor.Type.Trash
                     controller.getMessageList(messageType)
                     setSelectedCategory(2)
@@ -610,7 +657,6 @@ class MainActivity : AppCompatActivity(), MainView {
         if (manager != null) {
             val elems = mutableListOf<RefreshableData>()
             for (eval in evaluations.sortedWith(compareBy(manager.sortType?.eval?.lambda ?: Evaluation.SortType.CreatingDate.lambda))) {
-                Log.w("asd", eval.type?.name.toString())
                 if (eval.type?.name == "evkozi_jegy_ertekeles") {
                     elems.add(RefreshableData(eval.toString(), null, eval))
                 }
@@ -639,7 +685,7 @@ class MainActivity : AppCompatActivity(), MainView {
         if (name_tt.text == "") {
             name_tt.text = studentDetails.toString()
         } else {
-            val themeToggleButton = UIHelper.generateButton(this, "TOGGLE THEME", {_, _ -> toggleTheme()}, null, ::toggleDetails, details_ll)
+            val themeToggleButton = UIHelper.generateButton(this, getString(R.string.toggle_theme_ma), {_, _ -> toggleTheme()}, null, ::toggleDetails, details_ll)
             themeToggleButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
             details_ll.addView(themeToggleButton)
             if (studentDetails != null) {

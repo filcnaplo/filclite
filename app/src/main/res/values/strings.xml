@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Filc Lite</string>
-    <string name="auth_path">hu.filcnaplo.ellenorzo.lite.auth</string>
-    <string name="theme_path">hu.filcnaplo.ellenorzo.lite.theme</string>
+    <string name="auth_path" translatable="false">hu.filcnaplo.ellenorzo.lite.auth</string>
+    <string name="theme_path" translatable="false">hu.filcnaplo.ellenorzo.lite.theme</string>
+
     <!--ERRORS-->
     <string name="timeout_error_general">The KRETA servers took too long to respond!</string>
     <string name="network_error_general">The request abruptly closed!</string>
@@ -22,6 +23,32 @@
     <string name="institute_hint_la">Institute code/name</string>
 
     <!--MAIN ACTIVITY-->
+    <string name="toggle_theme_ma">Toggle theme</string>
+    <string name="date_ma">Date</string>
+    <string name="type_ma">Type</string>
+    <string name="teacher_ma">Teacher</string>
+    <string name="valid_from_ma">Valid from</string>
+    <string name="valid_until_ma">Valid until</string>
+    <string name="title_ma">Title</string>
+    <string name="send_date_ma">Send date</string>
+    <string name="inbox_ma">Inbox</string>
+    <string name="sent_ma">Sent</string>
+    <string name="monday_ma">Monday</string>
+    <string name="tuesday_ma">Tuesday</string>
+    <string name="wednesday_ma">Wednesday</string>
+    <string name="thursday_ma">Thursday</string>
+    <string name="friday_ma">Friday</string>
+    <string name="saturday_ma">Saturday</string>
+    <string name="sunday_ma">Sunday</string>
+    <string name="subject_ma">Subject</string>
+    <string name="lesson_start_time_ma">Lesson start time</string>
+    <string name="creating_time_ma">Creating time</string>
+    <string name="justification_state_ma">Justification state</string>
+    <string name="form_ma">Form</string>
+    <string name="value_ma">Value</string>
+    <string name="mode_ma">Mode</string>
+    <string name="post_date_ma">Post date</string>
+    <string name="deadline_ma">Deadline</string>
     <string name="evals_ma">Evaluations</string>
     <string name="notes_ma">Notes</string>
     <string name="noticeboard_ma">Noticeboard</string>
@@ -44,13 +71,13 @@
     <string name="message_mea">Message</string>
 
     <!--AUTHENTICATOR-->
-    <string name="kreta_account_id">com.filc.kreta</string>
+    <string name="kreta_account_id" translatable="false">com.filc.kreta</string>
     <string name="kreta_account_name">Kreta</string>
-    <string name="kreta_auth_type_full">fullAccess</string>
-    <string name="key_auth_type">keyAuthType</string>
-    <string name="key_is_adding_new_account">keyIsAddingNewAccount</string>
-    <string name="key_is_refresh_token">keyIsRefreshToken</string>
-    <string name="key_refresh_token">keyRefreshToken</string>
-    <string name="key_institute_code">keyInstituteCode</string>
-    <string name="key_password">keyPassword</string>
+    <string name="kreta_auth_type_full" translatable="false">fullAccess</string>
+    <string name="key_auth_type" translatable="false">keyAuthType</string>
+    <string name="key_is_adding_new_account" translatable="false">keyIsAddingNewAccount</string>
+    <string name="key_is_refresh_token" translatable="false">keyIsRefreshToken</string>
+    <string name="key_refresh_token" translatable="false">keyRefreshToken</string>
+    <string name="key_institute_code" translatable="false">keyInstituteCode</string>
+    <string name="key_password" translatable="false">keyPassword</string>
 </resources>

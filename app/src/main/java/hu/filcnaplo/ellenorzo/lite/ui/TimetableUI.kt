@@ -48,7 +48,16 @@ class TimetableUI {
                               themeHelper: ThemeHelper) {
             timetableHolder?.removeAllViews()
             for (day in currentTimetable) {
-                val text = day.key.toString()
+                val schoolDayToString = mapOf(
+                    SchoolDay.Monday to ctx.getString(R.string.monday_ma),
+                    SchoolDay.Tuesday to ctx.getString(R.string.tuesday_ma),
+                    SchoolDay.Wednesday to ctx.getString(R.string.wednesday_ma),
+                    SchoolDay.Thursday to ctx.getString(R.string.thursday_ma),
+                    SchoolDay.Friday to ctx.getString(R.string.friday_ma),
+                    SchoolDay.Saturday to ctx.getString(R.string.saturday_ma),
+                    SchoolDay.Sunday to ctx.getString(R.string.sunday_ma)
+                )
+                val text = schoolDayToString[day.key] ?: ctx.getString(R.string.monday_ma)
                 val textColor = if (KretaDate().fromSchoolDay(day.key).isToday()) {
                     themeHelper.getColorFromAttributes(R.attr.colorText)
                 } else {

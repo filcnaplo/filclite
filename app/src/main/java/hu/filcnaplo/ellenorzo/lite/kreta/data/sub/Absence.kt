@@ -21,18 +21,6 @@ class Absence (
     @Json(name = "Tipus") val type: Nature,
     @Json(name = "OsztalyCsoport") val classGroup: ClassGroup
 ): Comparable<Absence> {
-    companion object {
-        fun sortTypeFromString(str: String): SortType {
-            val stringToSortType = mapOf(
-                "Subject" to SortType.Subject,
-                "Teacher" to SortType.Teacher,
-                "Lesson start time" to SortType.ClassStartDate,
-                "Creating time" to SortType.Date,
-                "Justification state" to SortType.JustificationState)
-            return stringToSortType[str] ?: SortType.Subject
-        }
-    }
-
     enum class SortType(val lambda: (it: Absence) -> Comparable<*>) {
         Date({it.date}),
         ClassStartDate({it.absenceClass.startDate}),

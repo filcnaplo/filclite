@@ -1,13 +1,13 @@
 package hu.filcnaplo.ellenorzo.lite.kreta.data.timetable
 
-enum class SchoolDay(var day: String) {
-    Monday("Monday"),
-    Tuesday("Tuesday"),
-    Wednesday("Wednesday"),
-    Thursday("Thursday"),
-    Friday("Friday"),
-    Saturday("Saturday"),
-    Sunday("Sunday")
+enum class SchoolDay() {
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
+    Sunday
 }
 
 object SchoolDayOrder {
