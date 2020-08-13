@@ -6,6 +6,7 @@ import android.view.View
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import hu.filcnaplo.ellenorzo.lite.R
@@ -63,18 +64,22 @@ class UIHelper {
             )
         }
         fun displayError(ctx: Context, layout: View, error: String) {
-            val errorSnack = Snackbar.make(layout, error, Snackbar.LENGTH_LONG)
-            errorSnack.view.setBackgroundColor(ContextCompat.getColor(ctx,
-                R.color.colorError
-            ))
-            errorSnack.show()
+            displaySnack(ctx, layout, R.color.colorError, error)
         }
         fun displaySuccess(ctx: Context, layout: View, success: String) {
-            val successSnack = Snackbar.make(layout, success, Snackbar.LENGTH_LONG)
-            successSnack.view.setBackgroundColor(ContextCompat.getColor(ctx,
-                R.color.colorSuccess
+            displaySnack(ctx, layout, R.color.colorSuccess, success)
+        }
+        
+        private fun displaySnack(ctx: Context, layout: View, color: Int, text: String) {
+            val snack = Snackbar.make(layout, text, Snackbar.LENGTH_LONG)
+            val snackText = snack.view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+            snack.view.setBackgroundColor(ContextCompat.getColor(ctx,
+                color
             ))
-            successSnack.show()
+            snackText.setBackgroundColor(ContextCompat.getColor(ctx,
+                color
+            ))
+            snack.show()
         }
     }
 }
