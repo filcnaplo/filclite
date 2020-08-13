@@ -2,14 +2,11 @@ package hu.filcnaplo.ellenorzo.lite.controller
 
 import android.app.DownloadManager
 import android.content.Context
+import hu.filcnaplo.ellenorzo.lite.kreta.*
 import hu.filcnaplo.ellenorzo.lite.kreta.data.message.MessageDescriptor
 import hu.filcnaplo.ellenorzo.lite.kreta.data.timetable.SchoolClass
 import hu.filcnaplo.ellenorzo.lite.kreta.data.timetable.SchoolDay
 import hu.filcnaplo.ellenorzo.lite.kreta.data.timetable.Test
-import hu.filcnaplo.ellenorzo.lite.kreta.KretaDate
-import hu.filcnaplo.ellenorzo.lite.kreta.KretaError
-import hu.filcnaplo.ellenorzo.lite.kreta.KretaRequests
-import hu.filcnaplo.ellenorzo.lite.kreta.StudentDetails
 import hu.filcnaplo.ellenorzo.lite.kreta.data.homework.Homework
 import hu.filcnaplo.ellenorzo.lite.kreta.data.homework.HomeworkComment
 import hu.filcnaplo.ellenorzo.lite.kreta.data.message.Attachment
@@ -146,7 +143,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateEvaluationList(evals)
     }
     override fun onEvaluationListError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.EvaluationList))
         mainView?.hideProgress()
     }
 
@@ -154,7 +151,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateTimetable(timetable)
     }
     override fun onTimetableError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.Timetable))
         mainView?.hideProgress()
     }
 
@@ -162,10 +159,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateMessageDescriptors(messageList.reversed())
     }
     override fun onMessageListError(error: KretaError) {
-        when (error.errorString) {
-            "empty" -> mainView?.displayError("There were no messages to return!")
-            else -> mainView?.displayError(error.errorString)
-        }
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.MessageList))
         mainView?.hideProgress()
     }
 
@@ -173,7 +167,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateMessage(message)
     }
     override fun onMessageError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.Message))
         mainView?.hideProgress()
     }
 
@@ -189,7 +183,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateTestList(testList)
     }
     override fun onTestListError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.TestList))
         mainView?.hideProgress()
     }
 
@@ -197,7 +191,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateNoteList(notes)
     }
     override fun onNoteListError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.NoteList))
         mainView?.hideProgress()
     }
 
@@ -205,7 +199,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateNoticeList(notices)
     }
     override fun onNoticeListError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.NoticeList))
         mainView?.hideProgress()
     }
 
@@ -213,7 +207,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateHomeworkList(homeworks)
     }
     override fun onHomeworkListError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.HomeworkList))
         mainView?.hideProgress()
     }
 
@@ -221,7 +215,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateHomeworkCommentList(homeworkComments)
     }
     override fun onHomeworkCommentListError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.HomeworkCommentList))
         mainView?.hideProgress()
     }
 
@@ -229,7 +223,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateAbsenceList(absences)
     }
     override fun onAbsenceListError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.AbsenceList))
         mainView?.hideProgress()
     }
 
@@ -237,6 +231,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.generateStudentDetails(studentDetails)
     }
     override fun onStudentDetailsError(error: KretaError) {
+        //TODO: OMG VERY UGLY CAN BE RECURSIVE COULD DOS THE SERVER FUCK FUCK FUCK FIX IT SOMEONE PLS I NEED TO DO IT AAAAA
         getStudentDetails()
     }
 
@@ -244,17 +239,18 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.refreshCommentList(homeworkUid)
     }
     override fun onSendHomeworkError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.SendHomework))
         mainView?.hideProgress()
     }
 
     override fun onTrashMessageSuccess(messageId: Int, isTrashed: Boolean) {
+        //TODO: Translation
         mainView?.displaySuccess("Message ($messageId) ${if (isTrashed) "has been trashed" else "has been recovered"}!")
         getMessageList(if (isTrashed) MessageDescriptor.Type.Trash else MessageDescriptor.Type.Inbox)
     }
 
     override fun onTrashMessageError(error: KretaError) {
-        mainView?.displayError(error.errorString)
+        mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.TrashMessage))
         mainView?.hideProgress()
     }
 }

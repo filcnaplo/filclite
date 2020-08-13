@@ -32,7 +32,7 @@ class LoginController(ctx: Context, private val loginView: LoginView?)
         loginView?.hideProgress()
     }
     override fun onInstitutesError(error: KretaError) {
-        loginView?.displayError(error.errorString)
+        loginView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Login, ControllerHelper.RequestOrigin.InstituteList))
         loginView?.hideProgress()
     }
 
@@ -41,7 +41,7 @@ class LoginController(ctx: Context, private val loginView: LoginView?)
         loginView?.hideProgress()
     }
     override fun onTokensError(error: KretaError) {
-        loginView?.displayError(error.errorString)
+        loginView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Login, ControllerHelper.RequestOrigin.Tokens))
         loginView?.hideProgress()
     }
 }

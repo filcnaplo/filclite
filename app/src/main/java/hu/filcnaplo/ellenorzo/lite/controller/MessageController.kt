@@ -54,12 +54,12 @@ class MessageController(ctx: Context, private val messageView: MessageView?, acc
     }
 
     override fun onSendMessageError(error: KretaError) {
-        messageView?.displayError(error.errorString)
+        messageView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Message, ControllerHelper.RequestOrigin.SendMessage))
     }
 
     override fun onRefreshTokensSuccess(tokens: Map<String, String>) {}
     override fun onRefreshTokensError(error: KretaError) {
-        messageView?.displayError(error.errorString)
+        messageView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Message, ControllerHelper.RequestOrigin.RefreshToken))
     }
 
     override fun onWorkersSuccess(workers: List<Worker>) {
@@ -70,20 +70,20 @@ class MessageController(ctx: Context, private val messageView: MessageView?, acc
         messageView?.generateReceiverList(receivers)
     }
     override fun onWorkersError(error: KretaError) {
-        messageView?.displayError(error.errorString)
+        messageView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Message, ControllerHelper.RequestOrigin.Workers))
     }
 
     override fun onSendableReceiverTypesSuccess(types: List<Type>) {
         messageView?.generateSendableReceiverTypes(types)
     }
     override fun onSendableReceiverTypesError(error: KretaError) {
-        messageView?.displayError(error.errorString)
+        messageView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Message, ControllerHelper.RequestOrigin.SendableReceiverTypes))
     }
 
     override fun onUploadTemporaryAttachmentSuccess(attachment: Attachment) {
         messageView?.assignAttachmentTemporaryId(attachment)
     }
     override fun onUploadTemporaryAttachmentError(error: KretaError) {
-        messageView?.displayError(error.errorString)
+        messageView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Message, ControllerHelper.RequestOrigin.UploadTemporaryAttachment))
     }
 }

@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import android.webkit.MimeTypeMap
 import com.android.volley.*
 import hu.filcnaplo.ellenorzo.lite.kreta.data.Institute
@@ -166,11 +167,16 @@ class KretaRequests(ctx: Context) {
             if (institutes != null) {
                 listener.onInstitutesSuccess(institutes)
             } else {
-                listener.onInstitutesError(KretaError.ParseError("unknown"))
+                listener.onInstitutesError(KretaError.ParseError(ErrorReason.Empty))
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onInstitutesError(KretaError.VolleyError(error.toString(), error))
+            listener.onInstitutesError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
         }
         val request = NetworkJsonArrayRequest(Request.Method.GET,
             "${apiUrl}/api/v3/Institute",
@@ -186,11 +192,16 @@ class KretaRequests(ctx: Context) {
             if (tokens != null) {
                 listener.onTokensSuccess(tokens)
             } else {
-                listener.onTokensError(KretaError.ParseError("unknown"))
+                listener.onTokensError(KretaError.ParseError(ErrorReason.Empty))
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onTokensError(KretaError.VolleyError(error.toString(), error))
+            listener.onTokensError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
         }
         val headers = mapOf(
             NetworkHelper.Header.ApiKey to apiKey,
@@ -217,7 +228,12 @@ class KretaRequests(ctx: Context) {
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onRefreshTokensError(KretaError.VolleyError(error.toString(), error))
+            listener.onRefreshTokensError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
         }
         val headers = mapOf(
             NetworkHelper.Header.ApiKey to apiKey,
@@ -239,11 +255,21 @@ class KretaRequests(ctx: Context) {
             if (evals != null) {
                 listener.onEvaluationListSuccess(evals)
             } else {
-                listener.onEvaluationListError(KretaError.ParseError("unknown"))
+                listener.onEvaluationListError(
+                    when (response) {
+                        "[]" -> KretaError.EmptyError(ErrorReason.Empty)
+                        else -> KretaError.ParseError(ErrorReason.Unknown)
+                    }
+                )
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onEvaluationListError(KretaError.VolleyError(error.toString(), error))
+            listener.onEvaluationListError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -266,11 +292,21 @@ class KretaRequests(ctx: Context) {
             if (notes != null) {
                 listener.onNoteListSuccess(notes)
             } else {
-                listener.onNoteListError(KretaError.ParseError("unknown"))
+                listener.onNoteListError(
+                    when (response) {
+                        "[]" -> KretaError.EmptyError(ErrorReason.Empty)
+                        else -> KretaError.ParseError(ErrorReason.Unknown)
+                    }
+                )
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onNoteListError(KretaError.VolleyError(error.toString(), error))
+            listener.onNoteListError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -289,11 +325,21 @@ class KretaRequests(ctx: Context) {
             if (notice != null) {
                 listener.onNoticeListSuccess(notice)
             } else {
-                listener.onNoticeListError(KretaError.ParseError("unknown"))
+                listener.onNoticeListError(
+                    when (response) {
+                        "[]" -> KretaError.EmptyError(ErrorReason.Empty)
+                        else -> KretaError.ParseError(ErrorReason.Unknown)
+                    }
+                )
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onNoticeListError(KretaError.VolleyError(error.toString(), error))
+            listener.onNoticeListError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -312,11 +358,21 @@ class KretaRequests(ctx: Context) {
             if (absences != null) {
                 listener.onAbsenceListSuccess(absences)
             } else {
-                listener.onAbsenceListError(KretaError.ParseError("unknown"))
+                listener.onAbsenceListError(
+                    when (response) {
+                        "[]" -> KretaError.EmptyError(ErrorReason.Empty)
+                        else -> KretaError.ParseError(ErrorReason.Unknown)
+                    }
+                )
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onAbsenceListError(KretaError.VolleyError(error.toString(), error))
+            listener.onAbsenceListError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -336,11 +392,21 @@ class KretaRequests(ctx: Context) {
             if (timetable != null) {
                 listener.onTimetableSuccess(timetable)
             } else {
-                listener.onTimetableError(KretaError.ParseError("unknown"))
+                listener.onTimetableError(
+                    when (response) {
+                        "[]" -> KretaError.EmptyError(ErrorReason.Empty)
+                        else -> KretaError.ParseError(ErrorReason.Unknown)
+                    }
+                )
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onTimetableError(KretaError.VolleyError(error.toString(), error))
+            listener.onTimetableError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -360,11 +426,16 @@ class KretaRequests(ctx: Context) {
             if (messageList != null) {
                 listener.onMessageListSuccess(messageList)
             } else {
-                listener.onMessageListError(KretaError.ParseError("empty"))
+                listener.onMessageListError(KretaError.EmptyError(ErrorReason.Empty))
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onMessageListError(KretaError.VolleyError(error.toString(), error))
+            listener.onMessageListError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -392,7 +463,12 @@ class KretaRequests(ctx: Context) {
         val body = "{\"cimzettLista\":[$receiversText],\"csatolmanyok\":[$attachmentText], \"targy\":\"$subject\", \"szoveg\":\"$content\" $replyText}"
         val successListener = Response.Listener<String> { listener.onSendMessageSuccess() }
         val errorListener = Response.ErrorListener {  error ->
-            listener.onSendMessageError(KretaError.VolleyError(error.toString(), error))
+            listener.onSendMessageError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -417,11 +493,16 @@ class KretaRequests(ctx: Context) {
             if (message != null) {
                 listener.onMessageSuccess(message)
             } else {
-                listener.onMessageError(KretaError.ParseError("unknown"))
+                listener.onMessageError(KretaError.ParseError(ErrorReason.Invalid))
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onMessageError(KretaError.VolleyError(error.toString(), error))
+            listener.onMessageError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -454,7 +535,12 @@ class KretaRequests(ctx: Context) {
             listener.onUploadTemporaryAttachmentSuccess(attachment)
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onUploadTemporaryAttachmentError(KretaError.VolleyError(error.toString(), error))
+            listener.onUploadTemporaryAttachmentError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -509,7 +595,7 @@ class KretaRequests(ctx: Context) {
                 listener.onTrashMessageSuccess(messageId, isTrashed)
             },
             Response.ErrorListener {
-                listener.onTrashMessageError(KretaError.VolleyError(it.toString(), it))
+                listener.onTrashMessageError(KretaError.VolleyError(ErrorReason.VolleyError, it))
             },
             headers,
             "application/json; charset=utf-8",
@@ -523,11 +609,21 @@ class KretaRequests(ctx: Context) {
             if (tests != null) {
                 listener.onTestListSuccess(tests)
             } else {
-                listener.onTestListError(KretaError.ParseError("unknown"))
+                listener.onTestListError(
+                    when (response) {
+                        "[]" -> KretaError.EmptyError(ErrorReason.Empty)
+                        else -> KretaError.ParseError(ErrorReason.Unknown)
+                    }
+                )
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onTestListError(KretaError.VolleyError(error.toString(), error))
+            listener.onTestListError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -547,11 +643,21 @@ class KretaRequests(ctx: Context) {
             if (homeworks != null) {
                 listener.onHomeworkListSuccess(homeworks)
             } else {
-                listener.onHomeworkListError(KretaError.ParseError("unknown"))
+                listener.onHomeworkListError(
+                    when (response) {
+                        "[]" -> KretaError.EmptyError(ErrorReason.Empty)
+                        else -> KretaError.ParseError(ErrorReason.Unknown)
+                    }
+                )
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onHomeworkListError(KretaError.VolleyError(error.toString(), error))
+            listener.onHomeworkListError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -572,7 +678,12 @@ class KretaRequests(ctx: Context) {
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onHomeworkCommentListError(KretaError.VolleyError(error.toString(), error))
+            listener.onHomeworkCommentListError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -590,7 +701,12 @@ class KretaRequests(ctx: Context) {
             listener.onSendHomeworkSuccess(homeworkUid)
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onSendHomeworkError(KretaError.VolleyError(error.toString(), error))
+            listener.onSendHomeworkError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -616,11 +732,16 @@ class KretaRequests(ctx: Context) {
             if (studentDetails != null) {
                 listener.onStudentDetailsSuccess(studentDetails)
             } else {
-                listener.onStudentDetailsError(KretaError.ParseError("unknown"))
+                listener.onStudentDetailsError(KretaError.ParseError(ErrorReason.Unknown))
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onStudentDetailsError(KretaError.VolleyError(error.toString(), error))
+            listener.onStudentDetailsError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+        )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -667,11 +788,16 @@ class KretaRequests(ctx: Context) {
             if (workers != null) {
                 listener.onWorkersSuccess(workers)
             } else {
-                listener.onWorkersError(KretaError.ParseError("unknown"))
+                listener.onWorkersError(KretaError.ParseError(ErrorReason.Unknown))
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onWorkersError(KretaError.VolleyError(error.toString(), error))
+            listener.onWorkersError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
@@ -694,11 +820,16 @@ class KretaRequests(ctx: Context) {
             if (workers != null) {
                 listener.onSendableReceiverTypesSuccess(workers)
             } else {
-                listener.onSendableReceiverTypesError(KretaError.ParseError("unknown"))
+                listener.onSendableReceiverTypesError(KretaError.ParseError(ErrorReason.Unknown))
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            listener.onSendableReceiverTypesError(KretaError.VolleyError(error.toString(), error))
+            listener.onSendableReceiverTypesError(
+                when (error) {
+                    is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
+                    else -> KretaError.VolleyError(ErrorReason.VolleyError, error)
+                }
+            )
             if (isRefreshTokenNeeded(error)) {
                 refreshToken(tokenListener)
             }
