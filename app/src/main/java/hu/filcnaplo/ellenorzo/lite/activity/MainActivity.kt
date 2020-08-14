@@ -70,9 +70,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 null,
                 null,
                 { future ->
-                    Log.w("AUTHFIX-getbyfeat", "BEFORE FUTURE")
                     val bnd = future.result
-                    Log.w("AUTHFIX-getbyfeat", "FUTURE DONE")
                     val accessToken = bnd.getString(AccountManager.KEY_AUTHTOKEN)
                     account = Account(bnd.getString(AccountManager.KEY_ACCOUNT_NAME), bnd.getString(AccountManager.KEY_ACCOUNT_TYPE))
                     val refreshToken = accountManager.getUserData(account, getString(R.string.key_refresh_token))

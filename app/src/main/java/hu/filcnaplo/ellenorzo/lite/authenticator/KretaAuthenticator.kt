@@ -34,13 +34,9 @@ class KretaAuthenticator(val ctx: Context): AbstractAccountAuthenticator(ctx) {
         authTokenType: String?,
         options: Bundle?
     ): Bundle? {
-        Log.w("AUTHFIX-getauthtoken", "getAuthToken started")
         val accountManager = AccountManager.get(ctx)
-        Log.w("AUTHFIX-getauthtoken", "got accountmanager")
         var authToken = if (options?.getBoolean(ctx.getString(R.string.key_is_refresh_token), false) == true) null else accountManager.peekAuthToken(account, authTokenType)
-        Log.w("AUTHFIX-getauthtoken", "tried getting authtoken back, got: $authToken")
         val returnAuthToken = { refreshToken: String? ->
-            Log.w("AUTHFIX-getauthtoken", "we return authtoken returnAuthToken: $refreshToken")
             val result = Bundle()
             result.putString(AccountManager.KEY_ACCOUNT_NAME, account?.name)
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, account?.type)
@@ -49,23 +45,19 @@ class KretaAuthenticator(val ctx: Context): AbstractAccountAuthenticator(ctx) {
             result
         }
         val returnGetToken = { instituteCode: String ->
-            Log.w("AUTHFIX-getauthtoken", "returnGetToken: $instituteCode")
             apiHandler.getTokens(object : KretaRequests.OnTokensResult {
                 override fun onTokensSuccess(tokens: Map<String, String>) {
                     authToken = tokens["access_token"]
-                    Log.w("AUTHFIX-getauthtoken", "returnGetToken: success: $authToken")
                     response?.onResult(returnAuthToken(tokens["refresh_token"]))
                 }
 
                 override fun onTokensError(error: KretaError) {
-                    Log.w("AUTHFIX-getauthtoken", "returnGetToken: error: ${error.reason.toString()}")
                     response?.onResult(getLoginIntentBundle(account?.type, authTokenType, response))
                 }
             }, account?.name ?: "", accountManager.getPassword(account), instituteCode)
             null
         }
         if (!authToken.isNullOrEmpty()) {
-            Log.w("AUTHFIX-getauthtoken", "authToken not empty or null: $authToken")
             return returnAuthToken(accountManager.getUserData(account, ctx.getString(R.string.key_refresh_token)))
         }
         val refreshToken = options?.getString(ctx.getString(R.string.key_refresh_token))
@@ -77,12 +69,10 @@ class KretaAuthenticator(val ctx: Context): AbstractAccountAuthenticator(ctx) {
             apiHandler.refreshToken(object : KretaRequests.OnRefreshTokensResult {
                 override fun onRefreshTokensSuccess(tokens: Map<String, String>) {
                     authToken = tokens["access_token"]
-                    Log.w("AUTHFIX-getauthtoken", "refreshed token: $authToken")
                     response?.onResult(returnAuthToken(tokens["refresh_token"]))
                 }
 
                 override fun onRefreshTokensError(error: KretaError) {
-                    Log.w("AUTHFIX-getauthtoken", "failed to refresh token: ${error.reason}")
                     returnGetToken(instituteCode)
                 }
             })

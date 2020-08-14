@@ -4,7 +4,6 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
-import android.util.Log
 import android.webkit.MimeTypeMap
 import com.android.volley.*
 import hu.filcnaplo.ellenorzo.lite.kreta.data.Institute
@@ -196,7 +195,6 @@ class KretaRequests(ctx: Context) {
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            Log.w("AUTHFIX-ref", error.networkResponse.data.toString())
             listener.onTokensError(
                 when (error) {
                     is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
@@ -229,7 +227,6 @@ class KretaRequests(ctx: Context) {
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            Log.w("AUTHFIX-ref", error.networkResponse.data.toString())
             listener.onRefreshTokensError(
                 when (error) {
                     is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
@@ -738,7 +735,6 @@ class KretaRequests(ctx: Context) {
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            Log.w("AUTHFIX-stud", error.networkResponse.headers.toString())
             listener.onStudentDetailsError(
                 when (error) {
                     is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)
