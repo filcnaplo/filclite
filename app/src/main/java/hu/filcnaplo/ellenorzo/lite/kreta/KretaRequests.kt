@@ -196,7 +196,6 @@ class KretaRequests(ctx: Context) {
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            Log.w("AUTHFIX-ref", error.networkResponse.allHeaders.toString())
             Log.w("AUTHFIX-ref", error.networkResponse.data.toString())
             listener.onTokensError(
                 when (error) {
@@ -230,7 +229,6 @@ class KretaRequests(ctx: Context) {
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            Log.w("AUTHFIX-ref", error.networkResponse.allHeaders.toString())
             Log.w("AUTHFIX-ref", error.networkResponse.data.toString())
             listener.onRefreshTokensError(
                 when (error) {
@@ -740,8 +738,7 @@ class KretaRequests(ctx: Context) {
             }
         }
         val errorListener = Response.ErrorListener { error ->
-            Log.w("AUTHFIX-stud", error.networkResponse.allHeaders.toString())
-            Log.w("AUTHFIX-stud", error.networkResponse.data.toString())
+            Log.w("AUTHFIX-stud", error.networkResponse.headers.toString())
             listener.onStudentDetailsError(
                 when (error) {
                     is NoConnectionError -> KretaError.VolleyError(ErrorReason.NoConnectionError, error)

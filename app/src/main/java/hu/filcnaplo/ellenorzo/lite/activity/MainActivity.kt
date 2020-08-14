@@ -62,7 +62,6 @@ class MainActivity : AppCompatActivity(), MainView {
         themeHelper = ThemeHelper(this)
         themeHelper.setCurrentTheme()
         setContentView(R.layout.activity_main)
-
         val accountManager = AccountManager.get(this)
         val future: AccountManagerFuture<Bundle> =
             accountManager.getAuthTokenByFeatures(getString(R.string.kreta_account_id), getString(R.string.kreta_auth_type_full),
@@ -71,7 +70,9 @@ class MainActivity : AppCompatActivity(), MainView {
                 null,
                 null,
                 { future ->
+                    Log.w("AUTHFIX-getbyfeat", "BEFORE FUTURE")
                     val bnd = future.result
+                    Log.w("AUTHFIX-getbyfeat", "FUTURE DONE")
                     val accessToken = bnd.getString(AccountManager.KEY_AUTHTOKEN)
                     account = Account(bnd.getString(AccountManager.KEY_ACCOUNT_NAME), bnd.getString(AccountManager.KEY_ACCOUNT_TYPE))
                     val refreshToken = accountManager.getUserData(account, getString(R.string.key_refresh_token))
