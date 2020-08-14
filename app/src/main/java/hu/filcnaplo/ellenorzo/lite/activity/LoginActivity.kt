@@ -10,6 +10,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
+import hu.filcnaplo.ellenorzo.lite.BuildConfig
 import hu.filcnaplo.ellenorzo.lite.R
 import hu.filcnaplo.ellenorzo.lite.controller.LoginController
 import hu.filcnaplo.ellenorzo.lite.kreta.data.Institute
@@ -34,14 +35,13 @@ class LoginActivity : AccountAuthenticatorActivity(), LoginView {
         setContentView(R.layout.activity_login)
 
         controller = LoginController(this, this)
-        controller.getInstitutes()
-        showProgress()
+        getInstitutes()
         inst_code_tt.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 if (!gotInstitutes) {
-                    controller.getInstitutes()
+                    getInstitutes()
                 }
                 val newStringInstitutes = mutableListOf<String>()
                 originalStringInstitutes.forEach {
@@ -62,6 +62,7 @@ class LoginActivity : AccountAuthenticatorActivity(), LoginView {
             }
             showProgress()
         }
+        version_tv.text = "${BuildConfig.APPLICATION_ID}-${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}-${BuildConfig.DEBUG}-${BuildConfig.VERSION_CODE}"
     }
 
     override fun setInstitutes(institutes: List<Institute>) {
@@ -76,6 +77,11 @@ class LoginActivity : AccountAuthenticatorActivity(), LoginView {
             stringInstitutes = originalStringInstitutes
             refreshInstitutesSpinner()
         }
+    }
+    
+    private fun getInstitutes() {
+        controller.getInstitutes()
+        showProgress()
     }
 
     private fun refreshInstitutesSpinner() {

@@ -15,6 +15,7 @@
         android:layout_marginTop="100dp"
         android:ems="10"
         android:hint="@string/institute_hint_la"
+        android:importantForAutofill="no"
         android:inputType="textPersonName"
         android:singleLine="false"
         android:textAlignment="center"
@@ -40,6 +41,7 @@
             android:background="?attr/colorBackground"
             android:ems="10"
             android:hint="@string/username_la"
+            android:importantForAutofill="yes"
             android:inputType="textPersonName"
             android:textColor="?attr/colorText"
             android:textColorHint="?attr/colorText"
@@ -52,10 +54,11 @@
             android:id="@+id/password_et"
             android:layout_width="match_parent"
             android:layout_height="45dp"
-            android:autofillHints="no"
+            android:autofillHints="password"
             android:background="?attr/colorBackground"
             android:ems="10"
             android:hint="@string/password_la"
+            android:importantForAutofill="yes"
             android:inputType="textPassword"
             android:textColor="?attr/colorText"
             android:textColorHint="?attr/colorText"
@@ -105,4 +108,13 @@
         android:textColor="?attr/colorText"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/version_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/login_btt" />
 </androidx.constraintlayout.widget.ConstraintLayout>
