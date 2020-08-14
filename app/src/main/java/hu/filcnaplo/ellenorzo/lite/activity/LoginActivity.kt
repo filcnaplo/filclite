@@ -23,9 +23,10 @@ class LoginActivity : AccountAuthenticatorActivity(), LoginView {
     private lateinit var themeHelper: ThemeHelper
 
     private var instituteNames = mutableMapOf<String, Institute>()
+    private var gotInstitutes = false
     private var originalStringInstitutes = mutableListOf<String>()
     private var stringInstitutes = mutableListOf<String>()
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         themeHelper = ThemeHelper(this)
@@ -39,6 +40,9 @@ class LoginActivity : AccountAuthenticatorActivity(), LoginView {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {
+                if (!gotInstitutes) {
+                    controller.getInstitutes()
+                }
                 val newStringInstitutes = mutableListOf<String>()
                 originalStringInstitutes.forEach {
                     if (it.contains(s.toString(), true) || instituteNames[it]?.code?.contains(s.toString(), true) == true)
@@ -61,14 +65,17 @@ class LoginActivity : AccountAuthenticatorActivity(), LoginView {
     }
 
     override fun setInstitutes(institutes: List<Institute>) {
-        for (institute in institutes) {
-            instituteNames[institute.name] = institute
-            originalStringInstitutes.add(institute.name)
+        if (!gotInstitutes) {
+            gotInstitutes = true
+            for (institute in institutes) {
+                instituteNames[institute.name] = institute
+                originalStringInstitutes.add(institute.name)
 
+            }
+            originalStringInstitutes.sortBy { it }
+            stringInstitutes = originalStringInstitutes
+            refreshInstitutesSpinner()
         }
-        originalStringInstitutes.sortBy{it}
-        stringInstitutes = originalStringInstitutes
-        refreshInstitutesSpinner()
     }
 
     private fun refreshInstitutesSpinner() {
