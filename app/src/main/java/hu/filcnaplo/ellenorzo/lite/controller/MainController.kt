@@ -160,6 +160,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     }
     override fun onMessageListError(error: KretaError) {
         mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.MessageList))
+        mainView?.generateMessageDescriptors(listOf())
         mainView?.hideProgress()
     }
 
