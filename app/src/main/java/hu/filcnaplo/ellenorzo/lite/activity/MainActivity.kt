@@ -13,10 +13,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.livinglifetechway.quickpermissions_kotlin.runWithPermissions
 import hu.filcnaplo.ellenorzo.lite.R
@@ -483,6 +480,9 @@ class MainActivity : AppCompatActivity(), MainView {
                 manager?.holder?.addView(categoryHolder)
             }
         )
+        val tabCustomViews = mapOf(
+            Tab.Evaluations to listOf(evals_type_spinner)
+        )
         for (tab in Tab.values()) {
             val uiManager = UIManager(this,
                 themeHelper,
@@ -502,11 +502,17 @@ class MainActivity : AppCompatActivity(), MainView {
                 tabSpinnerElements[tab],
                 object : AdapterView.OnItemSelectedListener {
                     override fun onNothingSelected(parent: AdapterView<*>?) {}
-                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
                         tabOnItemSelectedListener[tab]?.invoke(parent, view, position, id)
                     }
-                }
-                )
+                },
+                tabCustomViews[tab]
+            )
             managers[tab] = uiManager
         }
     }
@@ -654,9 +660,38 @@ class MainActivity : AppCompatActivity(), MainView {
         val tab = Tab.Evaluations
         val manager = managers[tab]
         if (manager != null) {
+            val stringTypes = mutableListOf<String>()
+            for (eval in evaluations) {
+                if (!stringTypes.contains(eval.type?.description))
+                    stringTypes.add(eval.type?.description ?: "Unknown type") //TODO: Translation
+            }
+            val spinnerLayouts = themeHelper.getResourcesFromAttributes(
+                listOf(
+                    R.attr.sortSpinnerItemLayout,
+                    R.attr.sortSpinnerDropdownItemLayout
+                )
+            )
+            val adapter =
+                ArrayAdapter(this, spinnerLayouts[0], stringTypes)
+            adapter.setDropDownViewResource(spinnerLayouts[1])
+            val currentSelection = evals_type_spinner.selectedItem?.toString()
+            var usedLastSelection = false
+            evals_type_spinner.adapter = adapter
+            if (stringTypes.contains(currentSelection)) {
+                evals_type_spinner.setSelection(adapter.getPosition(currentSelection))
+                usedLastSelection = true
+            }
+            evals_type_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                    if (!usedLastSelection)
+                        controller.getEvaluationList()
+                    usedLastSelection = false
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
             val elems = mutableListOf<RefreshableData>()
-            for (eval in evaluations.sortedWith(compareBy(manager.sortType?.eval?.lambda ?: Evaluation.SortType.CreatingDate.lambda))) {
-                if (eval.type?.name == "evkozi_jegy_ertekeles") {
+            for (eval in evaluations.sortedWith(compareBy(manager?.sortType?.eval?.lambda ?: Evaluation.SortType.CreatingDate.lambda))) {
+                if (eval.type?.description == evals_type_spinner.selectedItem) {
                     elems.add(RefreshableData(eval.toString(), null, eval))
                 }
             }

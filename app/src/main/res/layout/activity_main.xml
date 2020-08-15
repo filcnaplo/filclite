@@ -281,6 +281,25 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/login_ll" />
 
+                <Spinner
+                    android:id="@+id/evals_type_spinner"
+                    style="?attr/spinnerStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="7dp"
+                    android:background="@color/darkColorPrimaryDark"
+                    android:dropDownWidth="match_parent"
+                    android:minHeight="45dp"
+                    android:scrollbarStyle="outsideInset"
+                    android:scrollbarThumbHorizontal="@color/darkColorText"
+                    android:scrollbarThumbVertical="@color/darkColorAccent"
+                    android:scrollbarTrackHorizontal="@color/darkColorText"
+                    android:scrollbarTrackVertical="@color/darkColorText"
+                    android:spinnerMode="dropdown"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/login_ll" />
+
                 <LinearLayout
                     android:id="@+id/eval_holder_ll"
                     android:layout_width="match_parent"

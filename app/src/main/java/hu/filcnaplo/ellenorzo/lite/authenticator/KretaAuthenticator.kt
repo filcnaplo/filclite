@@ -34,10 +34,14 @@ class KretaAuthenticator(val ctx: Context): AbstractAccountAuthenticator(ctx) {
         authTokenType: String?,
         options: Bundle?
     ): Bundle? {
+        Log.w("AUTHFIX", "0")
         val accountManager = AccountManager.get(ctx)
+        Log.w("AUTHFIX", "1")
         var authToken = if (options?.getBoolean(ctx.getString(R.string.key_is_refresh_token), false) == true) null else accountManager.peekAuthToken(account, authTokenType)
+        Log.w("AUTHFIX", "2: $authToken")
         val returnAuthToken = { refreshToken: String? ->
             val result = Bundle()
+            Log.w("AUTHFIX", "3: $refreshToken")
             result.putString(AccountManager.KEY_ACCOUNT_NAME, account?.name)
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, account?.type)
             result.putString(AccountManager.KEY_AUTHTOKEN, authToken)
@@ -45,41 +49,51 @@ class KretaAuthenticator(val ctx: Context): AbstractAccountAuthenticator(ctx) {
             result
         }
         val returnGetToken = { instituteCode: String ->
+            Log.w("AUTHFIX", "4: $instituteCode")
             apiHandler.getTokens(object : KretaRequests.OnTokensResult {
                 override fun onTokensSuccess(tokens: Map<String, String>) {
                     authToken = tokens["access_token"]
+                    Log.w("AUTHFIX", "5: $authToken")
                     response?.onResult(returnAuthToken(tokens["refresh_token"]))
                 }
 
                 override fun onTokensError(error: KretaError) {
+                    Log.w("AUTHFIX", "6: ${error.reason}")
                     response?.onResult(getLoginIntentBundle(account?.type, authTokenType, response))
                 }
             }, account?.name ?: "", accountManager.getPassword(account), instituteCode)
             null
         }
         if (!authToken.isNullOrEmpty()) {
+            Log.w("AUTHFIX", "7: $authToken")
             return returnAuthToken(accountManager.getUserData(account, ctx.getString(R.string.key_refresh_token)))
         }
         val refreshToken = options?.getString(ctx.getString(R.string.key_refresh_token))
         val instituteCode = options?.getString(ctx.getString(R.string.key_institute_code))
-        Log.w("AUTHFIX-getauthtoken", "refresh: $refreshToken | institute: $instituteCode")
+        Log.w("AUTHFIX", "8: $instituteCode | $refreshToken")
         if (refreshToken != null && instituteCode != null) {
+            Log.w("AUTHFIX", "9: $instituteCode | $refreshToken")
             apiHandler.refreshToken = refreshToken
             apiHandler.instituteCode = instituteCode
             apiHandler.refreshToken(object : KretaRequests.OnRefreshTokensResult {
                 override fun onRefreshTokensSuccess(tokens: Map<String, String>) {
                     authToken = tokens["access_token"]
+                    Log.w("AUTHFIX", "10: $authToken")
                     response?.onResult(returnAuthToken(tokens["refresh_token"]))
                 }
 
                 override fun onRefreshTokensError(error: KretaError) {
+                    Log.w("AUTHFIX", "11: $instituteCode | ${error.reason}")
                     returnGetToken(instituteCode)
                 }
             })
         } else if (instituteCode != null) {
+            Log.w("AUTHFIX", "12: $instituteCode | $refreshToken")
             return returnGetToken(instituteCode)
         }
+        Log.w("AUTHFIX", "13")
         response?.onResult(getLoginIntentBundle(account?.type, authTokenType, response))
+        Log.w("AUTHFIX", "14")
         return null
     }
 

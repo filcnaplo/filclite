@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import android.webkit.MimeTypeMap
 import com.android.volley.*
 import hu.filcnaplo.ellenorzo.lite.kreta.data.Institute
@@ -250,6 +251,7 @@ class KretaRequests(ctx: Context) {
     }
     fun getEvaluationList(listener: OnEvaluationListResult) {
         val successListener = Response.Listener<String> {  response ->
+            Log.w("evals", response)
             val evals = JsonHelper.makeEvaluationList(response)
             if (evals != null) {
                 listener.onEvaluationListSuccess(evals)

@@ -25,7 +25,8 @@ open class UIManager (
     val sortSpinner: Spinner? = null,
     var sortType: SortType? = null,
     spinnerElements: List<String>? = null,
-    onItemSelectedListener: AdapterView.OnItemSelectedListener? = null
+    onItemSelectedListener: AdapterView.OnItemSelectedListener? = null,
+    val customViews: List<View>? = null
 ) {
     var firstSpinnerSelection = true
     init {
@@ -41,16 +42,7 @@ open class UIManager (
         }
         if (sortSpinner != null && spinnerElements != null) {
             sortSpinner.onItemSelectedListener = onItemSelectedListener
-            val spinnerLayouts = themeHelper.getResourcesFromAttributes(
-                listOf(
-                    R.attr.sortSpinnerItemLayout,
-                    R.attr.sortSpinnerDropdownItemLayout
-                )
-            )
-            val adapter =
-                ArrayAdapter(ctx, spinnerLayouts[0], spinnerElements)
-            adapter.setDropDownViewResource(spinnerLayouts[1])
-            sortSpinner.adapter = adapter
+            setSpinnerElements(spinnerElements)
         }
     }
     fun refresh(elems: List<RefreshableData>) {
@@ -66,6 +58,24 @@ open class UIManager (
     fun setVisibility(visibility: Int) {
         holder.visibility = visibility
         sortSpinner?.visibility = visibility
+        if (customViews != null) {
+            for (view in customViews) {
+                view.visibility = visibility
+            }
+        }
         button.setBackgroundColor(themeHelper.getColorFromAttributes(if (visibility == View.GONE) R.attr.colorButtonUnselected else R.attr.colorButtonSelected))
+    }
+
+    fun setSpinnerElements(elems: List<String>) {
+        val spinnerLayouts = themeHelper.getResourcesFromAttributes(
+            listOf(
+                R.attr.sortSpinnerItemLayout,
+                R.attr.sortSpinnerDropdownItemLayout
+            )
+        )
+        val adapter =
+            ArrayAdapter(ctx, spinnerLayouts[0], elems)
+        adapter.setDropDownViewResource(spinnerLayouts[1])
+        sortSpinner?.adapter = adapter
     }
 }

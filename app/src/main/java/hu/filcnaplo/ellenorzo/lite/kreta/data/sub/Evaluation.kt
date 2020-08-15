@@ -49,6 +49,7 @@ class Evaluation(
     override fun toString(): String {
         if (nature == "Magatartas" || nature == "Szorgalom") {
             return  "${subject.name} ($teacher) \n" +
+                    "$textValue \n" +
                     creatingDate.toFormattedString(KretaDate.KretaDateFormat.DATETIME)
         }
         var text = "${subject.name} ($teacher)\n" +
