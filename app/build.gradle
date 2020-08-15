@@ -55,4 +55,9 @@ dependencies {
     implementation 'com.github.quickpermissions:quickpermissions-kotlin:0.4.0'
     implementation 'com.github.hardillb:MultiPartVolley:0.0.3'
     implementation 'com.github.Daio-io:dresscode:1.0.0'
+    def room_version = "2.2.5"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+
 }

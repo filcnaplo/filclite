@@ -2,6 +2,11 @@ package hu.filcnaplo.ellenorzo.lite.controller
 
 import android.app.DownloadManager
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import hu.filcnaplo.ellenorzo.lite.controller.cache.CacheHandler
+import hu.filcnaplo.ellenorzo.lite.controller.cache.CacheType
 import hu.filcnaplo.ellenorzo.lite.kreta.*
 import hu.filcnaplo.ellenorzo.lite.kreta.data.message.MessageDescriptor
 import hu.filcnaplo.ellenorzo.lite.kreta.data.timetable.SchoolClass
@@ -34,15 +39,24 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     KretaRequests.OnHomeworkCommentListResult,
     KretaRequests.OnSendHomeworkCommentResult,
     KretaRequests.OnNoticeListResult,
-    KretaRequests.OnTrashMessageResult
+    KretaRequests.OnTrashMessageResult,
+    ConnectivityManager.NetworkCallback()
 {
 
     private val apiHandler = KretaRequests(ctx, this, accessToken, refreshToken, instituteCode)
-
+    private val cacheHandler = CacheHandler(ctx)
+    
     fun getEvaluationList() {
-        val parentListener = this
-        GlobalScope.launch {
-            apiHandler.getEvaluationList(parentListener)
+        val type = CacheType.EvaluationList
+        val unique = ""
+        if (cacheHandler.shouldUseCache(type, unique)) {
+            cacheHandler.getEvaluationListCache(this)
+        } else {
+            val parentListener = this
+            GlobalScope.launch {
+                cacheHandler.requestedExternalSource(type, unique)
+                apiHandler.getEvaluationList(parentListener)
+            }
         }
     }
 
@@ -140,6 +154,8 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     }
 
     override fun onEvaluationListSuccess(evals: List<Evaluation>) {
+        if (!cacheHandler.isCachedReturn(CacheType.EvaluationList))
+            cacheHandler.cacheEvaluationList(evals)
         mainView?.generateEvaluationList(evals)
     }
     override fun onEvaluationListError(error: KretaError) {
@@ -253,5 +269,19 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     override fun onTrashMessageError(error: KretaError) {
         mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.TrashMessage))
         mainView?.hideProgress()
+    }
+
+    override fun onAvailable(network: Network) {
+        //TODO: Translation
+        mainView?.displaySuccess("A network is available!")
+    }
+
+    override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+        cacheHandler.networkCapabilities = networkCapabilities
+    }
+
+    override fun onLost(network: Network) {
+        //TODO: Translation
+        mainView?.displayError("Lost connection to the internet!")
     }
 }

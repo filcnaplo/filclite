@@ -1,24 +1,29 @@
 package hu.filcnaplo.ellenorzo.lite.kreta.data.sub
 
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import hu.filcnaplo.ellenorzo.lite.kreta.KretaDate
 
 @JsonClass(generateAdapter = true)
+@Entity(tableName = "evals")
 class Evaluation(
-    @Json(name = "Uid")  val uid: String,
-    @Json(name = "Mod") val mode: Nature?,
+    @PrimaryKey(autoGenerate = false) @ColumnInfo(name = "eval_uid") @Json(name = "Uid")  val uid: String,
+    @Embedded(prefix = "nature_mode_") @Json(name = "Mod") val mode: Nature?,
     @Json(name = "SulySzazalekErteke") val weight: Int?,
     @Json(name = "SzovegesErtek") val textValue: String?,
     @Json(name = "SzovegesErtekRovidNev") val textValueShort: String?,
     @Json(name = "SzamErtek") val numberValue: Int?,
-    @Json(name = "LattamozasDatuma") val seen: KretaDate?,
-    @Json(name = "KeszitesDatuma") val creatingDate: KretaDate,
-    @Json(name = "RogzitesDatuma") val postDate: KretaDate,
+    @Embedded(prefix = "kretadate_seen_") @Json(name = "LattamozasDatuma") val seen: KretaDate?,
+    @Embedded(prefix = "kretadate_creatingdate_") @Json(name = "KeszitesDatuma") val creatingDate: KretaDate,
+    @Embedded(prefix = "kretadate_postdate_") @Json(name = "RogzitesDatuma") val postDate: KretaDate,
     @Json(name = "Jelleg") val nature: String?,
-    @Json(name = "ErtekFajta") val valueType: Nature?,
-    @Json(name = "Tipus") val type: Nature?,
-    @Json(name = "Tantargy") val subject: Subject,
+    @Embedded(prefix = "nature_valuetype_") @Json(name = "ErtekFajta") val valueType: Nature?,
+    @Embedded(prefix = "nature_type_") @Json(name = "Tipus") val type: Nature?,
+    @Embedded(prefix = "subject_") @Json(name = "Tantargy") val subject: Subject,
     @Json(name = "ErtekeloTanarNeve") val teacher: String,
     @Json(name = "Tema") val theme: String?//,
     //@Json(name = "OsztalyCsoport") val classGroup: String?

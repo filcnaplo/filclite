@@ -7,6 +7,7 @@ import android.app.ActionBar
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.text.util.Linkify
 import android.util.Log
@@ -83,6 +84,8 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     private fun initializeActivity() {
+        val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        cm.registerDefaultNetworkCallback(controller)
         setupManagers()
         name_tt.setOnClickListener {
             if (canClick) {
