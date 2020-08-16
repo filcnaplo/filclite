@@ -283,5 +283,6 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     override fun onLost(network: Network) {
         //TODO: Translation
         mainView?.displayError("Lost connection to the internet!")
+        cacheHandler.networkCapabilities = null
     }
 }

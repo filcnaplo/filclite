@@ -29,19 +29,24 @@ class CacheHandler(val ctx: Context) {
     enum class NetworkQuality {
         Metered,
         Wired,
-        Normal
+        Normal,
+        NoConnection
     }
     private fun getNetworkQuality(networkCapabilities: NetworkCapabilities?): NetworkQuality {
         return if (networkCapabilities != null) {
-            if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) { //TODO: When somehow?
-                NetworkQuality.Wired
-            } else if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)) {
-                NetworkQuality.Normal
+            if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+                if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) { //TODO: When somehow?
+                    NetworkQuality.Wired
+                } else if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)) {
+                    NetworkQuality.Normal
+                } else {
+                    NetworkQuality.Metered
+                }
             } else {
-                NetworkQuality.Metered
+                NetworkQuality.NoConnection //TODO: WE DON'T REACH THIS
             }
         } else {
-            NetworkQuality.Normal
+            NetworkQuality.NoConnection
         }
     }
     
@@ -51,13 +56,17 @@ class CacheHandler(val ctx: Context) {
 
     fun shouldUseCache(type: CacheType, unique: String): Boolean {
         val quality = getNetworkQuality(networkCapabilities)
-        val last = lastRequest[mapOf(type to unique)]
-        return if (last != null) {
-            type.validities[quality] ?: type.validities[NetworkQuality.Normal] ?: 0 > (now() - last) //TODO: MAYBE NOT TURNING FALSE CHECK IT OUT
+        return if (quality == NetworkQuality.NoConnection) {
+            true
         } else {
-            false
+            val last = lastRequest[mapOf(type to unique)]
+            if (last != null) {
+                type.validities[quality] ?: type.validities[NetworkQuality.Normal] ?: 0 > (now() - last)
+            } else {
+                false
+            }
         }
-    }
+   }
     
     fun isCachedReturn(cacheType: CacheType): Boolean {
         val cached = isCachedValue.getOrDefault(cacheType, false)
