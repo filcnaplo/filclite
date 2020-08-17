@@ -5,6 +5,7 @@ import android.net.NetworkCapabilities
 import androidx.room.Room
 import hu.filcnaplo.ellenorzo.lite.kreta.KretaRequests
 import hu.filcnaplo.ellenorzo.lite.kreta.data.message.MessageDescriptor
+import hu.filcnaplo.ellenorzo.lite.kreta.data.sub.Absence
 import hu.filcnaplo.ellenorzo.lite.kreta.data.sub.Evaluation
 import hu.filcnaplo.ellenorzo.lite.kreta.data.sub.Note
 import kotlinx.coroutines.Dispatchers
@@ -119,6 +120,22 @@ class CacheHandler(val ctx: Context) {
                 listener.onNoteListSuccess(noteList)
             }
             isCachedValue[CacheType.NoteList] = true
+        }
+    }
+    
+    fun cacheAbsenceList(absenceList: List<Absence>) {
+        GlobalScope.launch {
+            db.absenceListDao().deleteList(db.absenceListDao().getAll())
+            db.absenceListDao().insertList(absenceList)
+        }
+    }
+    fun getAbsenceListCache(listener: KretaRequests.OnAbsenceListResult) {
+        GlobalScope.launch {
+            val absenceList = db.absenceListDao().getAll()
+            launch(Dispatchers.Main) {
+                listener.onAbsenceListSuccess(absenceList)
+            }
+            isCachedValue[CacheType.AbsenceList] = true
         }
     }
 }

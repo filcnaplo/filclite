@@ -128,10 +128,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     }
 
     fun getAbsenceList() {
-        val parentListener = this
-        GlobalScope.launch {
-            apiHandler.getAbsenceList(parentListener)
-        }
+        requestCacheOrExternal(CacheType.AbsenceList, "", { apiHandler.getAbsenceList(this) }, { cacheHandler.getAbsenceListCache(this) })
     }
 
     fun getStudentDetails() {
@@ -235,8 +232,10 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.hideProgress()
     }
 
-    override fun onAbsenceListSuccess(absences: List<Absence>) {
-        mainView?.generateAbsenceList(absences)
+    override fun onAbsenceListSuccess(absenceList: List<Absence>) {
+        if (!cacheHandler.isCachedReturn(CacheType.AbsenceList))
+            cacheHandler.cacheAbsenceList(absenceList)
+        mainView?.generateAbsenceList(absenceList)
     }
     override fun onAbsenceListError(error: KretaError) {
         mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.AbsenceList))
