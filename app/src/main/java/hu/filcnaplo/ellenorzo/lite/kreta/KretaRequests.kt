@@ -423,7 +423,7 @@ class KretaRequests(ctx: Context) {
 
     fun getMessageList(listener: OnMessageListResult, type: MessageDescriptor.Type) {
         val successListener = Response.Listener<String> { response ->
-            val messageList = JsonHelper.makeMessageList(response)
+            val messageList = JsonHelper.makeMessageList(response, type)
             if (messageList != null) {
                 listener.onMessageListSuccess(messageList)
             } else {

@@ -45,19 +45,20 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
 
     private val apiHandler = KretaRequests(ctx, this, accessToken, refreshToken, instituteCode)
     private val cacheHandler = CacheHandler(ctx)
-    
-    fun getEvaluationList() {
-        val type = CacheType.EvaluationList
-        val unique = ""
+
+    private fun requestCacheOrExternal(type: CacheType, unique: String, external: () -> Unit, cache: () -> Unit) {
         if (cacheHandler.shouldUseCache(type, unique)) {
-            cacheHandler.getEvaluationListCache(this)
+            cache()
         } else {
-            val parentListener = this
             GlobalScope.launch {
                 cacheHandler.requestedExternalSource(type, unique)
-                apiHandler.getEvaluationList(parentListener)
+                external()
             }
         }
+    }
+    
+    fun getEvaluationList() {
+        requestCacheOrExternal(CacheType.EvaluationList, "", { apiHandler.getEvaluationList(this) }, { cacheHandler.getEvaluationListCache(this) })
     }
 
     fun getTimetable(fromDate: KretaDate, toDate: KretaDate) {
@@ -68,10 +69,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     }
 
     fun getMessageList(type: MessageDescriptor.Type) {
-        val parentListener = this
-        GlobalScope.launch {
-            apiHandler.getMessageList(parentListener, type)
-        }
+        requestCacheOrExternal(CacheType.MessageList, type.toString(), { apiHandler.getMessageList(this, type) }, { cacheHandler.getMessageListCache(this, type) })
     }
     fun getMessage(messageId: Int) {
         val parentListener = this
@@ -172,6 +170,8 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     }
 
     override fun onMessageListSuccess(messageList: List<MessageDescriptor>) {
+        if (!cacheHandler.isCachedReturn(CacheType.MessageList))
+            cacheHandler.cacheMessageList(messageList, MessageDescriptor.MessageDescriptorTypeConverter().fromStringToType(messageList[0].type ?: ""))
         mainView?.generateMessageDescriptors(messageList.reversed())
     }
     override fun onMessageListError(error: KretaError) {

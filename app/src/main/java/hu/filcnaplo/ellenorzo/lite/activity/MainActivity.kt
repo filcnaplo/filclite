@@ -693,7 +693,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
             val elems = mutableListOf<RefreshableData>()
-            for (eval in evaluations.sortedWith(compareBy(manager?.sortType?.eval?.lambda ?: Evaluation.SortType.CreatingDate.lambda))) {
+            for (eval in evaluations.sortedWith(compareBy(manager.sortType?.eval?.lambda ?: Evaluation.SortType.CreatingDate.lambda))) {
                 if (eval.type?.description == evals_type_spinner.selectedItem) {
                     elems.add(RefreshableData(eval.toString(), null, eval))
                 }

@@ -1,10 +1,10 @@
-package hu.filcnaplo.ellenorzo.lite.controller.cache.eval
+package hu.filcnaplo.ellenorzo.lite.controller.cache.dao
 
 import androidx.room.*
 import hu.filcnaplo.ellenorzo.lite.kreta.data.sub.Evaluation
 
 @Dao
-interface EvaluationDao {
+interface EvaluationListDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertList(evals: List<Evaluation>)
 

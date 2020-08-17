@@ -7,10 +7,7 @@ import hu.filcnaplo.ellenorzo.lite.kreta.adapter.KretaDateAdapter
 import hu.filcnaplo.ellenorzo.lite.kreta.data.Institute
 import hu.filcnaplo.ellenorzo.lite.kreta.data.homework.Homework
 import hu.filcnaplo.ellenorzo.lite.kreta.data.homework.HomeworkComment
-import hu.filcnaplo.ellenorzo.lite.kreta.data.message.LongerMessageDescriptor
-import hu.filcnaplo.ellenorzo.lite.kreta.data.message.MessageDescriptor
-import hu.filcnaplo.ellenorzo.lite.kreta.data.message.TemporaryAttachment
-import hu.filcnaplo.ellenorzo.lite.kreta.data.message.Worker
+import hu.filcnaplo.ellenorzo.lite.kreta.data.message.*
 import hu.filcnaplo.ellenorzo.lite.kreta.data.sub.*
 import hu.filcnaplo.ellenorzo.lite.kreta.data.timetable.SchoolClass
 import hu.filcnaplo.ellenorzo.lite.kreta.data.timetable.SchoolDay
@@ -69,7 +66,7 @@ class JsonHelper {
             return if (timetable.isEmpty()) null else timetable
         }
 
-        fun makeMessageList(messageListString: String): List<MessageDescriptor>? {
+        fun makeMessageList(messageListString: String, type: MessageDescriptor.Type): List<MessageDescriptor>? {
             if (messageListString.isEmpty()) {
                 return null
             }
@@ -81,6 +78,7 @@ class JsonHelper {
             for (i in 0 until messageListJson.length()) {
                 val messageDescriptor = adapter.fromJson(messageListJson[i].toString())
                 if (messageDescriptor != null) {
+                    messageDescriptor.type = type.toString()
                     messageList.add(messageDescriptor)
                 }
             }

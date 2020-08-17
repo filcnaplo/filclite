@@ -1,11 +1,11 @@
 package hu.filcnaplo.ellenorzo.lite.controller.cache
 
-import android.accounts.NetworkErrorException
 import android.content.Context
 import android.net.NetworkCapabilities
-import android.util.Log
 import androidx.room.Room
 import hu.filcnaplo.ellenorzo.lite.kreta.KretaRequests
+import hu.filcnaplo.ellenorzo.lite.kreta.data.message.MessageDescriptor
+import hu.filcnaplo.ellenorzo.lite.kreta.data.message.MessageType
 import hu.filcnaplo.ellenorzo.lite.kreta.data.sub.Evaluation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -76,16 +76,31 @@ class CacheHandler(val ctx: Context) {
     
     fun cacheEvaluationList(evals: List<Evaluation>) {
         GlobalScope.launch {
-            db.evalDao().insertList(evals)
+            db.evalListDao().insertList(evals)
         }
     }
     fun getEvaluationListCache(listener: KretaRequests.OnEvaluationListResult) {
         GlobalScope.launch {
-            val evals = db.evalDao().getAll()
+            val evals = db.evalListDao().getAll()
             launch(Dispatchers.Main) {
                 listener.onEvaluationListSuccess(evals)
             }
             isCachedValue[CacheType.EvaluationList] = true
+        }
+    }
+
+    fun cacheMessageList(messages: List<MessageDescriptor>, type: MessageDescriptor.Type) {
+        GlobalScope.launch {
+            db.messageListDao().insertList(messages)
+        }
+    }
+    fun getMessageListCache(listener: KretaRequests.OnMessageListResult, type: MessageDescriptor.Type) {
+        GlobalScope.launch {
+            val messages = db.messageListDao().getAllWithType(type)
+            launch(Dispatchers.Main) {
+                listener.onMessageListSuccess(messages)
+            }
+            isCachedValue[CacheType.MessageList] = true
         }
     }
 }
