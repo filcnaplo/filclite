@@ -1,20 +1,24 @@
 package hu.filcnaplo.ellenorzo.lite.kreta.data.sub
 
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import hu.filcnaplo.ellenorzo.lite.kreta.KretaDate
 
 @JsonClass(generateAdapter = true)
+@Entity(tableName = "notes")
 class Note (
-    @Json(name = "Uid") val uid: String,
+    @PrimaryKey @Json(name = "Uid") val uid: String,
     @Json(name = "Cim") val title: String,
-    @Json(name = "Datum") val date: KretaDate,
-    @Json(name = "KeszitesDatuma") val creatingDate: KretaDate,
+    @Embedded(prefix = "date_") @Json(name = "Datum") val date: KretaDate,
+    @Embedded(prefix = "creatingdate_") @Json(name = "KeszitesDatuma") val creatingDate: KretaDate,
     @Json(name = "KeszitoTanarNeve") val teacher: String,
-    @Json(name = "LattamozasDatuma") val seenDate: KretaDate?,
-    @Json(name = "OsztalyCsoport") val classGroup: ClassGroup?,
+    @Embedded(prefix = "seendate_") @Json(name = "LattamozasDatuma") val seenDate: KretaDate?,
+    @Embedded(prefix = "classgroup_") @Json(name = "OsztalyCsoport") val classGroup: ClassGroup?,
     @Json(name = "Tartalom") val text: String,
-    @Json(name = "Tipus") val type: Nature
+    @Embedded(prefix = "nature_") @Json(name = "Tipus") val type: Nature
 ): Comparable<Note> {
     companion object {
         fun sortTypeFromString(str: String): SortType {

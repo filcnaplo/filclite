@@ -5,8 +5,8 @@ import android.net.NetworkCapabilities
 import androidx.room.Room
 import hu.filcnaplo.ellenorzo.lite.kreta.KretaRequests
 import hu.filcnaplo.ellenorzo.lite.kreta.data.message.MessageDescriptor
-import hu.filcnaplo.ellenorzo.lite.kreta.data.message.MessageType
 import hu.filcnaplo.ellenorzo.lite.kreta.data.sub.Evaluation
+import hu.filcnaplo.ellenorzo.lite.kreta.data.sub.Note
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -103,6 +103,22 @@ class CacheHandler(val ctx: Context) {
                 listener.onMessageListSuccess(messages)
             }
             isCachedValue[CacheType.MessageList] = true
+        }
+    }
+    
+    fun cacheNoteList(noteList: List<Note>) {
+        GlobalScope.launch {
+            db.noteListDao().deleteList(db.noteListDao().getAll())
+            db.noteListDao().insertList(noteList)
+        }
+    }
+    fun getNoteListCache(listener: KretaRequests.OnNoteListResult) {
+        GlobalScope.launch {
+            val noteList = db.noteListDao().getAll()
+            launch(Dispatchers.Main) {
+                listener.onNoteListSuccess(noteList)
+            }
+            isCachedValue[CacheType.NoteList] = true
         }
     }
 }

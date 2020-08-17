@@ -103,10 +103,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     }
 
     fun getNoteList() {
-        val parentListener = this
-        GlobalScope.launch {
-            apiHandler.getNoteList(parentListener)
-        }
+        requestCacheOrExternal(CacheType.MessageList, "", { apiHandler.getNoteList(this) }, { cacheHandler.getNoteListCache(this) })
     }
 
     fun getNoticeList() {
@@ -205,6 +202,8 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
     }
 
     override fun onNoteListSuccess(notes: List<Note>) {
+        if (!cacheHandler.isCachedReturn(CacheType.NoteList))
+            cacheHandler.cacheNoteList(notes)
         mainView?.generateNoteList(notes)
     }
     override fun onNoteListError(error: KretaError) {
