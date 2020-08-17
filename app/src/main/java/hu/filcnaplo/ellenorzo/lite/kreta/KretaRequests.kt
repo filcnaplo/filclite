@@ -72,15 +72,15 @@ class KretaRequests(ctx: Context) {
         fun onTestListError(error: KretaError)
     }
     interface OnNoteListResult {
-        fun onNoteListSuccess(testList: List<Note>)
+        fun onNoteListSuccess(noteList: List<Note>)
         fun onNoteListError(error: KretaError)
     }
     interface OnNoticeListResult {
-        fun onNoticeListSuccess(testList: List<Notice>)
+        fun onNoticeListSuccess(noticeList: List<Notice>)
         fun onNoticeListError(error: KretaError)
     }
     interface OnHomeworkListResult {
-        fun onHomeworkListSuccess(homeworks: List<Homework>)
+        fun onHomeworkListSuccess(homeworkList: List<Homework>)
         fun onHomeworkListError(error: KretaError)
     }
     interface OnHomeworkCommentListResult {
@@ -88,7 +88,7 @@ class KretaRequests(ctx: Context) {
         fun onHomeworkCommentListError(error: KretaError)
     }
     interface OnAbsenceListResult {
-        fun onAbsenceListSuccess(homeworks: List<Absence>)
+        fun onAbsenceListSuccess(absenceList: List<Absence>)
         fun onAbsenceListError(error: KretaError)
     }
     interface OnStudentDetailsResult {

@@ -201,10 +201,10 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.hideProgress()
     }
 
-    override fun onNoteListSuccess(notes: List<Note>) {
+    override fun onNoteListSuccess(noteList: List<Note>) {
         if (!cacheHandler.isCachedReturn(CacheType.NoteList))
-            cacheHandler.cacheNoteList(notes)
-        mainView?.generateNoteList(notes)
+            cacheHandler.cacheNoteList(noteList)
+        mainView?.generateNoteList(noteList)
     }
     override fun onNoteListError(error: KretaError) {
         mainView?.displayError(ControllerHelper.getErrorString(error.reason, ControllerHelper.ControllerOrigin.Main, ControllerHelper.RequestOrigin.NoteList))
