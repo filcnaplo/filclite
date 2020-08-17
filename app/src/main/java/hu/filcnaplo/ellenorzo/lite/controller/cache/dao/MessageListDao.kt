@@ -10,4 +10,7 @@ interface MessageListDao {
 
     @Query("SELECT * FROM messages WHERE type = :type")
     suspend fun getAllWithType(type: MessageDescriptor.Type): List<MessageDescriptor>
+
+    @Delete
+    suspend fun deleteList(messages: List<MessageDescriptor>)
 }

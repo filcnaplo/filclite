@@ -10,4 +10,7 @@ interface EvaluationListDao {
 
     @Query("SELECT * FROM evals")
     suspend fun getAll(): List<Evaluation>
+
+    @Delete
+    suspend fun deleteList(evals: List<Evaluation>)
 }

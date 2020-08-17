@@ -76,6 +76,7 @@ class CacheHandler(val ctx: Context) {
     
     fun cacheEvaluationList(evals: List<Evaluation>) {
         GlobalScope.launch {
+            db.evalListDao().deleteList(db.evalListDao().getAll())
             db.evalListDao().insertList(evals)
         }
     }
@@ -91,6 +92,7 @@ class CacheHandler(val ctx: Context) {
 
     fun cacheMessageList(messages: List<MessageDescriptor>, type: MessageDescriptor.Type) {
         GlobalScope.launch {
+            db.messageListDao().deleteList(db.messageListDao().getAllWithType(type))
             db.messageListDao().insertList(messages)
         }
     }
