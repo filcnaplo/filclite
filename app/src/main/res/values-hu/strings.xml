@@ -34,6 +34,9 @@
     <string name="send_date_ma">Küldés dátuma</string>
     <string name="inbox_ma">Beérkezett</string>
     <string name="sent_ma">Elküldött</string>
+    <string name="empty_timetable_ma">Az órarended üres ebben az intervallumban!</string>
+    <string name="from_ma">Kezdés</string>
+    <string name="until_ma">Vége</string>
     <string name="monday_ma">Hétfő</string>
     <string name="tuesday_ma">Kedd</string>
     <string name="wednesday_ma">Szerda</string>

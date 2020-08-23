@@ -35,6 +35,9 @@
     <string name="send_date_ma">Send date</string>
     <string name="inbox_ma">Inbox</string>
     <string name="sent_ma">Sent</string>
+    <string name="empty_timetable_ma">Your timetable is empty in this period!</string>
+    <string name="from_ma">From</string>
+    <string name="until_ma">Until</string>
     <string name="monday_ma">Monday</string>
     <string name="tuesday_ma">Tuesday</string>
     <string name="wednesday_ma">Wednesday</string>

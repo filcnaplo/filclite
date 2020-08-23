@@ -56,7 +56,6 @@ class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, m
     fun fromString(str: String?): KretaDate {
         val dateAndTime = str?.split("-","T",":")
         if (dateAndTime != null && str.isNotBlank()) {
-            Log.w("day", str)
             year = dateAndTime[0].toInt()
             month = dateAndTime[1].toInt()
             day = dateAndTime[2].toInt()
@@ -79,6 +78,16 @@ class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, m
 
     fun toLocalDateTime(): LocalDateTime {
         return LocalDateTime.of(year, month, day, hour, minute, second)
+    }
+
+    fun fromLocalDateTime(dateTime: LocalDateTime): KretaDate {
+        year = dateTime.year
+        month = dateTime.monthValue
+        day = dateTime.dayOfMonth
+        hour = dateTime.hour
+        minute = dateTime.minute
+        second = dateTime.second
+        return this
     }
 
     fun toSchoolDay(): SchoolDay {
@@ -124,5 +133,9 @@ class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, m
             return difference
         }
         return 0
+    }
+    
+    operator fun plus(increment: Int): KretaDate {
+        return fromLocalDateTime((this.toLocalDateTime().plusDays(increment.toLong())))
     }
 }

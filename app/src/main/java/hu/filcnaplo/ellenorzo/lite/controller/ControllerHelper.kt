@@ -64,7 +64,7 @@ class ControllerHelper {
                 ErrorReason.Empty to "There are no notices!"
             ),
             RequestOrigin.HomeworkList to mapOf(
-                ErrorReason.Empty to "There are no homework!"
+                ErrorReason.Empty to "There are no homework in this time period!"
             ),
             RequestOrigin.HomeworkCommentList to mapOf(
                 ErrorReason.Empty to "There are no comments!"

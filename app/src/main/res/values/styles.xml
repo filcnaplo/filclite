@@ -16,6 +16,11 @@
         <item name="loginSpinnerItemLayout">@layout/dark_login_spinner_item</item>
         <item name="loginSpinnerDropdownItemLayout">@layout/dark_login_spinner_item</item>
         <item name="android:textColor">@color/darkColorText</item>
+        <item name="android:textColorSecondary">@color/darkColorText</item>
+        <item name="android:textColorPrimary">@color/darkColorText</item>
+        <item name="android:headerDayOfMonthTextAppearance">@color/darkColorText</item>
+        <item name="android:headerMonthTextAppearance">@color/darkColorText</item>
+        <item name="android:headerYearTextAppearance">@color/darkColorText</item>
         <item name="android:buttonStyle">@style/darkButtonStyle</item>
         <item name="android:background">@color/darkColorBackground</item>
     </style>
@@ -36,6 +41,11 @@
         <item name="loginSpinnerItemLayout">@layout/light_login_spinner_item</item>
         <item name="loginSpinnerDropdownItemLayout">@layout/light_login_spinner_item</item>
         <item name="android:textColor">@color/lightColorText</item>
+        <item name="android:textColorSecondary">@color/lightColorText</item>
+        <item name="android:textColorPrimary">@color/lightColorText</item>\
+        <item name="android:headerDayOfMonthTextAppearance">@color/lightColorText</item>
+        <item name="android:headerMonthTextAppearance">@color/lightColorText</item>
+        <item name="android:headerYearTextAppearance">@color/lightColorText</item>
         <item name="android:buttonStyle">@style/lightButtonStyle</item>
         <item name="android:background">@color/lightColorBackground</item>
     </style>
