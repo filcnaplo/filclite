@@ -24,6 +24,7 @@
     <!--MAIN ACTIVITY-->
     <string name="toggle_theme_ma">Téma választás</string>
     <string name="student_details_ma">Tanuló adatai</string>
+    <string name="add_account_ma">Fiók hozzáadása</string>
     <string name="date_ma">Dátum</string>
     <string name="type_ma">Típus</string>
     <string name="teacher_ma">Tanár</string>

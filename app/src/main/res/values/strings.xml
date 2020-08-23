@@ -25,6 +25,7 @@
     <!--MAIN ACTIVITY-->
     <string name="toggle_theme_ma">Toggle theme</string>
     <string name="student_details_ma">Student details</string>
+    <string name="add_account_ma">Add account</string>
     <string name="date_ma">Date</string>
     <string name="type_ma">Type</string>
     <string name="teacher_ma">Teacher</string>
