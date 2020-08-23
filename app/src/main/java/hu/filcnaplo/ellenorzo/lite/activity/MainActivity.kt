@@ -726,11 +726,12 @@ class MainActivity : AppCompatActivity(), MainView {
     }
     
     private fun generateSettings() {
-        val themeToggleButton = UIHelper.generateButton(this, getString(R.string.toggle_theme_ma), {_, _ -> toggleTheme()}, null, ::toggleDetails, details_ll)
         val studentDetailsButton = UIHelper.generateButton(this, getString(R.string.student_details_ma), {_, _ -> controller.getStudentDetails(); listOf()}, null, ::toggleDetails, details_ll)
+        details_ll.addView(studentDetailsButton)
+        val themeToggleButton = UIHelper.generateButton(this, getString(R.string.toggle_theme_ma), {_, _ -> toggleTheme()}, null, ::toggleDetails, details_ll)
         val addAccountButton = UIHelper.generateButton(this, getString(R.string.add_account_ma), {_, _ -> sendToLogin(); listOf()}, null, ::toggleDetails, details_ll)
-        val buttons = listOf(themeToggleButton, studentDetailsButton, addAccountButton)
-        for (button in buttons) {
+        val settingButtons = listOf(themeToggleButton, addAccountButton)
+        for (button in settingButtons) {
             button.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
             details_ll.addView(button)
         }
