@@ -28,7 +28,8 @@ class SchoolClass(
     @Json(name = "Tema")  val theme: String?,
     @Json(name = "TeremNeve")  val classRoom: String?,
     @Json(name = "Tipus")  val type: Nature,
-    @Json(name = "VegIdopont")  val endDate: KretaDate
+    @Json(name = "VegIdopont")  val endDate: KretaDate,
+    var schoolDay: SchoolDay? = null
 ) {
     override fun toString(): String {
         return  "$count. $subject ($classRoom) \n" +

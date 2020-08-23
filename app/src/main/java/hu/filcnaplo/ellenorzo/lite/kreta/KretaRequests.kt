@@ -56,7 +56,7 @@ class KretaRequests(ctx: Context) {
         fun onRefreshTokensError(error: KretaError)
     }
     interface OnTimetableResult {
-        fun onTimetableSuccess(timetable: MutableMap<SchoolDay, MutableList<SchoolClass>>)
+        fun onTimetableSuccess(timetable: MutableList<SchoolClass>)
         fun onTimetableError(error: KretaError)
     }
     interface OnMessageListResult {

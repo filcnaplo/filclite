@@ -155,7 +155,7 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.hideProgress()
     }
 
-    override fun onTimetableSuccess(timetable: MutableMap<SchoolDay, MutableList<SchoolClass>>) {
+    override fun onTimetableSuccess(timetable: MutableList<SchoolClass>) {
         mainView?.generateTimetable(timetable)
     }
     override fun onTimetableError(error: KretaError) {

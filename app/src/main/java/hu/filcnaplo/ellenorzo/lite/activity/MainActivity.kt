@@ -576,7 +576,7 @@ class MainActivity : AppCompatActivity(), MainView {
         }
     }
 
-    override fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>?) {
+    override fun generateTimetable(timetable: List<SchoolClass>?) {
         TimetableUI.generateTimetable(this, timetable,
             managers[Tab.Timetable]?.holder,
             details_ll,

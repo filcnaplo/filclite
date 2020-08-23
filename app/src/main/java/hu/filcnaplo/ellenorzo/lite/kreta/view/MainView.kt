@@ -16,7 +16,7 @@ import hu.filcnaplo.ellenorzo.lite.kreta.data.timetable.Test
 interface MainView {
     fun hideProgress()
     fun showProgress()
-    fun generateTimetable(timetable: Map<SchoolDay, List<SchoolClass>>?)
+    fun generateTimetable(timetable: List<SchoolClass>?)
     fun displayError(error: String)
     fun displaySuccess(success: String)
     fun generateMessageDescriptors(messages: List<MessageDescriptor>)

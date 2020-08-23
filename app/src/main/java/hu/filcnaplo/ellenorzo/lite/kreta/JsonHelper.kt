@@ -39,29 +39,18 @@ class JsonHelper {
             return tokens
         }
 
-        fun makeTimetable(timetableString: String): MutableMap<SchoolDay, MutableList<SchoolClass>>? {
-            val timetable = mutableMapOf<SchoolDay, MutableList<SchoolClass>>()
+        fun makeTimetable(timetableString: String): MutableList<SchoolClass>? {
+            val timetable = mutableListOf<SchoolClass>()
             val timetableJson = JSONArray(timetableString)
             val moshi: Moshi = Moshi.Builder().add(KretaDateAdapter()).build()
             val adapter: JsonAdapter<SchoolClass> = moshi.adapter(
                 SchoolClass::class.java)
-            for (day in SchoolDayOrder.schoolDayOrder)
-            {
-                timetable[day] = mutableListOf()
-            }
             for (i in 0 until timetableJson.length()) {
                 val schoolClass = adapter.fromJson(timetableJson[i].toString())
                 if (schoolClass != null) {
-                    val schoolDay = schoolClass.startDate.toSchoolDay()
-                    timetable[schoolDay]?.add(schoolClass)
+                    schoolClass.schoolDay = schoolClass.startDate.toSchoolDay()
+                    timetable.add(schoolClass)
                 }
-            }
-            for (day in SchoolDayOrder.schoolDayOrder) {
-                val schoolDay = timetable[day]
-                if (schoolDay != null)
-                    if (schoolDay.isEmpty()) {
-                        timetable.remove(day)
-                    }
             }
             return if (timetable.isEmpty()) null else timetable
         }
