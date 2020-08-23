@@ -146,7 +146,11 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
             apiHandler.trashMessage(parentListener, messageId, isTrashed)
         }
     }
-
+    
+    fun getTokens(): List<String> {
+        return listOf(apiHandler.accessToken, apiHandler.refreshToken, apiHandler.instituteCode)
+    }
+    
     override fun onEvaluationListSuccess(evals: List<Evaluation>) {
         if (!cacheHandler.isCachedReturn(CacheType.EvaluationList))
             cacheHandler.cacheEvaluationList(evals)

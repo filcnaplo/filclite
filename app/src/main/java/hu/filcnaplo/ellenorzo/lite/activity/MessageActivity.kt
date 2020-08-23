@@ -42,15 +42,13 @@ class MessageActivity : AppCompatActivity(), MessageView {
         themeHelper.setCurrentTheme()
         setContentView(R.layout.activity_message)
 
-        val sharedPref = getSharedPreferences(getString(R.string.auth_path), Context.MODE_PRIVATE) ?: return
-        val accessToken = sharedPref.getString("accessToken", null)
-        val refreshToken = sharedPref.getString("refreshToken", null)
-        val instituteCode = sharedPref.getString("instituteCode", null)
+        val extras = intent.extras
+        val accessToken = extras?.getString("accessToken")
+        val refreshToken = extras?.getString("refreshToken")
+        val instituteCode = extras?.getString("instituteCode")
         if (accessToken != null && refreshToken != null && instituteCode != null) {
             controller = MessageController(this, this, accessToken, refreshToken, instituteCode)
         } else {
-            val loginIntent = Intent(this, LoginActivity::class.java)
-            startActivity(loginIntent)
             finish()
         }
         message_btt.setOnClickListener {
@@ -64,10 +62,10 @@ class MessageActivity : AppCompatActivity(), MessageView {
         }
         val spinnerLayouts = themeHelper.getResourcesFromAttributes(listOf(R.attr.sortSpinnerItemLayout, R.attr.sortSpinnerDropdownItemLayout))
         val adapterReceiverType =
-            ArrayAdapter(this, spinnerLayouts[0], listOf("Loading receiver types..."))
+            ArrayAdapter(this, spinnerLayouts[0], listOf("Loading receiver types...")) //TODO: Translation
         adapterReceiverType.setDropDownViewResource(spinnerLayouts[1])
         val adapterReceivers =
-            ArrayAdapter(this, spinnerLayouts[0], listOf("Choose a receiver type first..."))
+            ArrayAdapter(this, spinnerLayouts[0], listOf("Choose a receiver type first...")) //TODO: Translation
         adapterReceivers.setDropDownViewResource(spinnerLayouts[1])
         receivertype_s.adapter = adapterReceiverType
         receivertype_s.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -78,7 +76,7 @@ class MessageActivity : AppCompatActivity(), MessageView {
                 position: Int,
                 id: Long
             ) {
-                //ARISZTOKRETA FEJLESZTO (X3NIXBOI), COWARE APPS, ALDJON MEG AZ URISTEN
+                //X3NIXBOI thx
                 val bridgeMap = mapOf(
                     1 to 9,
                     2 to 8,

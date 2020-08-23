@@ -38,6 +38,7 @@ import hu.filcnaplo.ellenorzo.lite.ui.manager.RefreshableData
 import hu.filcnaplo.ellenorzo.lite.ui.manager.UIManager
 import hu.filcnaplo.ellenorzo.lite.view.MainView
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_message.*
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 
@@ -599,6 +600,8 @@ class MainActivity : AppCompatActivity(), MainView {
             }
             managers[tab]?.refresh(elems)
         }
+        val sendButton = UIHelper.generateButton(this, getString(R.string.send_ma), { _, _ -> sendToMessageSending(); listOf()})
+        messages_holder_ll.addView(sendButton)
         switchTab(tab, false)
         hideProgress()
     }
@@ -776,6 +779,18 @@ class MainActivity : AppCompatActivity(), MainView {
         val loginIntent = Intent(this, LoginActivity::class.java)
         startActivity(loginIntent)
         finish()
+    }
+
+    private fun sendToMessageSending(replyId: Int = 0) {
+        val messageIntent = Intent(this, MessageActivity::class.java)
+        val bundle = Bundle()
+        val tokens = controller.getTokens()
+        bundle.putString("accessToken", tokens[0])
+        bundle.putString("refreshToken", tokens[1])
+        bundle.putString("instituteCode", tokens[2])
+        //bundle.putInt("replyId", replyId)
+        messageIntent.putExtras(bundle)
+        startActivity(messageIntent)
     }
 
     private fun toggleTheme(): List<View> {
