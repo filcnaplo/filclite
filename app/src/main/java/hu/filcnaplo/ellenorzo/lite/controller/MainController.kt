@@ -45,6 +45,8 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
 
     private val apiHandler = KretaRequests(ctx, this, accessToken, refreshToken, instituteCode)
     private val cacheHandler = CacheHandler(ctx)
+    private var refreshTryCount = 0
+    private val maxRefreshRetry = 3
 
     private fun requestCacheOrExternal(type: CacheType, unique: String, external: () -> Unit, cache: () -> Unit) {
         if (cacheHandler.shouldUseCache(type, unique)) {
@@ -188,7 +190,9 @@ class MainController(ctx: Context, private var mainView: MainView?, accessToken:
         mainView?.hideProgress()
     }
     override fun onRefreshTokensError(error: KretaError) {
-        mainView?.sendToLogin()
+        if (maxRefreshRetry <= refreshTryCount) {
+            mainView?.sendToLogin()
+        }
     }
 
     override fun onTestListSuccess(testList: List<Test>) {
