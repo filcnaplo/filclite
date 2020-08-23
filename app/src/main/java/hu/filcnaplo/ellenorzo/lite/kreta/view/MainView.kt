@@ -26,7 +26,7 @@ interface MainView {
     fun refreshToken(tokens: Map<String, String>)
     fun sendToLogin()
     fun generateHomeworkList(homeworks: List<Homework>)
-    fun generateStudentDetails(studentDetails: StudentDetails?)
+    fun generateStudentDetails(studentDetails: StudentDetails)
     fun generateNoteList(notes: List<Note>)
     fun generateNoticeList(notes: List<Notice>)
     fun generateAbsenceList(absences: List<Absence>)

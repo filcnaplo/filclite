@@ -1,5 +1,6 @@
 package hu.filcnaplo.ellenorzo.lite.kreta
 
+import android.util.Log
 import hu.filcnaplo.ellenorzo.lite.kreta.data.timetable.SchoolDay
 import hu.filcnaplo.ellenorzo.lite.kreta.data.timetable.SchoolDayOrder
 import java.time.DayOfWeek
@@ -55,6 +56,7 @@ class KretaDate(year: Int = 1970, month: Int = 1, day: Int = 1, hour: Int = 0, m
     fun fromString(str: String?): KretaDate {
         val dateAndTime = str?.split("-","T",":")
         if (dateAndTime != null && str.isNotBlank()) {
+            Log.w("day", str)
             year = dateAndTime[0].toInt()
             month = dateAndTime[1].toInt()
             day = dateAndTime[2].toInt()

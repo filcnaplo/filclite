@@ -29,7 +29,9 @@ class StudentDetails (
         var tutelariesString = ""
         for (tutelary in tutelaries) {
             tutelariesString += "\n    ${tutelary.name} (${tutelary.uid})"
-            tutelariesString += "\n         ${tutelary.email}"
+            if (tutelary.email != null)
+                tutelariesString += "\n         ${tutelary.email}"
+            if (tutelary.phoneNumber != null)
             tutelariesString += "\n         ${tutelary.phoneNumber}"
         }
         return  "Uid:\n    $uid" +

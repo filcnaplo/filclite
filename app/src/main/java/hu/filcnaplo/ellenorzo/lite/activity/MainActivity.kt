@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity(), MainView {
         name_tt.setOnClickListener {
             if (canClick) {
                 if (details_ll.visibility == View.GONE) {
-                    generateStudentDetails(null)
+                    generateSettings()
                 } else {
                     toggleDetails(true)
                 }
@@ -717,20 +717,26 @@ class MainActivity : AppCompatActivity(), MainView {
         switchTab(tab, false)
         hideProgress()
     }
+    
+    private fun generateSettings() {
+        val themeToggleButton = UIHelper.generateButton(this, getString(R.string.toggle_theme_ma), {_, _ -> toggleTheme()}, null, ::toggleDetails, details_ll)
+        themeToggleButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
+        details_ll.addView(themeToggleButton)
+        val studentDetailsButton = UIHelper.generateButton(this, getString(R.string.student_details_ma), {_, _ -> controller.getStudentDetails(); listOf()}, null, ::toggleDetails, details_ll)
+        studentDetailsButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
+        details_ll.addView(studentDetailsButton)
+        toggleDetails()
+    }
 
-    override fun generateStudentDetails(studentDetails: StudentDetails?) {
-        if (name_tt.text == "") {
-            name_tt.text = studentDetails.toString()
+    override fun generateStudentDetails(studentDetails: StudentDetails) {
+        val studentName = studentDetails.toString()
+        if (name_tt.text != studentName) {
+            name_tt.text = studentName
         } else {
-            val themeToggleButton = UIHelper.generateButton(this, getString(R.string.toggle_theme_ma), {_, _ -> toggleTheme()}, null, ::toggleDetails, details_ll)
-            themeToggleButton.setBackgroundColor(themeHelper.getColorFromAttributes(R.attr.colorAccent))
-            details_ll.addView(themeToggleButton)
-            if (studentDetails != null) {
-                val nameDetailsTextView = TextView(this)
-                nameDetailsTextView.text = studentDetails.toDetailedString()
-                details_ll.addView(nameDetailsTextView)
-            }
-            toggleDetails()
+            val nameDetailsTextView = TextView(this)
+            Log.w("student", "yea")
+            nameDetailsTextView.text = studentDetails.toDetailedString()
+            details_ll.addView(nameDetailsTextView)
         }
     }
 
